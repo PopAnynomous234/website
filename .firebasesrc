@@ -1,0 +1,14 @@
+{
+  "projects": {
+    "default": "c0delistener"
+  },
+  "targets": {
+    "c0delistener": {
+      "hosting": {
+        "main": [
+          "c0delistener"
+        ]
+      }
+    }
+  }
+}
