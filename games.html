@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <title>Game Selection</title>
+                    <link rel="stylesheet" href="st.css">
+    <style>
+    body {
+        background-color: black;
+        overflow-x: hidden; /* Prevents horizontal scrollbar */
+        margin: 0;
+        padding: 0;
+        font-family: sans-serif;
+    }
+
+    #card-container {
+        display: flex;
+        justify-content:center;
+        flex-wrap: wrap;
+        padding: 20px;
+    }
+
+/* The Card Base */
+.game-card {
+    width: 250px;
+    height: 175px;
+    margin: 10px; /* Increased margin to give the outer box room to breathe */
+    background-color: #000;
+    border-radius: 12px;
+    position: relative;
+    /* IMPORTANT: Remove 'overflow: hidden' so the outer box is visible */
+    overflow: visible; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+/* The External Hollow Box */
+.game-card::before {
+    content: '';
+    position: absolute;
+    /* Negative values pull the box OUTSIDE the card */
+    top: -5px;
+    left: -5px;
+    right: -5px;
+    bottom: -5px;
+    
+    /* Hollow border style */
+    border: 8px solid #26FF9A;
+    border-radius: 15px; /* Slightly larger radius to match the gap */
+    
+    /* Animation: Invisible and slightly larger to "zoom in" from outside */
+    opacity: 0;
+    transform: scale(1.1); 
+    transition: all 0.2s ease-out;
+    pointer-events: none;
+    z-index: -1; /* Puts it behind the card so it doesn't block clicks */
+}
+
+/* Hover State: Snap the outer box into place */
+.game-card:hover::before {
+    opacity: 1;
+    transform: scale(1);
+    box-shadow: 0 0 15px #26FF9A; /* Outer glow */
+}
+
+/* Optional: Slight lift effect on the card itself */
+.game-card:hover {
+    transform: scale(1.02);
+}
+
+    /* === Image Styling: Fill the entire card === */
+    .game-card img {
+        width: 100%; /* Take full width of the parent (250px) */
+        height: 100%; /* Take full height of the parent (175px) */
+        object-fit: cover; 
+        border-radius:12px;
+        position: absolute;
+        top: 0;
+        left: 0;
+        transition:all 0.4s ease-in-out ;
+    }
+
+    .game-card img:hover {
+      filter:hue-rotate(180deg);
+    }
+
+    /* === Text Styling: Place on top of image === */
+    .game-card h2 {
+        /* Bring the text above the image */
+        position: relative;
+        z-index: 10; 
+
+        /* Align text to the bottom center of the card */
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        
+        /* Styling for readability */
+        color: #26FF9A; /* Keeps your neon green color */
+        background-color: rgba(0, 0, 0, 0.7); /* Darker overlay behind text */
+        border-radius:0 0 12px 12px;
+        padding: 10px 0;
+        margin: 0; 
+        text-align: center;
+        box-sizing: border-box; /* Ensures padding is included in the 100% width */
+    }
+
+    /* Fullscreen Game Container */
+    #game-container {
+        display: none; /* Hidden by default, shown when a game is clicked (via JS in era10.js etc.) */
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: black;
+        z-index: 1000;
+    }
+h1 {
+  color:#26FF9A;
+}
+    .search-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.search-bar-container {
+    position: relative;
+    width: 350px;
+}
+
+.search-bar-container i {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #26FF9A;
+}
+
+#gameSearch {
+    width: 100%;
+    padding: 12px 15px 12px 45px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid #26FF9A;
+    border-radius: 25px;
+    color: white;
+    font-size: 16px;
+    outline: none;
+    transition: box-shadow 0.3s ease;
+}
+
+#gameSearch:focus {
+    box-shadow: 0 0 15px rgba(38, 255, 154, 0.4);
+}
+
+.game-counter {
+    color: #26FF9A;
+    font-family: monospace;
+    font-size: 1rem;
+    background: rgba(38, 255, 154, 0.1);
+    border: 1px solid #26FF9A;
+    padding: 5px 15px;
+    border-radius: 20px;
+}
+/* Favorite Heart Button */
+.fav-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 20;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 20px;
+    transition: all 0.3s ease;
+    text-shadow: 0 0 5px black;
+}
+
+.fav-btn:hover {
+    transform: scale(1.2);
+    color: #ff4d4d;
+}
+
+.fav-btn.active {
+    color: #ff4d4d;
+    text-shadow: 0 0 5px #ff4d4d;
+}
+
+/* Filter Controls Wrapper */
+.filter-controls {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.filter-btn {
+    background: transparent;
+    border: 1px solid #26FF9A;
+    color: #26FF9A;
+    padding: 5px 15px;
+    border-radius: 15px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.3s;
+}
+
+.filter-btn.active {
+    background: #26FF9A;
+    color: black;
+}
+/* Animation for Lazy Loading */
+.game-card {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out, box-shadow 0.2s ease-in-out;
+}
+
+.game-card.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+    </style>
+</head>
+<body>
+<div class="sidebar">
+    <img src="https://cdn.jsdelivr.net/gh/PopAnynomous234/assets/logo.png" width=70px height=70px alt="logo">
+      <ul>
+          <li>
+          <a href="index.html">
+            <i class="fas fa-home icon"></i>
+            <span class="text">Home</span>
+          </a>
+        </li>
+        <li>
+          <a href="ai.html">
+            <i class="fas fa-robot icon"></i>
+            <span class="text">AI</span>
+          </a>
+        </li>
+        <li>
+          <a href="tools.html">
+        <i class="fa-solid fa-globe icon" style="color: #ffffff;"></i>
+            <span class="text">Tools</span>
+          </a>
+        </li>
+        <li>
+          <a href="games.html">
+            <i class="fas fa-gamepad icon"></i>
+            <span class="text">Games</span>
+          </a>
+        </li>
+              <li>
+          <a href="music.html">
+            <i class="fas fa-music icon"></i>
+            <span class="text">Music</span>
+          </a>
+        </li>
+                <li>
+          <a href="chat.html">
+            <i class="fa-regular fa-comments icon"></i>
+            <span class="text">Chat</span>
+          </a>
+        </li>
+        <li>
+          <a href="settings.html">
+            <i class="fas fa-cog icon"></i>
+            <span class="text">Settings</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+
+
+    <div class="search-wrapper">
+      <h1>Available Games</h1>
+      
+      <div class="search-bar-container">
+          <i class="fas fa-search"></i>
+          <input type="text" id="gameSearch" style="color:#26FF9A" placeholder="Search games A-Z...">
+      </div>
+  
+      <div class="filter-controls">
+          <div class="game-counter">
+              <i class="fas fa-gamepad"></i> Games: <span id="count-number">0</span>
+          </div>
+          <button id="showFavs" class="filter-btn">
+              <i class="fas fa-heart"></i> Favorites
+          </button>
+      </div>
+  </div>
+    <div id="card-container">
+        <!-- Game cards will be generated here by JavaScript -->
+    </div>
+    <div id="game-container">
+    </div>
+
+
+<script src="era10.js"></script>
+<script src="era4.js"></script>
+<script src="era5.js"></script>
+<script src="pe.js"></script>
+<script src="warn.js"></script>
+<script src="cursor.js"></script>
+<script src="widget.js"></script>
+<script>
+    let showOnlyFavs = false;
+    let favorites = JSON.parse(localStorage.getItem('myFavGames')) || [];
+    const container = document.getElementById('card-container');
+
+    // 1. A-Z Sorting Function
+    function sortCardsAlphabetically() {
+        const cards = Array.from(document.querySelectorAll('.game-card'));
+        cards.sort((a, b) => {
+            const titleA = a.querySelector('h2').innerText.toLowerCase();
+            const titleB = b.querySelector('h2').innerText.toLowerCase();
+            return titleA.localeCompare(titleB);
+        });
+        cards.forEach(card => container.appendChild(card));
+    }
+
+    // 2. Intersection Observer (Lazy Loading)
+    const lazyLoadObserver = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+                observer.unobserve(entry.target); // Stop watching once visible
+            }
+        });
+    }, { threshold: 0.1 });
+
+    // 3. Update Display (Search + Favorites)
+    function updateDisplay() {
+        const searchTerm = document.getElementById('gameSearch').value.toLowerCase();
+        const cards = document.querySelectorAll('.game-card');
+        let visibleCount = 0;
+
+        cards.forEach(card => {
+            const title = card.querySelector('h2').innerText;
+            const isFav = favorites.includes(title);
+            const matchesSearch = title.toLowerCase().includes(searchTerm);
+            
+            if (matchesSearch && (!showOnlyFavs || isFav)) {
+                card.style.display = "block";
+                // Re-trigger observer check for newly shown cards
+                lazyLoadObserver.observe(card);
+                visibleCount++;
+            } else {
+                card.style.display = "none";
+                card.classList.remove('visible'); // Reset animation state
+            }
+        });
+        document.getElementById('count-number').innerText = visibleCount;
+    }
+
+    // 4. Toggle Favorite
+    function toggleFav(title, btnElement) {
+        if (favorites.includes(title)) {
+            favorites = favorites.filter(f => f !== title);
+            btnElement.classList.remove('active');
+        } else {
+            favorites.push(title);
+            btnElement.classList.add('active');
+        }
+        localStorage.setItem('myFavGames', JSON.stringify(favorites));
+        updateDisplay();
+    }
+
+    // 5. Initialize: Wait for era10.js, then Sort, Tag, and Observe
+    const initInterval = setInterval(() => {
+        const cards = document.querySelectorAll('.game-card');
+        if (cards.length > 0) {
+            clearInterval(initInterval);
+
+            // First, Sort A-Z
+            sortCardsAlphabetically();
+
+            // Then, set up Hearts and Observer
+            document.querySelectorAll('.game-card').forEach(card => {
+                const title = card.querySelector('h2').innerText;
+                
+                // Add Heart Button if it doesn't exist
+                if (!card.querySelector('.fav-btn')) {
+                    const heart = document.createElement('i');
+                    heart.className = `fas fa-heart fav-btn ${favorites.includes(title) ? 'active' : ''}`;
+                    heart.onclick = (e) => {
+                        e.stopPropagation();
+                        toggleFav(title, heart);
+                    };
+                    card.appendChild(heart);
+                }
+
+                // Start observing for lazy load
+                lazyLoadObserver.observe(card);
+            });
+
+            updateDisplay();
+        }
+    }, 500);
+
+    // 6. UI Events
+    document.getElementById('gameSearch').addEventListener('input', updateDisplay);
+    
+    document.getElementById('showFavs').addEventListener('click', function() {
+        showOnlyFavs = !showOnlyFavs;
+        this.classList.toggle('active');
+        updateDisplay();
+    });
+</script>
+
+</body>
+</html>
