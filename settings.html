@@ -1,0 +1,778 @@
+<html>
+  <head>
+    <title>Settings</title>
+    <link rel="icon" href="https://www.dropbox.com/scl/fi/q9kb67v0mk3gcqhcgapd9/Untitled__431_x_431_px___1_-removebg-preview.png?rlkey=jmpf12pgjfq2pmw41q5ccq9k6&st=2z3k0znt&raw=1" type="image/svg+xml">
+    <link rel="stylesheet" href="st.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <style>
+      /* Reset */
+      body {
+        font-family: Arial, sans-serif;
+        height: 100%;
+        background-color: #000;
+        color: #eee;
+      }
+
+      /* "Card" area (bigger, no card look) */
+      .settings-area {
+        width: 100%;
+        max-width: 1000px;
+        background: transparent;
+        display: flex;
+        flex-direction: column;
+      }
+      .tabs {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+      }
+      .tabs button {
+        flex: 1;
+        padding: 18px;
+        border: none;
+        border-radius: 8px;
+        margin-right:5px;
+        background: #17241e;
+        color: #c1ffe2;
+        box-shadow: 0 0 0 0.67px #676767;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.6s ease-in-out;
+      }
+      .tabs button.active {
+        background: linear-gradient(150deg,#19ac68, #26ff9a, #70fdbb);
+        border-radius:4px;
+        color: #fff;
+      }
+      .tab-content {
+        display: none;
+        background-color:#1a1a1a;
+        padding:15px;
+        border-radius:10px;
+        box-shadow:
+        0 0 3px #fff;
+        animation: slideInFromLeft 0.8s ease-out forwards;
+      }
+      
+      @keyframes slideInFromLeft {
+  0% {
+    /* Start position: 100% of the element's width off the left edge */
+    transform: translateX(-20%);
+    opacity: 0;
+  }
+  100% {
+    /* End position: Default position */
+    transform: translateX(0);
+        opacity:0.80;
+  }
+}
+      .tab-content.active {
+        display: block;
+      }
+
+      /* Sections */
+      .section {
+        margin-bottom: 20px;
+      }
+      .section h3 {
+        margin-bottom: 10px;
+        color: #26ff9a;
+      }
+      .menu-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 12px;
+      }
+      .menu-item label {
+        width: 180px;
+      }
+      .menu-item input[type="checkbox"],
+      .menu-item select,
+      .menu-item input[type="text"],
+      .menu-item button {
+        flex: 1;
+        padding: 8px;
+        border-radius: 4px;
+        border: 1px solid #555;
+        background: #333;
+        color: #eee;
+      }
+      .menu-item button {
+        width: auto;
+        margin-left: 10px;
+        cursor: pointer;
+      }
+
+      /* Responsive */
+      @media (max-width: 600px) {
+        .menu-item {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+        .menu-item label {
+          margin-bottom: 5px;
+          width: 100%;
+        }
+      }
+      .myButton {
+        background-color: black; /* The initial color */
+        color: white; /* Text color */
+        padding: 10px 20px; /* Some spacing */
+        border-radius: 8px;
+        border: 0.5px solid #26ff9a; /* Remove default border */
+        cursor: pointer; /* Change cursor to a hand pointer */
+        transition: box-shadow 0.3s ease; /* Smooth transition effect */
+        font-size: 16px; /* Font size */
+      }
+      .myButton:hover {
+        box-shadow:
+          0 0 4px #26ff9a, /* Inner glow/sharper glow */
+          0 0 8px #26ff9a, /* Medium glow */
+          0 0 11px #26ff9a; /* Wider, softer glow */
+      }
+      /* Changed 'erti' selector to class '.erti' */
+      .erti {
+        color: #26ff9a;
+        font-weight: bold;
+      }
+
+      /* Changed 'savg' id to class .savg */
+      .savg {
+        width: 40px;
+        height: 40px;
+        background-color: #1a1a1a;
+        transition: box-shadow 0.3s ease-in-out;
+        border-radius: 5px;
+        border: 0.5px solid #26ff9a;
+      }
+
+      .savg:hover {
+        box-shadow:
+          0 0 4px #26ff9a, /* Inner glow/sharper glow */
+          0 0 8px #26ff9a, /* Medium glow */
+          0 0 11px #26ff9a; /* Wider, softer glow */
+      }
+
+      .main-content {
+        display: flex;
+        justify-content: center; /* Centers horizontally */
+        height: 100vh; /* Example: Centers within the viewport height */
+      }
+
+      .ey {
+        display: flex; /* Aligns immediate children (image and text-container) side-by-side */
+        align-items: center; /* Vertically centers items within the container */
+        gap: 15px; /* Adds space between the image and the text-container */
+
+        /* Optional styling for visibility */
+        border: 1px solid #ccc;
+        padding: 10px;
+        max-width: 400px;
+      }
+
+      .text-container {
+        display: flex; /* Aligns children (h4 and span) vertically */
+        flex-direction: column;
+        /* Adjust margins on default H4 and span elements if needed */
+        margin: 0;
+        padding: 0;
+      }
+
+      /* Optional: Remove default browser margins from the h4 for a cleaner look */
+      .text-container h4,
+      .text-container span {
+        margin: 0;
+      }
+
+      .tyt {
+        border: none;
+        border-radius: 5px;
+        background-color: #ff622e;
+        transition: background-color 1s ease;
+        color: white;
+        font-size: 20px;
+        width: 80px;
+        height: 40px;
+      }
+
+      .tyt:hover {
+        background-color: #ff4000;
+      }
+      
+            .tyt3 {
+        border: none;
+        border-radius: 5px;
+        background-color: #676767;
+        transition: background-color 1s ease;
+        color: white;
+        font-size: 20px;
+        width: 80px;
+        height: 40px;
+      }
+
+      .tyt3:hover {
+        background-color: #B8B8B8;
+      }
+      .tyt2 {
+        border: none;
+        border-radius: 5px;
+        background-color: #353af0;
+        transition: background-color 1s ease;
+        color: white;
+        font-size: 20px;
+        width: 80px;
+        height: 40px;
+      }
+
+      .tyt2:hover {
+        background-color: #575bff;
+      }
+
+      .se {
+        width: 240px;
+        height: 40px;
+        background-color: #26ff9a;
+        border-radius: 3.5px;
+        color: white;
+        font-weight: bold;
+        border: none;
+        transition: background-color 0.3s ease-in-out;
+      }
+
+      .se:hover {
+        background-color: #78ffbd;
+      }
+
+      #cookieFileInput {
+        display: none;
+      }
+
+      #controls {
+          width:400px;
+      }
+      #controls label {
+        display: block;
+        margin: 10px 0 4px 0;
+        font-weight: bold;
+      }
+input[type=range] {
+  /* 1. Base Reset */
+  -webkit-appearance: none;
+  height: 25px; 
+  width: 100%;
+  margin: 10px 0;
+  background: transparent; 
+}
+/* WebKit (Chrome, Safari, Edge) Thumb */
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  height: 20px;
+  width: 20px;
+  border-radius: 50%;
+  background: #26FF9A; /* NEON GREEN */
+  cursor: pointer;
+  box-shadow: 0 0 5px rgba(38, 255, 154, 0.7); /* Optional: Adds a neon glow */
+  margin-top: -8px; 
+}
+
+/* Mozilla (Firefox) Thumb */
+input[type=range]::-moz-range-thumb {
+  height: 20px;
+  width: 20px;
+  border: none;
+  border-radius: 50%;
+  background: #26FF9A; /* NEON GREEN */
+  cursor: pointer;
+}
+
+/* -------------------------------------- */
+/* 3. TRACK (The Bar) Styling             */
+/* -------------------------------------- */
+
+/* WebKit (Chrome, Safari, Edge) Track */
+input[type=range]::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 6px;
+  cursor: pointer;
+  background: #111111; /* DARK/BLACK Track Background */
+  border-radius: 5px;
+}
+
+/* Mozilla (Firefox) Track */
+input[type=range]::-moz-range-track {
+  width: 100%;
+  height: 6px;
+  cursor: pointer;
+  background: #111111; /* DARK/BLACK Track Background */
+  border-radius: 5px;
+}
+
+/* Microsoft (IE/Legacy Edge) Track and Fill */
+input[type=range]::-ms-track {
+  width: 100%;
+  height: 10px;
+  cursor: pointer;
+  background: transparent; 
+  border-color: transparent;
+  color: transparent;
+}
+input[type=range]::-ms-fill-lower {
+  background: #26FF9A; /* Neon Green for the filled part */
+  border-radius: 5px;
+}
+input[type=range]::-ms-fill-upper {
+  background: #111111; /* Dark/Black for the unfilled part */
+  border-radius: 5px;
+}
+      #controls select {
+        width: 100%;
+        padding: 4px;
+        border-radius: 4px;
+        border: none;
+        background-color: #333;
+        color: #eee;
+      }
+        label { display: block; font-size: 0.85rem; color: #aaa; margin-bottom: 10px; }
+        
+        /* Modern Inputs */
+        select, .color-input { width: 100%; height: 45px; border-radius: 12px; border: 1px solid #333; background: #121212; color: #fff; padding: 0 12px; cursor: pointer; }
+        input[type="color"] { padding: 0; border: none; height: 50px; }
+
+        .toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 12px; background: #252525; border-radius: 12px; margin-bottom: 12px; }
+        .save-btn { width: 100%; padding: 15px; background: #26ff9a; color: #000; border: none; border-radius: 14px; font-weight: 700; cursor: pointer; margin-top: 10px; }
+        .save-btn:hover { filter: brightness(1.1); }
+        .nav-btn { display: block; text-align: center; margin-top: 15px; color: #8ab4f8; text-decoration: none; font-size: 0.85rem; }
+         /* Container Styling */
+  .toggle-container {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    font-family: Arial, sans-serif;
+    color: white;
+    padding: 20px;
+    background: #1a1a2b;
+    border-radius: 8px;
+    width: fit-content;
+  }
+
+  /* The switch - the box around the slider */
+  .switch {
+    position: relative;
+    display: inline-block;
+  }
+
+  /* Hide default HTML checkbox */
+  .switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  /* The slider */
+  .slider {
+    position: absolute;
+    content: "";
+    left: 4px;
+    bottom: 4px;
+    background:transparent;
+    transition: .4s;
+  }
+   </style>
+  </head>
+  <body>
+    <div class="sidebar">
+      <img src="https://cdn.jsdelivr.net/gh/PopAnynomous234/assets/logo.png" width=70px height=70px alt="logo">
+      <ul>
+        <li>
+          <a href="index.html">
+            <i class="fas fa-home icon"></i><span class="text">Home</span>
+          </a>
+        </li>
+        <li>
+          <a href="ai.html">
+            <i class="fas fa-robot icon"></i><span class="text">AI</span>
+          </a>
+        </li>
+        <li>
+          <a href="tools.html">
+            <i class="fa-solid fa-globe icon" style="color: #ffffff"></i
+            ><span class="text">Tools</span>
+          </a>
+        </li>
+        <li>
+          <a href="games.html">
+            <i class="fas fa-gamepad icon"></i><span class="text">Games</span>
+          </a>
+        </li>
+        <li>
+          <a href="music.html">
+            <i class="fas fa-music icon"></i><span class="text">Music</span>
+          </a>
+        </li>
+        <li>
+          <a href="chat.html">
+            <i class="fa-regular fa-comment icon"></i><span class="text">Chat</span>
+          </a>
+        </li>
+        <li>
+          <a href="settings.html">
+            <i class="fas fa-cog icon"></i><span class="text">Settings</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <div class="main-content">
+      <div class="settings-area">
+        <!-- Tabs -->
+        <div class="tabs">
+          <button class="active" data-tab="appearance">Theme</button>
+          <button data-tab="transform">Transform</button>
+          <button data-tab="about">Policy</button>
+          <button data-tab="misc">About</button>
+          <button data-tab="help">Help-Desk</button>
+        </div>
+
+        <!-- Tab Contents -->
+        <div id="appearance" class="tab-content active">
+          <div class="section">
+            <div class="menu-item">
+              <div id="controls">
+                  <h3>Particle Settings</h3>
+                <label for="particlesAmount"
+                  >Particles Amount: <span id="amountValue"></span></label
+                >
+                <input
+                  type="range"
+                  id="particlesAmount"
+                  min="0"
+                  max="300"
+                  step="1"
+                />
+
+                <label for="moveSpeed"
+                  >Move Speed: <span id="speedValue"></span></label
+                >
+                <input type="range" id="moveSpeed" min="0" max="10" step="0.1" />
+
+                <label for="sizeRange"
+                  >Particle Size: <span id="sizeValue"></span></label
+                >
+                <input type="range" id="sizeRange" min="0" max="20" step="0.1" />
+
+                <label for="shapeSelect">Shape:</label>
+                <select id="shapeSelect">
+                  <option value="circle">Circle</option>
+                  <option value="edge">Square</option>
+                  <option value="triangle">Triangle</option>
+                  <option value="star" selected>Star</option>
+                  <option value="polygon">Polygon</option>
+                  <option value="image">Image</option>
+                </select>
+              </div>
+            </div>
+          </div>
+            <h3>Widget Settings</h3>
+            
+                <label>Theme Colors</label>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                    <div><label style="font-size:0.7rem;">Accent</label><input type="color" id="accent" class="color-input"></div>
+                    <div><label style="font-size:0.7rem;">Background</label><input type="color" id="bg" class="color-input"></div>
+                </div>
+        
+          
+                <label>Animation Style</label>
+                <select id="style">
+                    <option value="style-chromeos">ChromeOS (Smooth Wide)</option>
+                    <option value="style-float">Floating (Minimal Rise)</option>
+                    <option value="style-glass">Glassmorphism (Full Reveal)</option>
+                </select>
+        
+        
+        
+                <label>Placement</label>
+                <select id="align">
+                    <option value="bottom-right">Bottom Right</option>
+                    <option value="bottom-left">Bottom Left</option>
+                    <option value="top-right">Top Right</option>
+                    <option value="top-left">Top Left</option>
+                </select>
+        
+            <div class="toggle-row">
+                <span>24-Hour Clock</span>
+                <input type="checkbox" id="h24" style="width:20px; height:20px;">
+            </div>
+        <div class="opt toggle-row" style="border-top: 1px solid #333; padding-top: 15px; margin-top: 20px;">
+            <span>Enable Widget</span>
+            <input type="checkbox" id="w_enabled" style="width:20px; height:20px;">
+        </div>
+            <button class="save-btn" onclick="save()">Apply Design</button>
+        </div>
+
+        <div id="transform" class="tab-content">
+          <div class="section">
+            <h3>About:Blank</h3>
+            <p>
+              About:Blank is originally a blank page, but you can fill in some
+              content and use it.
+            </p>
+            <p>Note: Some features might not work as expected.</p>
+            <button class="mybutton" id="toggleBtn">Toggle about:blank</button>
+    <p id="status"></p>
+    <p id="import-status" style="color:red;"></p>
+       <h3>Blob</h3>
+       <p>Blob saves the data of this website in the memory. Can't be seen by most extensions.</p>
+        <label class="switch">
+          <input type="checkbox" id="cloakToggle" onchange="handleToggle(this)">
+          <i class="fa-solid fa-mask" style="color: #63E6BE; width:50px; height:50px;"></i>
+          <span class="slider round"></span>
+        </label>
+       <h3>Transform Tab</h3>
+            <p>Want a Tab disguise? Choose here to change the tab title.</p>
+            <div class="menu-item">
+              <label for="preset">Preset:</label>
+              <select id="preset">
+                <option value="default">Default</option>
+                <option value="Canvas">Canvas</option>
+                <option value="Chrome New-Tab">Chrome New-Tab</option>
+                <option value="Clever">Clever</option>
+                <option value="Google Drive">Google Drive</option>
+                <option value="Kahoot">Kahoot</option>
+                <option value="Wayground">Wayground</option>
+                <option value="Custom">Custom</option>
+              </select>
+              <br />
+            </div>
+            <div id="custom-transform" style="display: none">
+              <div class="menu-item">
+                <label for="custom-title">Custom Title:</label>
+                <input type="text" id="custom-title" placeholder="Enter title" />
+                <button id="custom-title-btn">Update</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="about" class="tab-content">
+          <div class="section">
+            <h3>Terms and Conditions</h3>
+            <ul>
+              <li>
+                This webpage is only intended for fun and entertaniment purposes.
+              </li>
+              <li>
+                All the credits go to Pop_Playz and Attribution for this work must
+                exclusively be given to him.
+              </li>
+              <li>
+                Any violation of this policy may result in the temporary or
+                permanent suspension of the associated website or services, at our
+                sole discretion.
+              </li>
+              <li>
+                The content provided on this site has been independently developed
+                and does not infringe upon the intellectual property of any third
+                party.
+              </li>
+              <li>
+                The chat functionality of this website is powered by Firebase©.
+                Unauthorized use of the server's API key is strictly prohibited.
+              </li>
+              <li>
+                We disclose that the website recommendations on the About page are
+                unsponsored.
+              </li>
+              <li>
+                The signature brand color, #26FF9A, is proprietary to Codelistener
+                Page. Use of this specific color is restricted to official branding
+                materials only.
+              </li>
+              <li>
+                We utilize AI site monitoring tools to analyze time and usage
+                patterns. Detection of unusual traffic or activity will
+                automatically trigger a security investigation.
+              </li>
+              <li>
+                The particle effects featured on this webpage are generated using
+                the open-source particles.js library. As this is a widely available
+                public resource, claims of plagiarism or content replication
+                directed at the site owner regarding this specific feature are
+                unfounded and prohibited.
+              </li>
+              <li>
+                Accusations of unauthorized code inspection, use of Artificial
+                Intelligence (AI), or content plagiarism against the site owner
+                without evidence are strictly prohibited. Repeated unfounded claims
+                of this nature may result in the suspension of user access.
+              </li>
+              <li>
+                The chat space is monitored for prohibited language. The use of
+                banned words or offensive content will be documented and may result
+                in the activity being reported to relevant authorities.
+              </li>
+            </ul>
+            <p>&copy; Codelistener. All rights reserved.</p>
+          </div>
+        </div>
+
+        <div id="misc" class="tab-content">
+          <div class="section">
+            <h3>About</h3>
+            <h4>About the Creator</h4>
+            <img
+              src="https://www.dropbox.com/scl/fi/ttilluitkcy9c4zbnaj9m/Screenshot-2025-10-28-7.06.12-PM.png?rlkey=apwvzj9262wigstbfef7jigpc&st=nrzc1bl5&raw=1"
+              alt="Creator"
+            />
+            <p>
+              This webpage was created by Pop_Playz. He is a Minecraft player. He
+              has a star 97 in bedwars, VIII in skywars, and he is a pro.
+            </p>
+            <h3>Export & Import Cookies</h3>
+            <p>
+              Download Cookies to access in other sites or to access them in a
+              different computer!
+            </p>
+            <button class="se" onclick="downloadCookies()">Download</button>
+
+            <button
+              type="button"
+              class="se"
+              id="uploadButton"
+              onclick="triggerFileInput()"
+            >
+              Upload and Apply Cookies
+            </button>
+
+            <p id="statusMessage"></p>
+            <input
+              type="file"
+              id="cookieFileInput"
+              accept=".json"
+              onchange="uploadAndSetCookies(event)"
+            />
+            <h3>Uptime Status Page</h3>
+            <p>
+              Open the project's uptime status page to view current availability,
+              incidents, and historical uptime metrics.
+            </p>
+            <a href="https://codelistener.betteruptime.com" target="_blank" rel="noopener noreferrer">
+              <svg
+                class="savg"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 640 640"
+                aria-hidden="true"
+                focusable="false"
+              >
+                <!--!Font Awesome Free v7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.-->
+                <path
+                  fill="#26ff9a"
+                  d="M384 64C366.3 64 352 78.3 352 96C352 113.7 366.3 128 384 128L466.7 128L265.3 329.4C252.8 341.9 252.8 362.2 265.3 374.7C277.8 387.2 298.1 387.2 310.6 374.7L512 173.3L512 256C512 273.7 526.3 288 544 288C561.7 288 576 273.7 576 256L576 96C576 78.3 561.7 64 544 64L384 64zM144 160C99.8 160 64 195.8 64 240L64 496C64 540.2 99.8 576 144 576L400 576C444.2 576 480 540.2 480 496L480 416C480 398.3 465.7 384 448 384C430.3 384 416 398.3 416 416L416 496C416 504.8 408.8 512 400 512L144 512C135.2 512 128 504.8 128 496L128 240C128 231.2 135.2 224 144 224L224 224C241.7 224 256 209.7 256 192C256 174.3 241.7 160 224 160L144 160z"
+                />
+              </svg>
+            </a>
+            <h3>Unsponsored Recommendations</h3>
+            <p>Other websites that offer more features. </p>
+            <p>Warning: These websites may be blocked at anytime.</p>
+            <div class="ey">
+              <img
+                style="width: 30px; height: 30px"
+                src="https://cdn.jsdelivr.net/gh/nexora240-lgtm/Nexora-Assets/logos/nexora-amber.png"
+                alt="Nexora Logo"
+              />
+
+              <!-- New wrapper for the text block -->
+              <div class="text-container">
+                <h4 style="color: #ff4000">Nexora</h4>
+                <span style="color: #ffcbba"
+                  >A feature rich-website with chat zone and more games.</span
+                >
+              </div>
+              <button
+                class="tyt"
+                onclick="window.location.href='https://nexora.betteruptime.com'"
+              >
+                Visit
+              </button>
+            </div>
+<br>
+
+
+
+            <h3>Partners</h3>
+            <p>People that reached out to recommend their website.</p>
+
+            <div class="ey">
+              <img
+                style="width: 30px; height: 30px"
+                src="https://codehs.com/uploads/de7d915263b603983bc00f098201ff5e"
+                alt="Yes-or-no-Pedia logo"
+              />
+
+              <!-- New wrapper for the text block -->
+              <div class="text-container">
+                <h4 style="color: #6366f1">Yes or No-Pedia</h4>
+                <span style="color: #9598f5"
+                  >An encyclopedia with 2025-fire graphics and animations and vibrant
+                  colours.</span
+                >
+              </div>
+              <button
+                class="tyt2"
+                onclick="window.location.href='https://yesornopedia.codehs.me'"
+              >
+                Visit
+              </button>
+            </div>
+          </div>
+        </div>
+        <div id="help" class="tab-content">
+          <div class="section">
+            <h3>Games</h3>
+            <p>If a game doesn't load, please wait for two minutes. If it still does not open after this time, the game may be non-functional.</p>
+            <h3>AI</h3>
+            <p>If the Chatbot says "Error: OpenAI API error (429): You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.", then we need to pay money. This will be done in 5-15 days.</p>
+            <h3>Music</h3>
+            <p>If the Music page is blank, then the Spotify API was blocked.</p>
+            <h3>Chat</h3>
+            <p>If the chat login says this after creating an account "Error signing up: Firebase: Error (auth/email-already-in-use).", then there is already an account with that name and password, if it says this before logging in "Error signing in: Firebase: Error (auth/network-request-failed).", then you don't have wifi on or try again.If it says this before logging in "Error signing in: Firebase: Error (auth/invalid-credential).", then your email or password is wrong or doesn't exist.</p>
+            <h3>Settings</h3>
+            <p>If any pop-ups or redirects are not appearing, the pop-up option may be blocked or disabled by chrome. Go to the site settings (click the draggers at left of the search bar) and allow the "Pop-ups and redirects" option.</p>
+            <h3>For any more questions, talk to the owner or the website advertiser / reccomender / giver. Or talk to the owner in Chat ( Invite-Code = H3N5LH ).</h3>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="era5.js"></script>
+    <script src="era3.js"></script>
+    <script src="era4.js"></script>
+    <script src="pe.js"></script>
+    <script src="about.js"></script>
+    <script src="warn.js"></script>
+    <script src="era20.js"></script>
+    <script src="era21.js"></script>
+    <script src="cursor.js"></script>
+    <script src="widget.js"></script>
+    <script>
+      window.onload = () => {
+          document.getElementById('accent').value = localStorage.getItem('w_accent') || '#26ff9a';
+          document.getElementById('bg').value = localStorage.getItem('w_bg') || '#202124';
+          document.getElementById('style').value = localStorage.getItem('w_style') || 'style-chromeos';
+          document.getElementById('align').value = localStorage.getItem('w_align') || 'bottom-right';
+          document.getElementById('h24').checked = localStorage.getItem('w_24h') === 'true';
+          const isEnabled = localStorage.getItem('w_enabled') !== 'false'; 
+          document.getElementById('w_enabled').checked = isEnabled;
+      };
+  
+      function save() {
+          localStorage.setItem('w_accent', document.getElementById('accent').value);
+          localStorage.setItem('w_bg', document.getElementById('bg').value);
+          localStorage.setItem('w_style', document.getElementById('style').value);
+          localStorage.setItem('w_align', document.getElementById('align').value);
+          localStorage.setItem('w_24h', document.getElementById('h24').checked);
+          localStorage.setItem('w_enabled', document.getElementById('w_enabled').checked);
+          alert("Settings Saved!");
+      }
+  </script>
+  <script src="blob.js"></script>
+  </body>
+</html>
