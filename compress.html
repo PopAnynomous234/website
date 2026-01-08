@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Compressor - Tool</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --neon-green: #26FF9A;
+            --bg-dark: #05070a;
+            --card-bg: #0d1117;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        /* The Main Tool Container */
+        .compressor-card {
+            background: var(--card-bg);
+            width: 320px;
+            padding: 30px;
+            border-radius: 15px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            /* Very thin border decimal method */
+            border: 0.5px solid rgba(38, 255, 154, 0.2);
+            transition: transform 0.3s ease;
+        }
+
+        /* The Hollow Border Box (Appears on Hover) */
+        .compressor-card::before {
+            content: '';
+            position: absolute;
+            top: -8px;
+            left: -8px;
+            right: -8px;
+            bottom: -8px;
+            border: 2px solid var(--neon-green);
+            border-radius: 20px;
+            opacity: 0;
+            transform: scale(0.9);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            pointer-events: none;
+        }
+
+        .compressor-card:hover::before {
+            opacity: 1;
+            transform: scale(1);
+            box-shadow: 0 0 20px var(--neon-green);
+        }
+
+        .icon {
+            font-size: 50px;
+            color: white;
+            margin-bottom: 15px;
+        }
+
+        h2 {
+            color: var(--neon-green);
+            margin: 0 0 20px 0;
+            text-transform: uppercase;
+            font-size: 18px;
+            letter-spacing: 1px;
+        }
+
+        /* Drop Zone Area */
+        .drop-zone {
+            width: 100%;
+            border: 1px dashed rgba(38, 255, 154, 0.4);
+            border-radius: 10px;
+            padding: 20px;
+            cursor: pointer;
+            transition: background 0.3s;
+            box-sizing: border-box;
+        }
+
+        .drop-zone:hover {
+            background: rgba(38, 255, 154, 0.05);
+        }
+
+        .drop-zone p {
+            font-size: 12px;
+            margin: 0;
+            color: #888;
+        }
+
+        /* Download Button */
+        #download-btn {
+            display: none; /* Hidden until compression is done */
+            margin-top: 20px;
+            background: var(--neon-green);
+            color: black;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            text-transform: uppercase;
+            transition: transform 0.2s;
+        }
+
+        #download-btn:hover {
+            transform: scale(1.03);
+        }
+
+        #status {
+            margin-top: 15px;
+            font-size: 12px;
+            color: var(--neon-green);
+        }
+
+        input[type="file"] { display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="compressor-card">
+        <i class="fas fa-file-image icon"></i>
+        <h2>Image Compressor</h2>
+
+        <div class="drop-zone" id="drop-zone">
+            <p>Click or Drag Image Here</p>
+            <input type="file" id="file-input" accept="image/*">
+        </div>
+
+        <div id="status"></div>
+        <button id="download-btn">Download Compressed</button>
+    </div>
+
+    <script>
+const dropZone = document.getElementById('drop-zone');
+const fileInput = document.getElementById('file-input');
+const downloadBtn = document.getElementById('download-btn');
+const status = document.getElementById('status');
+
+// Handle selection
+dropZone.onclick = () => fileInput.click();
+
+fileInput.onchange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    status.innerText = "Compressing...";
+    
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (event) => {
+        const img = new Image();
+        img.src = event.target.result;
+        img.onload = () => {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            canvas.width = img.width;
+            canvas.height = img.height;
+            ctx.drawImage(img, 0, 0);
+
+            // Export as JPEG with 0.7 quality
+            const compressedData = canvas.toDataURL('image/jpeg', 0.01);
+            
+            // Calculate compressed size from Base64 string
+            // Base64 is roughly 1.33x larger than binary, so we adjust back
+            const head = 'data:image/jpeg;base64,';
+            const compressedSizeInBytes = Math.round((compressedData.length - head.length) * 3 / 4);
+            
+            // Format sizes for display
+            const oldSize = (file.size / 1024).toFixed(1);
+            const newSize = (compressedSizeInBytes / 1024).toFixed(1);
+            const savings = (100 - (newSize / oldSize * 100)).toFixed(0);
+            
+            // Update UI with comparison
+            status.innerHTML = `
+                <div style="margin-bottom: 5px;">Ready! Reduced by ${savings}%</div>
+                <div style="color: #888; font-size: 11px;">
+                    ${oldSize} KB <i class="fas fa-arrow-right" style="font-size: 10px; margin: 0 5px;"></i> ${newSize} KB
+                </div>
+            `;
+            
+            downloadBtn.style.display = 'block';
+            downloadBtn.onclick = () => {
+                const link = document.createElement('a');
+                link.href = compressedData;
+                link.download = `compressed_${file.name.split('.')[0]}.jpg`;
+                link.click();
+            };
+        };
+    };
+};
+    </script>
+</body>
+</html>
