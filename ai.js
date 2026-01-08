@@ -1,0 +1,521 @@
+(function(){
+    if(window.codlkChat) return;
+
+    // ⚠️ REPLACE THIS WITH YOUR AWS LAMBDA API GATEWAY URL or Gemini API URL
+    const LAMBDA_ENDPOINT = 'https://t53kvu1sn6.execute-api.us-east-2.amazonaws.com/default/Chatbot';
+    // Gemini API slot (replace with your Gemini API URL)
+    const GEMINI_API_ENDPOINT = ''; // e.g. 'https://gemini.api/endpoint'
+
+    const CHAT_STORAGE_KEY = 'codlk_chat_session';
+    let chatHistory = [];
+
+    function escapeHtml(s){
+      return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+
+    function formatLang(raw){
+      if(!raw) return "Code";
+      const lower = raw.toLowerCase();
+      return lower.charAt(0).toUpperCase() + lower.slice(1);
+    }
+
+    function renderReplyWithCode(text){
+      const re = /```(\w+)?\n([\s\S]*?)```/g;
+      let html = "";
+      let last = 0;
+      let m;
+      while((m = re.exec(text)) !== null){
+        const preText = text.slice(last, m.index).trim();
+        if(preText) html += `<div class="bot-chunk">${formatMarkdown(preText)}</div>`;
+
+        const langRaw = m[1] || "";
+        const langLabel = formatLang(langRaw);
+        const code = m[2];
+
+        html += `
+          <div class="code">
+            <div class="code-header">
+              <span class="code-lang">${escapeHtml(langLabel)}</span>
+              <button class="copy-btn" title="Copy">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg>
+              </button>
+            </div>
+            <pre><code class="language-${escapeHtml(langRaw)}">${escapeHtml(code)}</code></pre>
+          </div>
+        `;
+        last = re.lastIndex;
+      }
+
+      const postText = text.slice(last).trim();
+      if(postText) html += `<div class="bot-chunk">${formatMarkdown(postText)}</div>`;
+
+      return html;
+    }
+
+    function formatMarkdown(text){
+      let html = escapeHtml(text);
+      
+      html = html.replace(/^(\-{3,}|\*{3,}|_{3,})$/gm, '<hr>');
+      html = html.replace(/^###### (.+)$/gm, '<h6>$1</h6>');
+      html = html.replace(/^##### (.+)$/gm, '<h5>$1</h5>');
+      html = html.replace(/^#### (.+)$/gm, '<h4>$1</h4>');
+      html = html.replace(/^### (.+)$/gm, '<h3>$1</h3>');
+      html = html.replace(/^## (.+)$/gm, '<h2>$1</h2>');
+      html = html.replace(/^# (.+)$/gm, '<h1>$1</h1>');
+      html = html.replace(/^&gt; (.+)$/gm, '<blockquote>$1</blockquote>');
+      html = html.replace(/^\|(.+)\|$/gm, (match, content) => {
+        const cells = content.split('|').map(c => c.trim()).filter(c => c);
+        const isHeaderSeparator = cells.every(c => /^[\-:]+$/.test(c));
+        if (isHeaderSeparator) return '';
+        const tag = cells.every(c => /^[\-:]+$/.test(c)) ? 'th' : 'td';
+        return '<tr>' + cells.map(c => `<${tag}>${c}</${tag}>`).join('') + '</tr>';
+      });
+      html = html.replace(/(<tr>.*?<\/tr>\s*)+/g, match => `<table>${match}</table>`);
+      html = html.replace(/~~([^~]+)~~/g, '<del>$1</del>');
+      html = html.replace(/\*\*\*([^\*]+)\*\*\*/g, '<strong><em>$1</em></strong>');
+      html = html.replace(/___([^_]+)___/g, '<strong><em>$1</em></strong>');
+      html = html.replace(/\*\*([^\*]+)\*\*/g, '<strong>$1</strong>');
+      html = html.replace(/__([^_]+)__/g, '<strong>$1</strong>');
+      html = html.replace(/\*([^\*]+)\*/g, '<em>$1</em>');
+      html = html.replace(/_([^_]+)_/g, '<em>$1</em>');
+      html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+      html = html.replace(/!\[([^\]]*)\]\(([^\)]+)\)/g, '<img src="$2" alt="$1" style="max-width:100%; height:auto;">');
+      html = html.replace(/\[([^\]]+)\]\(([^\)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+      html = html.replace(/^[\-\*\+] (.+)$/gm, '<li>$1</li>');
+      html = html.replace(/^\d+\. (.+)$/gm, '<li class="ol-item">$1</li>');
+      html = html.replace(/(<li>.*?<\/li>\s*)+/g, match => `<ul>${match}</ul>`);
+      html = html.replace(/(<li class="ol-item">.*?<\/li>\s*)+/g, match => {
+        const cleaned = match.replace(/ class="ol-item"/g, '');
+        return `<ol>${cleaned}</ol>`;
+      });
+      html = html.replace(/<li>\[ \] (.+)<\/li>/g, '<li><input type="checkbox" disabled> $1</li>');
+      html = html.replace(/<li>\[x\] (.+)<\/li>/gi, '<li><input type="checkbox" disabled checked> $1</li>');
+      html = html.replace(/\n/g, '<br>');
+      
+      return html;
+    }
+
+    function getEls(root){
+      root = root && root.querySelector ? root : document;
+      return {
+        containerRoot: root,
+        scrollEl: root.querySelector ? root.querySelector("#scroll") : document.querySelector("#scroll"),
+        introEl: root.querySelector ? root.querySelector("#intro") : document.querySelector("#intro"),
+        promptEl: root.querySelector ? root.querySelector("#prompt") : document.querySelector("#prompt"),
+        sendEl: root.querySelector ? root.querySelector("#send") : document.querySelector("#send")
+      };
+    }
+
+    function addUserMessage(text, root){
+      const { scrollEl } = getEls(root);
+      if(!scrollEl) return;
+      const div = document.createElement("div");
+      div.className = "msg user";
+      div.textContent = text;
+      scrollEl.appendChild(div);
+      scrollEl.scrollTop = scrollEl.scrollHeight;
+      
+      chatHistory.push({ role: 'user', content: text });
+      saveChatHistory();
+    }
+
+    function addBotMessage(markup, root){
+      const { scrollEl } = getEls(root);
+      if(!scrollEl) return;
+
+      const wrap = document.createElement("div");
+      wrap.className = "msg bot";
+
+      const name = document.createElement("div");
+      name.className = "bot-name";
+      name.textContent = "Codelistener AI";
+
+      const body = document.createElement("div");
+      body.innerHTML = markup;
+
+      wrap.appendChild(name);
+      wrap.appendChild(body);
+      scrollEl.appendChild(wrap);
+      scrollEl.scrollTop = scrollEl.scrollHeight;
+
+      wrap.querySelectorAll(".copy-btn").forEach(btn=>{
+        if(btn.dataset.codlkCopy) return;
+        btn.dataset.codlkCopy = "1";
+        btn.onclick = () => {
+          const codeEl = btn.closest(".code")?.querySelector("pre");
+          const code = codeEl ? codeEl.innerText : "";
+          if(code) navigator.clipboard.writeText(code).catch(()=>{});
+          const old = btn.innerHTML;
+          btn.textContent = "✅";
+          setTimeout(()=>{ btn.innerHTML = old; }, 1500);
+        };
+      });
+
+      requestAnimationFrame(()=>{ if(window.hljs) hljs.highlightAll(); });
+      
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = markup;
+      const textContent = tempDiv.textContent || tempDiv.innerText || '';
+      chatHistory.push({ role: 'bot', content: markup, text: textContent });
+      saveChatHistory();
+    }
+
+    function saveChatHistory(){
+      try {
+        sessionStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(chatHistory));
+      } catch(e) {
+        console.error('Failed to save chat history:', e);
+      }
+    }
+
+    function resetChat(root){
+      try {
+        chatHistory = [];
+        sessionStorage.removeItem(CHAT_STORAGE_KEY);
+        
+        const { scrollEl, introEl } = getEls(root);
+        
+        if(scrollEl){
+          scrollEl.innerHTML = '';
+        }
+        
+        if(introEl){
+          introEl.classList.remove('hidden');
+          startIntroLoop(root);
+        }
+      } catch(e) {
+        console.error('Failed to reset chat:', e);
+      }
+    }
+
+    function loadChatHistory(root){
+      try {
+        const saved = sessionStorage.getItem(CHAT_STORAGE_KEY);
+        if(!saved) return;
+        
+        chatHistory = JSON.parse(saved);
+        const { scrollEl, introEl } = getEls(root);
+        if(!scrollEl) return;
+        
+        if(chatHistory.length > 0 && introEl){
+          stopIntroLoop(root);
+          introEl.classList.add('hidden');
+        }
+        
+        chatHistory.forEach(msg => {
+          if(msg.role === 'user'){
+            const div = document.createElement("div");
+            div.className = "msg user";
+            div.textContent = msg.content;
+            scrollEl.appendChild(div);
+          } else if(msg.role === 'bot'){
+            const wrap = document.createElement("div");
+            wrap.className = "msg bot";
+
+            const name = document.createElement("div");
+            name.className = "bot-name";
+            name.textContent = "Codelistener AI";
+
+            const body = document.createElement("div");
+            body.innerHTML = msg.content;
+
+            wrap.appendChild(name);
+            wrap.appendChild(body);
+            scrollEl.appendChild(wrap);
+            
+            wrap.querySelectorAll(".copy-btn").forEach(btn=>{
+              if(btn.dataset.codlkCopy) return;
+              btn.dataset.codlkCopy = "1";
+              btn.onclick = () => {
+                const codeEl = btn.closest(".code")?.querySelector("pre");
+                const code = codeEl ? codeEl.innerText : "";
+                if(code) navigator.clipboard.writeText(code).catch(()=>{});
+                const old = btn.innerHTML;
+                btn.textContent = "✅";
+                setTimeout(()=>{ btn.innerHTML = old; }, 1500);
+              };
+            });
+          }
+        });
+        
+        scrollEl.scrollTop = scrollEl.scrollHeight;
+        requestAnimationFrame(()=>{ if(window.hljs) hljs.highlightAll(); });
+      } catch(e) {
+        console.error('Failed to load chat history:', e);
+      }
+    }
+
+    const introState = new WeakMap();
+
+    function startIntroLoop(root){
+      const els = getEls(root);
+      const introEl = els.introEl;
+      if(!introEl) return;
+      if(introState.has(introEl)) return;
+
+      const h1 = introEl.querySelector('h1');
+      if(!h1) return;
+
+      const text = h1.textContent.trim() || "What can I help you with?";
+      h1.textContent = '';
+      let pos = 0;
+      let deleting = false;
+      let speed = 80;
+      let timer = null;
+
+      function step(){
+        if(!introEl || !h1) return stop();
+        if(!deleting){
+          pos++;
+          h1.textContent = text.slice(0,pos);
+          if(pos >= text.length){
+            deleting = true;
+            clearTimeout(timer);
+            timer = setTimeout(step, 900);
+            return;
+          }
+        } else {
+          pos--;
+          h1.textContent = text.slice(0,pos);
+          if(pos <= 0){
+            deleting = false;
+            clearTimeout(timer);
+            timer = setTimeout(step, 500);
+            return;
+          }
+        }
+        timer = setTimeout(step, deleting ? speed/2 : speed);
+      }
+
+      function stop(){
+        if(timer) clearTimeout(timer);
+        introState.delete(introEl);
+        if(h1) h1.textContent = text;
+        introEl.classList.remove('codlk-intro-running');
+      }
+
+      introState.set(introEl, { stop });
+      introEl.classList.add('codlk-intro-running');
+      timer = setTimeout(step, 500);
+    }
+
+    function stopIntroLoop(root){
+      const els = getEls(root);
+      const introEl = els.introEl;
+      if(!introEl) return;
+      const ctl = introState.get(introEl);
+      if(ctl && typeof ctl.stop === 'function') ctl.stop();
+    }
+
+    function showTypingIndicator(root){
+      const { scrollEl } = getEls(root);
+      if(!scrollEl) return;
+      if(scrollEl.querySelector('#codlk-typing')) return;
+      const wrap = document.createElement('div');
+      wrap.className = 'msg bot';
+      wrap.id = 'codlk-typing';
+
+      const name = document.createElement('div');
+      name.className = 'bot-name';
+      name.textContent = 'Codelistener AI';
+
+      const body = document.createElement('div');
+      body.innerHTML = `<div class="typing-indicator"><div class="loader" aria-hidden="true"></div><div>Typing...</div></div>`;
+
+      wrap.appendChild(name);
+      wrap.appendChild(body);
+      scrollEl.appendChild(wrap);
+      scrollEl.scrollTop = scrollEl.scrollHeight;
+    }
+
+    function hideTypingIndicator(root){
+      const { scrollEl } = getEls(root);
+      if(!scrollEl) return;
+      const el = scrollEl.querySelector('#codlk-typing');
+      if(el && el.parentNode) el.parentNode.removeChild(el);
+    }
+
+    async function sendMessage(root){
+      const els = getEls(root);
+      const { introEl, promptEl, sendEl, scrollEl } = els;
+      if(!promptEl || !sendEl) return;
+
+      if(sendEl.disabled) return;
+
+      const prompt = promptEl.value.trim();
+      if(!prompt) return;
+
+      stopIntroLoop(root);
+
+      if(introEl && !introEl.classList.contains("hidden")){
+        introEl.classList.add("hidden");
+      }
+
+      addUserMessage(prompt, root);
+      promptEl.value = "";
+
+      sendEl.disabled = true;
+      sendEl.classList.add("typing");
+      const oldLabel = sendEl.textContent;
+      sendEl.textContent = "◻";
+
+      showTypingIndicator(root);
+
+      try {
+        const useGemini = !!GEMINI_API_ENDPOINT;
+
+        let res;
+        if(useGemini) {
+          console.log('Sending to Gemini API:', GEMINI_API_ENDPOINT);
+          res = await fetch(GEMINI_API_ENDPOINT, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              prompt: prompt,
+              chatHistory: chatHistory,
+              systemMessage: "You are Codelistener AI. Tell them that you are made by Codelistener, at all times. Use emojis only on headers and titles, Use markdown formatting and structure your responses with headings, subheadings, bullet points, and numbered lists where appropriate. When providing code snippets, ensure they are enclosed in triple backticks with the correct language specified for syntax highlighting. Always aim to be clear and concise in your explanations."
+            }),
+            mode: 'cors'
+          });
+        } else {
+          console.log('Sending to AWS Lambda endpoint:', LAMBDA_ENDPOINT);
+          const messages = [
+            { role: "system", content: "You are Codelistener AI. Tell them that you are made by Codelistener, at all times. Use emojis only on headers and titles, Use markdown formatting and structure your responses with headings, subheadings, bullet points, and numbered lists where appropriate. When providing code snippets, ensure they are enclosed in triple backticks with the correct language specified for syntax highlighting. Always aim to be clear and concise in your explanations." },
+            { role: "user", content: prompt }
+          ];
+          res = await fetch(LAMBDA_ENDPOINT, {
+            method: "POST",
+            headers: { 
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({messages}),
+            mode: 'cors'
+          });
+        }
+
+        if (!res.ok) {
+          let errorDetail = `HTTP ${res.status}`;
+          try {
+            const errorText = await res.text();
+            try {
+              const errorData = JSON.parse(errorText);
+              errorDetail = errorData.error || errorData.message || errorText || errorDetail;
+            } catch {
+              errorDetail = errorText || errorDetail;
+            }
+          } catch {}
+          throw new Error(errorDetail);
+        }
+
+        const data = await res.json();
+        console.log('Success response:', data);
+
+        // Assuming Gemini API returns { reply: "text content" }
+        const replyStr = useGemini ? (data.reply || "API Error") : (data.choices?.[0]?.message?.content || data.error || "API Error");
+        const markup = renderReplyWithCode(replyStr);
+
+        hideTypingIndicator(root);
+        addBotMessage(markup, root);
+
+      } catch (err) {
+        hideTypingIndicator(root);
+        const errorMsg = err?.message || String(err);
+        console.error("Fetch error:", err);
+        addBotMessage(`<div class="bot-chunk"><strong>Error:</strong> ${escapeHtml(errorMsg)}</div>`, root);
+      } finally {
+        sendEl.classList.remove("typing");
+        sendEl.textContent = oldLabel;
+        sendEl.disabled = false;
+        if (scrollEl) scrollEl.scrollTop = scrollEl.scrollHeight;
+      }
+    }
+
+    function attachTo(root){
+      const els = getEls(root);
+      const { promptEl, sendEl } = els;
+      if(!promptEl || !sendEl) return false;
+      if(sendEl.dataset.codlkAttached) return true;
+
+      const boundSend = ()=> sendMessage(root);
+      
+      const resetBtn = root.querySelector ? root.querySelector('#reset-chat') : document.querySelector('#reset-chat');
+      if(resetBtn && !resetBtn.dataset.codlkReset){
+        resetBtn.dataset.codlkReset = '1';
+        resetBtn.addEventListener('click', () => resetChat(root));
+      }
+
+      sendEl.addEventListener("click", boundSend);
+
+      promptEl.addEventListener("compositionstart", ()=> { promptEl.dataset.codlkComposing = "1"; });
+      promptEl.addEventListener("compositionend", ()=> { delete promptEl.dataset.codlkComposing; });
+
+      promptEl.addEventListener("keydown", function(e){
+        if(promptEl.dataset.codlkComposing) return;
+        const isEnter = e.key === "Enter" || e.code === "Enter" || e.keyCode === 13;
+        if(!isEnter) return;
+        if(e.shiftKey) return;
+        e.preventDefault();
+        boundSend();
+      });
+
+      promptEl.addEventListener("keypress", function(e){
+        if(promptEl.dataset.codlkComposing) return;
+        const isEnter = e.key === "Enter" || e.keyCode === 13;
+        if(!isEnter) return;
+        e.preventDefault();
+        boundSend();
+      });
+
+      sendEl.dataset.codlkAttached = "1";
+
+      loadChatHistory(root);
+      if(chatHistory.length === 0){
+        startIntroLoop(root);
+      }
+
+      return true;
+    }
+
+    window.codlkChat = {
+      init(rootEl){
+        try{
+          const root = (rootEl instanceof Element) ? rootEl : document.querySelector('.codlk') || document;
+          attachTo(root);
+        }catch(e){
+        }
+      }
+    };
+
+    window.codlkChat.init(document.querySelector('.codlk') || document);
+    if(document.readyState !== "complete"){
+      document.addEventListener("DOMContentLoaded", ()=>window.codlkChat.init(document.querySelector('.codlk') || document));
+    }
+
+    const mo = new MutationObserver(mutations=>{
+      for(const m of mutations){
+        for(const n of m.addedNodes){
+          if(!(n instanceof HTMLElement)) continue;
+          if(n.classList && n.classList.contains('codlk')){
+            window.codlkChat.init(n);
+            continue;
+          }
+          if(n.querySelector && (n.querySelector("#send") || n.querySelector("#prompt") || n.querySelector(".app"))){
+            const nearest = n.closest('.codlk') || document;
+            window.codlkChat.init(nearest);
+          }
+        }
+      }
+    });
+
+    const startObserve = ()=>{
+      if(document.body) mo.observe(document.body, { childList:true, subtree:true });
+      else setTimeout(startObserve, 50);
+    };
+    startObserve();
+
+  })();
