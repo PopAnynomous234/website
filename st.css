@@ -1,0 +1,165 @@
+:root {
+  --sidebar-expanded: 200px;
+  --sidebar-collapsed: 60px;
+  --speed: 0.3s;
+  --accent: #26ff9a;
+  --bg-dark: #111;
+  --bg-hover: #1a1a1a;
+}
+
+/* ===========================
+   ICON ANIMATION
+=========================== */
+@keyframes icon-pop {
+  0% { transform: scale(1) rotate(0deg); }
+  50% { transform: scale(1.15) rotate(-20deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+
+/* ===========================
+   SIDEBAR CONTAINER
+=========================== */
+.sidebar {
+  position: fixed;
+  inset: 7px auto 10px 10px;
+  width: var(--sidebar-collapsed);
+  background: var(--bg-dark);
+  border-radius: 12px;
+  border: 1px solid #333;
+  overflow: hidden;
+  opacity: 0.8;
+  z-index: 1000;
+  transition:
+    width var(--speed) ease,
+    background var(--speed) ease,
+    box-shadow var(--speed) ease;
+}
+
+.sidebar:hover {
+  width: var(--sidebar-expanded);
+  background: var(--bg-hover);
+  border-color: var(--accent);
+  box-shadow:
+    0 0 25px rgba(38,255,154,0.35),
+    inset 0 0 10px rgba(38,255,154,0.2);
+}
+
+/* ===========================
+   LIST RESET
+=========================== */
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* ===========================
+   LIST ITEMS (NO GAPS)
+=========================== */
+.sidebar li {
+  border-bottom: 1px solid #333;
+  cursor: pointer;
+}
+
+.sidebar li:last-child {
+  border-bottom: none;
+}
+
+/* ===========================
+   LINKS (FULL HIT AREA)
+=========================== */
+.sidebar li a {
+  display: flex;
+  align-items: center;
+  height: 54px;
+  padding: 0 20px;
+  gap: 15px;
+
+  color: #fff;
+  text-decoration: none;
+  position: relative;
+  overflow: hidden;
+
+  cursor: pointer;
+  transition:
+    background var(--speed) ease,
+    box-shadow var(--speed) ease;
+}
+
+/* ===========================
+   GLOW SWEEP EFFECT
+=========================== */
+.sidebar li a::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(38,255,154,0.6),
+    transparent
+  );
+  transform: translateX(-100%);
+  transition: transform 0.6s ease;
+  pointer-events: none;
+}
+
+.sidebar li a:hover::before {
+  transform: translateX(100%);
+}
+
+/* ===========================
+   HOVER STATE
+=========================== */
+.sidebar li a:hover {
+  background: #222;
+  box-shadow:
+    inset 0 0 0 1px var(--accent),
+    0 0 12px rgba(38,255,154,0.6);
+}
+
+/* ===========================
+   ICON
+=========================== */
+.sidebar li a .icon {
+  width: 40px;
+  text-align: center;
+  font-size: 1.5em;
+  transition:
+    color var(--speed) ease,
+    filter var(--speed) ease;
+}
+
+.sidebar li a:hover .icon {
+  color: var(--accent);
+  filter: drop-shadow(0 0 8px rgba(38,255,154,0.9));
+  animation: icon-pop 0.4s ease;
+}
+
+/* ===========================
+   TEXT (SLIDE IN)
+=========================== */
+.sidebar li a .text {
+  opacity: 0;
+  transform: translateX(-10px);
+  white-space: nowrap;
+  font-weight: bold;
+  transition:
+    opacity var(--speed) ease,
+    transform var(--speed) ease;
+}
+
+.sidebar:hover .text {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* ===========================
+   FONT AWESOME FIX
+=========================== */
+.fa-home::before     { content: "\f015"; }
+.fa-gamepad::before  { content: "\f11b"; }
+.fa-cog::before      { content: "\f013"; }
+.fa-globe::before    { content: "\f0ac"; }
+.fa-comments::before { content: "\f075"; }
+
