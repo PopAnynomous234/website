@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+  <link rel="stylesheet" href="ai.css" />
+  <link rel="stylesheet" href="st.css">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <title>Codelistener AI</title>
+</head>
+
+<body>
+<div class="sidebar">
+  <img src="https://cdn.jsdelivr.net/gh/PopAnynomous234/assets/logo.png" width=70px height=70px alt="logo">
+      <ul>
+          <li>
+          <a href="index.html">
+            <i class="fas fa-home icon"></i>
+            <span class="text">Home</span>
+          </a>
+        </li>
+        <li>
+          <a href="ai.html">
+            <i class="fas fa-robot icon"></i>
+            <span class="text">AI</span>
+          </a>
+        </li>
+        <li>
+          <a href="tools.html">
+        <i class="fa-solid fa-globe icon" style="color: #ffffff;"></i>
+            <span class="text">Tools</span>
+          </a>
+        </li>
+        <li>
+          <a href="games.html">
+            <i class="fas fa-gamepad icon"></i>
+            <span class="text">Games</span>
+          </a>
+        </li>
+              <li>
+          <a href="music.html">
+            <i class="fas fa-music icon"></i>
+            <span class="text">Music</span>
+          </a>
+        </li>
+                <li>
+          <a href="chat.html">
+            <i class="fa-regular fa-comment icon"></i>
+            <span class="text">Chat</span>
+          </a>
+        </li>
+        <li>
+          <a href="settings.html">
+            <i class="fas fa-cog icon"></i>
+            <span class="text">Settings</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+    <div class="codlk">
+      <div class="app">
+        <div class="chat">
+          <button id="reset-chat" class="reset-btn" title="Reset chat" aria-label="Reset chat"><i class="fa fa-refresh" aria-hidden="true"></i> Reset</button>
+          <div class="intro" id="intro"><h1>Ask me anything! Literally Anything!</h1></div>
+          <div class="scroll" id="scroll" aria-live="polite"></div>
+        </div>
+  
+        <div class="footer">
+          <div class="input-row">
+            <input id="prompt" class="input" placeholder="Message AI. Dont abuse the chatbot..." autocomplete="off" />
+            <button id="send" class="send" title="Send" aria-label="Send message">↑</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  
+    <script src="widget.js"></script>
+<script src="era4.js"></script>
+<script src="era5.js"></script>
+<script src="pe.js"></script>
+<script src="warn.js"></script>
+<script src="cursor.js"></script>
+<script type="module" src="ai.js"></script>
+</body>
+</html>
