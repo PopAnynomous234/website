@@ -1,0 +1,739 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Codelistener Chat</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="st.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        /* Basic CSS for a WhatsApp-like layout */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: black;
+            color: #333;
+        }
+        .container {
+            display: flex;
+            width: 90%;
+            max-width: 1200px;
+            height: 90vh;
+            background-color: black;
+            border-radius: 8px;
+            box-shadow:      
+        0 0 10px #26FF9A,  /* Inner glow/sharper glow */
+        0 0 20px #26FF9A,  /* Medium glow */
+        0 0 50px #26FF9A;  /* Wider, softer glow */
+            overflow: scroll;
+        }
+        #auth-section {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            text-align: center;
+        }
+        #app-section {
+            display: none; /* Hidden by default, shown when logged in */
+            width: 100%;
+            height: 100%;
+            display: flex;
+        }
+        .sidebar1 {
+            width: 30%;
+            border-right: 1px solid #eee;
+            background-color: #010101;
+            display: flex;
+            flex-direction: column;
+        }
+        .chat-area {
+            width: 70%;
+            display: flex;
+            flex-direction: column;
+              background-image: url('https://www.dropbox.com/scl/fi/bu3237fbedngu4i5jlt85/downloaaaaaad.jpeg?rlkey=4z56tliexm8r79pmrs8zotk79&st=6talqqzd&raw=1'); /* Replace with your image path */
+  background-repeat: no-repeat; /* Prevents image from repeating */
+  background-size: cover; /* Scales image to cover the entire background */
+  background-attachment: fixed; /* Keeps image fixed while scrolling */
+        }
+        h1, h2 {
+            color: #fff;
+            margin-bottom: 20px;
+        }
+        input[type="email"], input[type="password"], input[type="text"] {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin: 8px 0;
+            border: 2px solid #26FF9A;
+            border-radius: 5px;
+            box-sizing: border-box;
+            Transition: box-shadow 0.5s ease-in-out;
+        }
+        
+        input[type="email"], input[type="password"], input[type="text"]:focus {
+                        box-shadow:      
+        0 0 2px #26FF9A,  /* Inner glow/sharper glow */
+        0 0 4px #26FF9A,  /* Medium glow */
+        0 0 8px #26FF9A;  /* Wider, softer glow */
+        }
+        button {
+            background-color: black;
+            color: white;
+            padding: 10px 15px;
+            border: 2px solid #26FF9A;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 1rem;
+            transition: box-shadow 0.3s ease-in-out;
+        }
+        button:hover {
+         box-shadow: 
+        0 0 4px #26FF9A,  /* Inner glow/sharper glow */
+        0 0 8px #26FF9A,  /* Medium glow */
+        0 0 11px #26FF9A;  /* Wider, softer glow */;
+        }
+        #auth-status, #current-user-info {
+            margin-top: 15px;
+            font-weight: bold;
+        }
+        .sidebar1-header, .chat-header {
+            padding: 15px;
+            background-color: #27CF7F; /* WhatsApp header green */
+            color: white;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .sidebar1-header button {
+            background-color: #dc3545; /* Red for sign out */
+            padding: 5px 10px;
+            font-size: 0.8rem;
+        }
+        .sidebar1-header button:hover {
+            background-color: #c82333;
+        }
+        .sidebar1-section-header { /* NEW STYLE */
+            padding: 10px 15px;
+            background-color: #040404; /* Light green for section headers */
+            font-weight: bold;
+            color: #008069;
+            border-bottom: 1px solid #ddd;
+            border-top: 1px solid #ddd;
+            margin-top: 10px;
+        }
+        .contacts-list {
+            flex-grow: 1;
+            overflow-y: auto;
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .contacts-list li {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            color:#5a5a5a;
+            display: flex;
+            align-items: center;
+        }
+        .contacts-list li.active, .contacts-list li:hover {
+            background-color: #2a2a2a; /* Light green for selected/hovered contact */
+        }
+        .contacts-list li span {
+            margin-left: 10px;
+            font-weight: 500;
+        }
+        .contacts-list li.disabled {
+            color: #aaa;
+            cursor: not-allowed;
+            background-color: #f0f0f0;
+        }
+
+        .chat-messages {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .message {
+            max-width: 70%;
+            padding:5px;
+            max-height:70px;
+            border-radius: 10px;
+            box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+            line-height: 1.4;
+            word-wrap: break-word;
+        }
+        .message.sent {
+            align-self: flex-end;
+            background-color:transparent; /* WhatsApp sent message green */
+            color:#26FF9A;
+            margin-left: auto;
+        }
+        .message.received {
+            align-self: flex-start;
+            background-color: transparent; /* WhatsApp received message white */
+            color:#26FF9A;
+            margin-right: auto;
+        }
+        .message-sender {
+            font-size: 0.75em;
+            color: #666;
+            margin-bottom: 3px;
+        }
+        .message-timestamp {
+            font-size: 0.65em;
+            color: #999;
+            text-align: right;
+            margin-top: 5px;
+        }
+        .chat-input-area {
+            display: flex;
+            padding: 10px;
+            background-color: #030303;
+            border-top: 1px solid #eee;
+        }
+        .chat-input-area input {
+            flex-grow: 1;
+            margin-right: 10px;
+        }
+        .chat-input-area button {
+            margin: 0;
+        }
+        #no-chat-selected {
+            text-align: center;
+            margin-top: 50px;
+            color: #555;
+            font-size: 1.2rem;
+        }
+        .contact-avatar {
+            width: 40px;
+            height: 40px;
+            background-color: #012413;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+        #user-invite-code {
+            padding: 8px;
+            background-color: #e9e9e9;
+            border-radius: 5px;
+            margin-top: 10px;
+            font-size: 0.9em;
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <img src="https://cdn.jsdelivr.net/gh/PopAnynomous234/assets/logo.png" width=70px height=70px alt="logo">
+        <ul>
+          <li>
+            <a href="index.html">
+              <i class="fas fa-home icon"></i><span class="text">Home</span>
+            </a>
+          </li>
+          <li>
+            <a href="ai.html">
+              <i class="fas fa-robot icon"></i><span class="text">AI</span>
+            </a>
+          </li>
+          <li>
+            <a href="tools.html">
+              <i class="fa-solid fa-globe icon" style="color: #ffffff"></i
+              ><span class="text">Tools</span>
+            </a>
+          </li>
+          <li>
+            <a href="games.html">
+              <i class="fas fa-gamepad icon"></i><span class="text">Games</span>
+            </a>
+          </li>
+          <li>
+            <a href="music.html">
+              <i class="fas fa-music icon"></i><span class="text">Music</span>
+            </a>
+          </li>
+          <li>
+            <a href="chat.html">
+              <i class="fa-regular fa-comment icon"></i><span class="text">Chat</span>
+            </a>
+          </li>
+          <li>
+            <a href="settings.html">
+              <i class="fas fa-cog icon"></i><span class="text">Settings</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+    <div class="container">
+        <div id="auth-section">
+            <h1>Welcome to Codelistener chat!</h1>
+            <p>Log-in or Create Account to start chatting.📜</p>
+            <div>
+                <input type="email" id="emailInput" placeholder="Email">
+                <input type="password" id="passwordInput" placeholder="Password">
+            </div>
+            <div>
+                <button id="signUpButton">Create Account!</button>
+                <button id="signInButton">Log-in</button>
+            </div>
+            <p id="auth-status"></p>
+        </div>
+
+        <div id="app-section">
+            <div class="sidebar1">
+                <div class="sidebar1-header">
+                    <span id="current-user-email"></span>
+                    <button id="signOutButton">Sign Out</button>
+                </div>
+                <div style="padding: 15px; border-bottom: 1px solid #eee;">
+                    <p style="margin-bottom: 5px; font-weight: bold;">Your Invite Code:</p>
+                    <div id="user-invite-code">Loading...</div>
+                    <hr style="margin: 15px 0;">
+                    <input type="text" id="addFriendInviteCodeInput" placeholder="Enter friend's invite code">
+                    <button id="addFriendByCodeButton">Add Friend</button>
+                </div>
+
+                <div class="sidebar1-section-header">My Contacts</div>
+                <ul id="contacts-list" class="contacts-list">
+                    <!-- Contacts will be loaded here -->
+                    <li style="padding:15px;">Loading contacts...</li>
+                </ul>
+            </div>
+
+            <div class="chat-area">
+                <div class="chat-header">
+                    <span id="chat-partner-name">Select a contact to chat</span>
+                </div>
+                <div id="no-chat-selected">Please select a contact to start chatting.</div>
+                <div id="chat-messages" class="chat-messages">
+                    <!-- Messages will be loaded here -->
+                </div>
+                <div class="chat-input-area">
+                    <input type="text" id="messageInput" placeholder="Type a message..." disabled>
+                    <button id="sendMessageButton" disabled>Send</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-analytics.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
+        // CORRECTED LINE: Added 'or' to the import list
+        import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, doc, getDoc, getDocs, updateDoc, where, or, and, arrayUnion, setDoc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCovpBzaIhzVmfUkX09xj-56b-HAZmWADs",
+            authDomain: "chat-283f4.firebaseapp.com",
+            projectId: "chat-283f4",
+            storageBucket: "chat-283f4.firebasestorage.app",
+            messagingSenderId: "585084707472",
+            appId: "1:585084707472:web:583439303827fe711eee15",
+            measurementId: "G-CM3S6PYDZ5"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app); // Google Analytics
+        const auth = getAuth(app);           // Firebase Authentication
+        const db = getFirestore(app);        // Cloud Firestore
+
+        // --- UI Element References ---
+        const authSection = document.getElementById('auth-section');
+        const appSection = document.getElementById('app-section');
+        const emailInput = document.getElementById('emailInput');
+        const passwordInput = document.getElementById('passwordInput');
+        const signUpButton = document.getElementById('signUpButton');
+        const signInButton = document.getElementById('signInButton');
+        const signOutButton = document.getElementById('signOutButton');
+        const authStatusElement = document.getElementById('auth-status');
+        const currentUserEmailElement = document.getElementById('current-user-email');
+        const userInviteCodeElement = document.getElementById('user-invite-code'); // NEW
+
+        const addFriendInviteCodeInput = document.getElementById('addFriendInviteCodeInput'); // NEW
+        const addFriendByCodeButton = document.getElementById('addFriendByCodeButton');     // NEW
+
+        const contactsList = document.getElementById('contacts-list');
+        const chatPartnerName = document.getElementById('chat-partner-name');
+        const noChatSelected = document.getElementById('no-chat-selected');
+        const chatMessagesDiv = document.getElementById('chat-messages');
+        const messageInput = document.getElementById('messageInput');
+        const sendMessageButton = document.getElementById('sendMessageButton');
+
+        // --- Global State Variables ---
+        let currentUser = null;
+        let selectedFriend = null; // Stores the friend object { uid, email }
+        let unsubscribeFromMessages = null; // Function to stop listening to messages
+        let unsubscribeFromFriendsList = null; // Function to stop listening to accepted friends
+
+        // --- Utility to generate a simple invite code ---
+        function generateInviteCode() {
+            // A simple, short alphanumeric code
+            return Math.random().toString(36).substring(2, 8).toUpperCase();
+        }
+
+        // --- Firebase Authentication Listeners & Handlers ---
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = {
+                    uid: user.uid,
+                    email: user.email,
+                    displayName: user.email.split('@')[0] // Simple display name
+                };
+                authSection.style.display = 'none';
+                appSection.style.display = 'flex';
+                currentUserEmailElement.textContent = `Hello, ${currentUser.displayName}!`;
+
+                // Load user data including invite code
+                const userDocSnap = await getDoc(doc(db, "users", currentUser.uid));
+                if (userDocSnap.exists()) {
+                    const userData = userDocSnap.data();
+                    userInviteCodeElement.textContent = userData.inviteCode || 'N/A';
+                    currentUser.inviteCode = userData.inviteCode; // Store invite code
+                } else {
+                    userInviteCodeElement.textContent = 'Error loading code.';
+                }
+
+                loadAndDisplayFriends();
+            } else {
+                currentUser = null;
+                selectedFriend = null;
+                authSection.style.display = 'flex';
+                appSection.style.display = 'none';
+                authStatusElement.textContent = 'No user signed in.';
+                currentUserEmailElement.textContent = '';
+                userInviteCodeElement.textContent = 'Loading...'; // Reset invite code display
+                addFriendInviteCodeInput.value = ''; // Clear invite code input
+
+                // Reset UI elements
+                contactsList.innerHTML = '<li style="padding:15px;">Loading contacts...</li>';
+                chatPartnerName.textContent = 'Select a contact to chat';
+                noChatSelected.style.display = 'block';
+                chatMessagesDiv.style.display = 'none';
+                messageInput.disabled = true;
+                sendMessageButton.disabled = true;
+                if (unsubscribeFromMessages) {
+                    unsubscribeFromMessages();
+                    unsubscribeFromMessages = null;
+                }
+                if (unsubscribeFromFriendsList) {
+                    unsubscribeFromFriendsList();
+                    unsubscribeFromFriendsList = null;
+                }
+            }
+        });
+
+        signUpButton.addEventListener('click', async () => {
+            const email = emailInput.value;
+            const password = passwordInput.value;
+            if (!email || !password) {
+                authStatusElement.textContent = 'Please enter email and password.';
+                return;
+            }
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const newInviteCode = generateInviteCode(); // Generate invite code
+                await setDoc(doc(db, "users", userCredential.user.uid), {
+                    uid: userCredential.user.uid,
+                    email: email,
+                    displayName: email.split('@')[0],
+                    friends: [], // Initialize with an empty friends array
+                    inviteCode: newInviteCode, // Store invite code
+                    createdAt: serverTimestamp()
+                });
+                authStatusElement.textContent = `Signed up and logged in as ${email}. Your invite code is: ${newInviteCode}`;
+            } catch (error) {
+                authStatusElement.textContent = `Error signing up: ${error.message}`;
+                console.error("Sign up error:", error);
+            }
+        });
+
+        signInButton.addEventListener('click', async () => {
+            const email = emailInput.value;
+            const password = passwordInput.value;
+            if (!email || !password) {
+                authStatusElement.textContent = 'Please enter email and password.';
+                return;
+            }
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+                authStatusElement.textContent = `Logged in as ${email}.`;
+            } catch (error) {
+                authStatusElement.textContent = `Error signing in: ${error.message}`;
+                console.error("Sign in error:", error);
+            }
+        });
+
+        signOutButton.addEventListener('click', async () => {
+            try {
+                await signOut(auth);
+                authStatusElement.textContent = 'Signed out successfully.';
+            } catch (error) {
+                authStatusElement.textContent = `Error signing out: ${error.message}`;
+                console.error("Sign out error:", error);
+            }
+        });
+
+        // --- Accepted Friends List Management ---
+        async function loadAndDisplayFriends() {
+            if (!currentUser) return;
+
+            if (unsubscribeFromFriendsList) {
+                unsubscribeFromFriendsList();
+                unsubscribeFromFriendsList = null;
+            }
+
+            const userDocRef = doc(db, "users", currentUser.uid);
+
+            unsubscribeFromFriendsList = onSnapshot(userDocRef, async (docSnap) => {
+                contactsList.innerHTML = ''; // Clear existing list
+                if (docSnap.exists()) {
+                    const userData = docSnap.data();
+                    const friendUids = userData.friends || [];
+
+                    if (friendUids.length === 0) {
+                        contactsList.innerHTML = '<li style="padding:15px;">No contacts yet. Share your invite code or use someone else\'s!</li>';
+                        return;
+                    }
+
+                    // Fetch details for each friend UID
+                    const friendDetailsPromises = friendUids.map(uid => getDoc(doc(db, "users", uid)));
+                    const friendSnapshots = await Promise.all(friendDetailsPromises);
+
+                    friendSnapshots.forEach(friendDocSnap => {
+                        if (friendDocSnap.exists()) {
+                            const friend = friendDocSnap.data();
+                            displayFriendInList(friend);
+                        } else {
+                            console.warn(`Friend with UID ${friendDocSnap.id} not found.`);
+                        }
+                    });
+                } else {
+                    console.error("Current user document disappeared for:", currentUser.uid);
+                    contactsList.innerHTML = '<li style="padding:15px;">Error loading contacts.</li>';
+                }
+            }, (error) => {
+                console.error("Error listening to user's friends list:", error);
+                contactsList.innerHTML = '<li style="padding:15px;">Error loading contacts.</li>';
+            });
+        }
+
+        function displayFriendInList(friend) {
+            const li = document.createElement('li');
+            li.classList.add('contact-item');
+            li.dataset.uid = friend.uid;
+            li.dataset.email = friend.email;
+            li.dataset.displayName = friend.displayName;
+
+            const avatar = document.createElement('div');
+            avatar.classList.add('contact-avatar');
+            avatar.textContent = friend.displayName.charAt(0).toUpperCase();
+
+            const nameSpan = document.createElement('span');
+            nameSpan.textContent = friend.displayName;
+
+            li.appendChild(avatar);
+            li.appendChild(nameSpan);
+
+            if (selectedFriend && selectedFriend.uid === friend.uid) {
+                li.classList.add('active');
+            }
+
+            li.addEventListener('click', () => selectFriend(friend));
+            contactsList.appendChild(li);
+        }
+
+        // --- NEW: Add Friend by Invite Code Functionality ---
+        addFriendByCodeButton.addEventListener('click', async () => {
+            const inviteCode = addFriendInviteCodeInput.value.trim().toUpperCase();
+            if (!inviteCode) {
+                alert('Please enter an invite code.');
+                return;
+            }
+            if (!currentUser) {
+                alert('You must be signed in to add friends.');
+                return;
+            }
+            if (inviteCode === currentUser.inviteCode) { // Check against current user's invite code
+                alert("You cannot add yourself as a friend using your own invite code!");
+                return;
+            }
+
+            try {
+                // 1. Find the target user by invite code
+                const usersRef = collection(db, "users");
+                const q = query(usersRef, where("inviteCode", "==", inviteCode));
+                const querySnapshot = await getDocs(q);
+
+                if (querySnapshot.empty) {
+                    alert(`No user found with invite code "${inviteCode}".`);
+                    return;
+                }
+
+                const targetUserDoc = querySnapshot.docs[0];
+                const targetUserData = targetUserDoc.data();
+                const targetUserUid = targetUserData.uid;
+
+                // 2. Check if already friends
+                const currentUserDocSnap = await getDoc(doc(db, "users", currentUser.uid));
+                const currentUserFriends = currentUserDocSnap.exists() ? (currentUserDocSnap.data().friends || []) : [];
+                if (currentUserFriends.includes(targetUserUid)) {
+                    alert(`${targetUserData.displayName} is already in your contacts.`);
+                    addFriendInviteCodeInput.value = '';
+                    return;
+                }
+
+                // ***** CRITICAL SECURITY WARNING: These updates are allowed due to the insecure Firestore Rule. *****
+                // 3. Add each user to the other's friends array (direct client-side update)
+                // Current User (B) adds Target User (A)
+                await updateDoc(doc(db, "users", currentUser.uid), {
+                    friends: arrayUnion(targetUserUid)
+                });
+
+                // Target User (A) adds Current User (B)
+                await updateDoc(doc(db, "users", targetUserUid), {
+                    friends: arrayUnion(currentUser.uid)
+                });
+
+                alert(`You are now friends with ${targetUserData.displayName}!😃`);
+                addFriendInviteCodeInput.value = ''; // Clear input field
+            } catch (error) {
+                console.error("Error adding friend by invite code:", error);
+                alert(`Failed to add friend: ${error.message}`);
+            }
+        });
+
+
+        async function selectFriend(friend) {
+            if (unsubscribeFromMessages) {
+                unsubscribeFromMessages(); // Stop previous chat listener
+            }
+
+            selectedFriend = friend;
+            chatPartnerName.textContent = selectedFriend.displayName;
+            noChatSelected.style.display = 'none';
+            chatMessagesDiv.style.display = 'flex'; // Show chat messages area
+            messageInput.disabled = false;
+            sendMessageButton.disabled = false;
+            messageInput.focus();
+
+            // Update active state in contacts list
+            document.querySelectorAll('.contact-item').forEach(item => {
+                item.classList.remove('active');
+                if (item.dataset.uid === selectedFriend.uid) {
+                    item.classList.add('active');
+                }
+            });
+
+            // Start listening for messages with this friend
+            listenForChatMessages(currentUser.uid, selectedFriend.uid);
+        }
+
+        function listenForChatMessages(user1Id, user2Id) {
+            chatMessagesDiv.innerHTML = ''; // Clear previous messages
+
+            const messagesRef = collection(db, "chats");
+            const q = query(
+                messagesRef,
+                or(
+                    and(where("senderId", "==", user1Id), where("receiverId", "==", user2Id)),
+                    and(where("senderId", "==", user2Id), where("receiverId", "==", user1Id))
+                ),
+                orderBy("timestamp", "asc")
+            );
+
+            unsubscribeFromMessages = onSnapshot(q, (snapshot) => {
+                chatMessagesDiv.innerHTML = ''; // Clear before re-rendering
+                snapshot.forEach((doc) => {
+                    const message = doc.data();
+                    displayMessage(message);
+                });
+                chatMessagesDiv.scrollTop = chatMessagesDiv.scrollHeight; // Scroll to bottom
+            }, (error) => {
+                console.error("Error listening to messages:", error);
+            });
+        }
+
+        function displayMessage(message) {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message');
+            messageDiv.classList.add(message.senderId === currentUser.uid ? 'sent' : 'received');
+
+            const senderSpan = document.createElement('div');
+            senderSpan.classList.add('message-sender');
+            senderSpan.textContent = message.senderDisplayName || (message.senderId === currentUser.uid ? 'You' : selectedFriend.displayName);
+
+            const textP = document.createElement('p');
+            textP.textContent = message.text;
+
+            const timestampSpan = document.createElement('div');
+            timestampSpan.classList.add('message-timestamp');
+            if (message.timestamp) {
+                const date = message.timestamp.toDate();
+                timestampSpan.textContent = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            }
+
+            messageDiv.appendChild(senderSpan);
+            messageDiv.appendChild(textP);
+            messageDiv.appendChild(timestampSpan);
+            chatMessagesDiv.appendChild(messageDiv);
+        }
+
+        sendMessageButton.addEventListener('click', sendMessage);
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        async function sendMessage() {
+            const text = messageInput.value.trim();
+            if (text === '' || !currentUser || !selectedFriend) {
+                return;
+            }
+
+            try {
+                await addDoc(collection(db, "chats"), {
+                    senderId: currentUser.uid,
+                    senderDisplayName: currentUser.displayName,
+                    receiverId: selectedFriend.uid,
+                    receiverDisplayName: selectedFriend.displayName,
+                    text: text,
+                    timestamp: serverTimestamp()
+                });
+                messageInput.value = ''; // Clear input field
+            } catch (error) {
+                console.error("Error sending message:", error);
+            }
+        }
+    </script>
+<script src="era4.js"></script>
+<script src="era5.js"></script>
+<script src="pe.js"></script>
+<script src="warn.js"></script>
+<script src="cursor.js"></script>
+<script src="widget.js"></script>
+
+</body>
+</html>
