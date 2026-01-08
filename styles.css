@@ -1,0 +1,68 @@
+body {
+    background-color: #000;
+    color: #fff;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    position: center;
+  }
+  
+  
+  
+  .carousel-and-text {
+    position: relative;
+    width: 400px;
+    height: 400px;
+    margin: 50px auto;
+  }
+  
+  .carousel-container {
+    width: 100%;
+    height: 100%;
+    perspective: 400px;
+    perspective-origin: center;
+  }
+  
+  .text-overlay {
+    position: absolute;
+    top: 0; 
+    left: 50%;
+    transform: translateX(-50%); 
+    text-align: center;
+    color: #B3ADAD; 
+    font-family: 'Minecrafter';
+    z-index: 10;
+    width: 100%;
+  }
+  
+  
+  
+  
+  .carousel {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    transform-style: preserve-3d;
+    animation: rotate 10s infinite linear;
+  }
+  
+  
+  .carousel h1 {
+    display:flex;
+    position:relative;
+    top: 50%;
+    left: 60%;
+    transform: translate(-50%, -50%); 
+    width:350px;
+  }
+  
+
+  
+  
+  @keyframes rotate {
+    from { transform: rotateY(0deg); }
+    to { transform: rotateY(360deg); }
+  }
+  
+    
