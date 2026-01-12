@@ -719,6 +719,31 @@ const games = [
         title: "City Driver",
         image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSJh3tTVcsDa2MCvuLkDEWQFJfRAmneXXUNuA&s", 
         url: "citydriver.html"
+    },
+        {
+        title: "FNAF 2",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT3wghs5HzMbAW9gkmS3Nkc5wNkY4pdzeSFWw&s",
+        url: "fnaf2.html"
+    },
+    {
+        title: "FNAF 3",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQiKKVcRgA_UpO9YtMRoHlYL93qhPPl1DcepA&s",
+        url: "fnaf3.html"
+    },
+    {
+        title: "FNAF 4",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRDNFav3cIoeq8egxa5tlTydCVy9mJ5BnbOHg&s",
+        url: "fnaf4.html"
+    },
+    {
+        title: "FNAF World",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ_kcvPI-PUIZliCc_29e_-F0JJ6HGQHTjwVw&s",
+        url: "fnafworld.html"
+    },
+    {
+        title: "Five Nights at candy's",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTSJl2MlFUUSTc8kddL6-9zrTKumbvhCJHAYg&s",
+        url: "fnac.html"
     }
 ];
 
