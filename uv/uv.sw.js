@@ -47,14 +47,13 @@ class UVServiceWorker extends EventEmitter {
 			this.headers.forward.push("content-type");
 		}
 	}
-	async fetch({ request }) {
-		if (
-			!request.url.startsWith(
-				location.origin + (this.config.prefix || "/service/"),
-			)
-		) {
-			return fetch(request);
-		}
+async fetch({ request }) {
+
+    const uvPrefix = (this.config && this.config.prefix) ? this.config.prefix : '/uv/service/';
+	
+    if (!request.url.startsWith(location.origin + uvPrefix)) {
+        return fetch(request);
+    }
 		try {
 			const ultraviolet = new Ultraviolet(this.config);
 
