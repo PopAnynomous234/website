@@ -1,5 +1,5 @@
 self.__uv$config = {
-    prefix: '/service/',
+    prefix: 'uv/service/',
     bare: 'https://3sow4six3pqlu5t4qgyximuyrm0nlegb.lambda-url.us-east-2.on.aws/',
     encodeUrl: Ultraviolet.codec.xor.encode,
     decodeUrl: Ultraviolet.codec.xor.decode,
