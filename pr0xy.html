@@ -25,30 +25,37 @@
 
     <script>
         async function init() {
-            // 1. Setup the transport to GitHub (The "Bridge")
-            const connection = new BareMux.BareMuxConnection('https://cdn.jsdelivr.net/npm/@mercuryworkshop/bare-mux@2.0.4/dist/worker.js');
-            await connection.setTransport('https://cdn.jsdelivr.net/npm/@mercuryworkshop/bare-mux@2.0.4/dist/index.mjs', ['https://legendary-doodle-4j5jj5r566qrhqx79-8080.app.github.dev/v3/']);
-            
-if ('serviceWorker' in navigator) {
-    // We register the ROOT sw.js but set the scope to the UV prefix
-    await navigator.serviceWorker.register('/sw.js', {
-        scope: '/uv/service/' 
-    });
-    console.log("Worker Registered!");
-}
+            try {
+                // 1. Setup the transport
+                const connection = new BareMux.BareMuxConnection('https://cdn.jsdelivr.net/npm/@mercuryworkshop/bare-mux@2.0.4/dist/worker.js');
+                await connection.setTransport('https://cdn.jsdelivr.net/npm/@mercuryworkshop/bare-mux@2.0.4/dist/index.mjs', ['https://legendary-doodle-4j5jj5r566qrhqx79-8080.app.github.dev/v3/']);
+                
+                // 2. Register the Service Worker from ROOT
+                if ('serviceWorker' in navigator) {
+                    await navigator.serviceWorker.register('/sw.js', { 
+                        scope: '/uv/service/' 
+                    });
+                    console.log("Service Worker Active");
+                }
+            } catch (err) {
+                console.error("Init Failed:", err);
+            }
+        }
 
         document.getElementById('go').onclick = async () => {
             const input = document.getElementById('url').value;
             const frame = document.getElementById('display');
             
-            // Clean the URL
-            let target = input.includes('.') ? input : 'https://www.google.com/search?q=' + input;
+            if (!input) return;
+
+            let target = input.includes('.') ? input : 'https://www.google.com/search?q=' + encodeURIComponent(input);
             if (!target.startsWith('http')) target = 'https://' + target;
 
-            // Use the UV prefix directly (uv/service/...)
+            // Encode and load
             frame.src = __uv$config.prefix + __uv$config.encodeUrl(target);
         };
 
+        // Start the init process
         init();
     </script>
 </body>
