@@ -29,11 +29,13 @@
             const connection = new BareMux.BareMuxConnection('https://cdn.jsdelivr.net/npm/@mercuryworkshop/bare-mux@2.0.4/dist/worker.js');
             await connection.setTransport('https://cdn.jsdelivr.net/npm/@mercuryworkshop/bare-mux@2.0.4/dist/index.mjs', ['https://legendary-doodle-4j5jj5r566qrhqx79-8080.app.github.dev/v3/']);
             
-            // 2. Register the Service Worker
-            if ('serviceWorker' in navigator) {
-                await navigator.serviceWorker.register('/sw.js', { scope: __uv$config.prefix });
-            }
-        }
+if ('serviceWorker' in navigator) {
+    // We register the ROOT sw.js but set the scope to the UV prefix
+    await navigator.serviceWorker.register('/sw.js', {
+        scope: '/uv/service/' 
+    });
+    console.log("Worker Registered!");
+}
 
         document.getElementById('go').onclick = async () => {
             const input = document.getElementById('url').value;
