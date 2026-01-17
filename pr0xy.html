@@ -1,176 +1,53 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ultraviolet Proxy</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+    <script src="/uv/uv.bundle.js"></script>
+    <script src="/uv/uv.config.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mercuryworkshop/bare-mux@2.0.4/dist/index.js"></script>
+
     <style>
-        :root {
-            --neon-green: #26FF9A;
-            --bg-dark: #05070a;
-            --card-bg: #0d1117;
-        }
-
-        body {
-            background-color: var(--bg-dark);
-            color: white;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            overflow: hidden;
-        }
-
-        .container {
-            text-align: center;
-            width: 90%;
-            max-width: 600px;
-        }
-
-        h1 {
-            font-size: 2rem;
-            margin-bottom: 30px;
-            letter-spacing: 2px;
-            color: var(--neon-green);
-            text-shadow: 0 0 10px rgba(38, 255, 154, 0.3);
-        }
-
-        /* The Search Bar Container */
-        .search-wrapper {
-            background: var(--card-bg);
-            padding: 10px 20px;
-            border-radius: 50px;
-            display: flex;
-            align-items: center;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            position: relative;
-            transition: 0.3s ease;
-        }
-
-        /* Hollow Border Effect on Hover */
-        .search-wrapper:hover {
-            border-color: var(--neon-green);
-            box-shadow: 0 0 20px rgba(38, 255, 154, 0.2);
-        }
-
-        .search-wrapper i {
-            color: #555;
-            margin-right: 15px;
-        }
-
-        input {
-            background: transparent;
-            border: none;
-            color: white;
-            font-size: 18px;
-            width: 100%;
-            outline: none;
-            padding: 10px 0;
-        }
-
-        button#launch-btn {
-            background: var(--neon-green);
-            color: #000;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 50px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-left: 10px;
-            transition: transform 0.2s;
-        }
-
-        button#launch-btn:hover {
-            transform: scale(1.05);
-            background: #1de085;
-        }
-
-        .status-msg {
-            margin-top: 20px;
-            font-size: 12px;
-            color: #888;
-        }
-
-        #error-msg {
-            color: #ff4d4d;
-            margin-top: 10px;
-            display: none;
-        }
+        body { background: #111; margin: 0; font-family: sans-serif; height: 100vh; display: flex; flex-direction: column; }
+        .ui { padding: 20px; text-align: center; background: #222; }
+        input { padding: 10px; width: 50%; border-radius: 5px; border: none; }
+        button { padding: 10px 20px; cursor: pointer; background: #007bff; color: white; border: none; border-radius: 5px; }
+        iframe { flex-grow: 1; border: none; width: 100%; background: white; }
     </style>
 </head>
 <body>
 
-    <div class="container">
-    <h1>SECURE PROXY</h1>
-    <div class="search-wrapper">
-        <i class="fas fa-search"></i>
-        <input type="text" id="uv-address" placeholder="Enter URL..." autocomplete="off">
-        <button id="launch-btn">GO</button>
+    <div class="ui">
+        <input type="text" id="url" placeholder="Enter URL...">
+        <button id="go">GO</button>
     </div>
-    <p class="status-msg" id="sw-status">Initializing...</p>
-</div>
 
-<script src="/uv/uv.bundle.js"></script>
-<script src="/uv/uv.config.js"></script>
+    <iframe id="display"></iframe>
 
-<script>
-    // Grab elements
-    const input = document.getElementById('uv-address');
-    const btn = document.getElementById('launch-btn');
-    const status = document.getElementById('sw-status');
-
-    // DEBUG: This will tell us if the button is actually found
-    if (!btn) {
-        console.error("CRITICAL: Button with ID 'launch-btn' not found!");
-    } else {
-        console.log("Button linked successfully.");
-    }
-
-    // Register Service Worker immediately
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/uv/uv.sw.js', {
-            scope: '/uv/service/'
-        }).then(() => {
-            status.textContent = "Service Worker: Ready";
-        }).catch(err => {
-            status.textContent = "Service Worker: Error";
-            console.error(err);
-        });
-    }
-
-    // The Click Logic
-    btn.onclick = (event) => {
-        event.preventDefault();
-        console.log("Click detected!");
-
-        let url = input.value.trim();
-        if (!url) return;
-
-        // Basic Search/URL formatting
-        if (!url.includes('.') || url.includes(' ')) {
-            url = 'https://www.google.com/search?q=' + encodeURIComponent(url);
-        } else if (!url.startsWith('http')) {
-            url = 'https://' + url;
+    <script>
+        async function init() {
+            // 1. Setup the transport to GitHub (The "Bridge")
+            const connection = new BareMux.BareMuxConnection('https://cdn.jsdelivr.net/npm/@mercuryworkshop/bare-mux@2.0.4/dist/worker.js');
+            await connection.setTransport('https://cdn.jsdelivr.net/npm/@mercuryworkshop/bare-mux@2.0.4/dist/index.mjs', ['https://legendary-doodle-4j5jj5r566qrhqx79-8080.app.github.dev/v3/']);
+            
+            // 2. Register the Service Worker
+            if ('serviceWorker' in navigator) {
+                await navigator.serviceWorker.register('/sw.js', { scope: __uv$config.prefix });
+            }
         }
 
-        try {
-            const encoded = __uv$config.encodeUrl(url);
-            window.location.href = __uv$config.prefix + encoded;
-        } catch (e) {
-            console.error("Encoding failed. Is uv.config.js loaded?", e);
-            alert("Proxy config missing. Check your /uv/ folder.");
-        }
-    };
+        document.getElementById('go').onclick = async () => {
+            const input = document.getElementById('url').value;
+            const frame = document.getElementById('display');
+            
+            // Clean the URL
+            let target = input.includes('.') ? input : 'https://www.google.com/search?q=' + input;
+            if (!target.startsWith('http')) target = 'https://' + target;
 
-    // Enter key support
-    input.onkeydown = (e) => {
-        if (e.key === 'Enter') btn.click();
-    };
-</script>
+            // Use the UV prefix directly (uv/service/...)
+            frame.src = __uv$config.prefix + __uv$config.encodeUrl(target);
+        };
+
+        init();
+    </script>
 </body>
 </html>
