@@ -1,6 +1,6 @@
-importScripts('./uv.bundle.js');
-importScripts('./uv.config.js');
-importScripts('./uv.handler.js');
+importScripts('/uv/uv.bundle.js');
+importScripts('/uv/uv.config.js');
+importScripts('/uv/uv.handler.js');
 
 class UVServiceWorker extends EventEmitter {
 	constructor(config = __uv$config) {
@@ -163,44 +163,38 @@ class UVServiceWorker extends EventEmitter {
 				delete responseCtx.headers["set-cookie"];
 			}
 
-			if (responseCtx.body) {
-				switch (request.destination) {
-					case "script":
-					case "worker":
-						responseCtx.body = `if (!self.__uv && self.importScripts) importScripts('${__uv$config.bundle}', '${__uv$config.config}', '${__uv$config.handler}');\n`;
-						responseCtx.body += ultraviolet.js.rewrite(await response.text());
-						break;
-					case "style":
-						responseCtx.body = ultraviolet.rewriteCSS(await response.text());
-						break;
-					case "iframe":
-					case "document":
-						if (
-							isHtml(
-								ultraviolet.meta.url,
-								responseCtx.headers["content-type"] || "",
-							)
-						) {
-							responseCtx.body = ultraviolet.rewriteHtml(
-								await response.text(),
-								{
-									document: true,
-									injectHead: ultraviolet.createHtmlInject(
-										this.config.handler,
-										this.config.bundle,
-										this.config.config,
-										ultraviolet.cookie.serialize(
-											cookies,
-											ultraviolet.meta,
-											true,
-										),
-										request.referrer,
-									),
-								},
-							);
-						}
-				}
-			}
+			/* Inside your uv.sw.js - Update these specific lines */
+
+if (responseCtx.body) {
+    switch (request.destination) {
+        case "script":
+        case "worker":
+            // CHANGE: Use absolute paths /uv/ instead of config variables here
+            responseCtx.body = `if (!self.__uv && self.importScripts) importScripts('/uv/uv.bundle.js', '/uv/uv.config.js', '/uv/uv.handler.js');\n`;
+            responseCtx.body += ultraviolet.js.rewrite(await response.text());
+            break;
+        case "style":
+            responseCtx.body = ultraviolet.rewriteCSS(await response.text());
+            break;
+        case "iframe":
+        case "document":
+            if (isHtml(ultraviolet.meta.url, responseCtx.headers["content-type"] || "")) {
+                responseCtx.body = ultraviolet.rewriteHtml(
+                    await response.text(),
+                    {
+                        document: true,
+                        injectHead: ultraviolet.createHtmlInject(
+                            '/uv/uv.handler.js', // CHANGE: Absolute path
+                            '/uv/uv.bundle.js',  // CHANGE: Absolute path
+                            '/uv/uv.config.js',  // CHANGE: Absolute path
+                            ultraviolet.cookie.serialize(cookies, ultraviolet.meta, true),
+                            request.referrer,
+                        ),
+                    },
+                );
+            }
+    }
+}
 
 			if (requestCtx.headers.accept === "text/event-stream") {
 				responseCtx.headers["content-type"] = "text/event-stream";
