@@ -127,19 +127,17 @@
         const status = document.getElementById('sw-status');
         const errorMsg = document.getElementById('error-msg');
 
-        // 2. Register the Service Worker
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('uv/uv.sw.js', {
-                    scope: __uv$config.prefix 
-                }).then(() => {
-                    status.innerHTML = "Proxy Engine: <span style='color: #26FF9A;'>ACTIVE</span>";
-                }).catch(err => {
-                    status.innerHTML = "Proxy Engine: <span style='color: #ff4d4d;'>FAILED</span>";
-                    console.error(err);
-                });
-            });
-        }
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        // Look in the uv folder for the worker
+        navigator.serviceWorker.register('/uv/uv.sw.js', {
+            // Scope must match prefix: '/uv/service/'
+            scope: '/uv/service/' 
+        }).then(() => {
+            console.log('UV Service Worker Registered Successfully');
+        });
+    });
+}
 
         // 3. Launch Logic
         btn.onclick = async (event) => {
