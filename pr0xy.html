@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultraviolet Proxy</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --neon-green: #26FF9A;
+            --bg-dark: #05070a;
+            --card-bg: #0d1117;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        .container {
+            text-align: center;
+            width: 90%;
+            max-width: 600px;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 30px;
+            letter-spacing: 2px;
+            color: var(--neon-green);
+            text-shadow: 0 0 10px rgba(38, 255, 154, 0.3);
+        }
+
+        /* The Search Bar Container */
+        .search-wrapper {
+            background: var(--card-bg);
+            padding: 10px 20px;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            transition: 0.3s ease;
+        }
+
+        /* Hollow Border Effect on Hover */
+        .search-wrapper:hover {
+            border-color: var(--neon-green);
+            box-shadow: 0 0 20px rgba(38, 255, 154, 0.2);
+        }
+
+        .search-wrapper i {
+            color: #555;
+            margin-right: 15px;
+        }
+
+        input {
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 18px;
+            width: 100%;
+            outline: none;
+            padding: 10px 0;
+        }
+
+        button#launch-btn {
+            background: var(--neon-green);
+            color: #000;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 50px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-left: 10px;
+            transition: transform 0.2s;
+        }
+
+        button#launch-btn:hover {
+            transform: scale(1.05);
+            background: #1de085;
+        }
+
+        .status-msg {
+            margin-top: 20px;
+            font-size: 12px;
+            color: #888;
+        }
+
+        #error-msg {
+            color: #ff4d4d;
+            margin-top: 10px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>SECURE PROXY</h1>
+        
+        <div class="search-wrapper">
+            <i class="fas fa-search"></i>
+            <input type="text" id="uv-address" placeholder="Enter URL or Search Google..." autocomplete="off">
+            <button id="launch-btn">GO</button>
+        </div>
+
+        <p id="error-msg">Please enter a valid URL or search term.</p>
+        <p class="status-msg" id="sw-status">Initializing Service Worker...</p>
+    </div>
+
+    <script src="uv/uv.bundle.js"></script>
+    <script src="uv/uv.config.js"></script>
+
+    <script>
+        const input = document.getElementById('uv-address');
+        const btn = document.getElementById('launch-btn');
+        const status = document.getElementById('sw-status');
+        const errorMsg = document.getElementById('error-msg');
+
+        // 2. Register the Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('uv/uv.sw.js', {
+                    scope: __uv$config.prefix 
+                }).then(() => {
+                    status.innerHTML = "Proxy Engine: <span style='color: #26FF9A;'>ACTIVE</span>";
+                }).catch(err => {
+                    status.innerHTML = "Proxy Engine: <span style='color: #ff4d4d;'>FAILED</span>";
+                    console.error(err);
+                });
+            });
+        }
+
+        // 3. Launch Logic
+        btn.onclick = async (event) => {
+            event.preventDefault();
+            let url = input.value.trim();
+
+            if (!url) {
+                errorMsg.style.display = 'block';
+                return;
+            }
+
+            errorMsg.style.display = 'none';
+
+            // Check if it's a URL or a search query
+            if (!url.includes('.') || url.includes(' ')) {
+                url = 'https://www.google.com/search?q=' + encodeURIComponent(url);
+            } else if (!url.startsWith('http')) {
+                url = 'https://' + url;
+            }
+
+            // Redirect using the UV encoding
+            window.location.href = __uv$config.prefix + __uv$config.encodeUrl(url);
+        };
+
+        // Allow "Enter" key to launch
+        input.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') btn.click();
+        });
+    </script>
+</body>
+</html>
