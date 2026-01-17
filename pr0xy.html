@@ -106,66 +106,71 @@
 <body>
 
     <div class="container">
-        <h1>SECURE PROXY</h1>
-        
-        <div class="search-wrapper">
-            <i class="fas fa-search"></i>
-            <input type="text" id="uv-address" placeholder="Enter URL or Search Google..." autocomplete="off">
-            <button id="launch-btn">GO</button>
-        </div>
-
-        <p id="error-msg">Please enter a valid URL or search term.</p>
-        <p class="status-msg" id="sw-status">Initializing Service Worker...</p>
+    <h1>SECURE PROXY</h1>
+    <div class="search-wrapper">
+        <i class="fas fa-search"></i>
+        <input type="text" id="uv-address" placeholder="Enter URL..." autocomplete="off">
+        <button id="launch-btn">GO</button>
     </div>
+    <p class="status-msg" id="sw-status">Initializing...</p>
+</div>
 
-    <script src="uv/uv.bundle.js"></script>
-    <script src="uv/uv.config.js"></script>
+<script src="/uv/uv.bundle.js"></script>
+<script src="/uv/uv.config.js"></script>
 
-    <script>
-const input = document.getElementById('uv-address');
-const btn = document.getElementById('launch-btn');
-const status = document.getElementById('sw-status');
+<script>
+    // Grab elements
+    const input = document.getElementById('uv-address');
+    const btn = document.getElementById('launch-btn');
+    const status = document.getElementById('sw-status');
 
-// 1. Register IMMEDIATELY (No 'load' wrapper)
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/uv/uv.sw.js', {
-        scope: '/uv/service/'
-    }).then(() => {
-        status.textContent = "Service Worker: Ready";
-        console.log('UV Service Worker Registered');
-    }).catch(err => {
-        status.textContent = "Service Worker: Error";
-        console.error(err);
-    });
-}
-
-// 2. Button Logic
-btn.onclick = async (event) => {
-    event.preventDefault();
-    console.log("Click detected!");
-
-    let url = input.value.trim();
-    if (!url) return;
-
-    // URL Formatting
-    if (!url.includes('.') || url.includes(' ')) {
-        url = 'https://www.google.com/search?q=' + encodeURIComponent(url);
-    } else if (!url.startsWith('http')) {
-        url = 'https://' + url;
+    // DEBUG: This will tell us if the button is actually found
+    if (!btn) {
+        console.error("CRITICAL: Button with ID 'launch-btn' not found!");
+    } else {
+        console.log("Button linked successfully.");
     }
 
-    // Redirect Logic
-    try {
-        const encoded = __uv$config.encodeUrl(url);
-        const target = __uv$config.prefix + encoded;
-        
-        console.log("Launching:", target);
-        window.location.href = target;
-    } catch (e) {
-        alert("Config not loaded properly. Check uv.config.js");
-        console.error(e);
+    // Register Service Worker immediately
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/uv/uv.sw.js', {
+            scope: '/uv/service/'
+        }).then(() => {
+            status.textContent = "Service Worker: Ready";
+        }).catch(err => {
+            status.textContent = "Service Worker: Error";
+            console.error(err);
+        });
     }
-};
-    </script>
+
+    // The Click Logic
+    btn.onclick = (event) => {
+        event.preventDefault();
+        console.log("Click detected!");
+
+        let url = input.value.trim();
+        if (!url) return;
+
+        // Basic Search/URL formatting
+        if (!url.includes('.') || url.includes(' ')) {
+            url = 'https://www.google.com/search?q=' + encodeURIComponent(url);
+        } else if (!url.startsWith('http')) {
+            url = 'https://' + url;
+        }
+
+        try {
+            const encoded = __uv$config.encodeUrl(url);
+            window.location.href = __uv$config.prefix + encoded;
+        } catch (e) {
+            console.error("Encoding failed. Is uv.config.js loaded?", e);
+            alert("Proxy config missing. Check your /uv/ folder.");
+        }
+    };
+
+    // Enter key support
+    input.onkeydown = (e) => {
+        if (e.key === 'Enter') btn.click();
+    };
+</script>
 </body>
 </html>
