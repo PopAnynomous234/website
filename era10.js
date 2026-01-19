@@ -741,9 +741,49 @@ const games = [
         url: "fnafworld.html"
     },
     {
-        title: "Five Nights at candy's",
+        title: "Five Nights at Candy's",
         image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTSJl2MlFUUSTc8kddL6-9zrTKumbvhCJHAYg&s",
         url: "fnac.html"
+    },
+        {
+        title: "Stickman Kombat 2D",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQu7IP2r8P74edCob_Ma0Gthz51cm8PQC-LMg&s",
+        url: "stick.html"
+    },
+    {
+        title: "Bottle Flip",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSqA_2Q3iyzD8JgnPFyAixi3Cdmt2ZoLLR0eQ&s",
+        url: "bottle.html"
+    },
+    {
+        title: "Slope",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQL3-ook6c3OlcZYAcNU6KbEjs79K4BGFOGUg&s",
+        url: "slope.html"
+    },
+    {
+        title: "Slope 2 Player",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS4M_99Un_dFeo6YkgejrmoenWIqT1nvbI3hA&s",
+        url: "slope2.html"
+    },
+    {
+        title: "Slope 3",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRj1tHWOQJlt8lfke14PSDUubojia30JfRskg&s",
+        url: "slope3.html"
+    },
+    {
+        title: "Smash Karts",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTrHpaEKu-dAdRPF4cRaNa5rftEW9-xznJfbw&s",
+        url: "smashk.html"
+    },
+    {
+        title: "Apple Worm",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSS5UVgdYZje3RNLHAIsCyAAgvjpJrEipBurA&s",
+        url: "applew.html"
+    },
+    {
+        title: "Stickman Hook",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRLCWdJ7OxBWOtsfvbsWMNE3a4lF2xd1onTGA&s",
+        url: "stickmanh.html"
     }
 ];
 
