@@ -112,8 +112,60 @@
   transition: 0.2s;
 }
 
+/* Container to hold sidebars + game */
+.game-layout {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 20px;
+    width: 100%;
+    margin-top: 30px;
+}
 
+/* Make sure sidebars stay 160px wide */
+.sidebar1 {
+    width: 160px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-top: 10px;
+}
 
+/* Adjust the game container to NOT have a top margin anymore 
+   since the layout container handles it */
+#game-container {
+    margin-top: 0 !important; 
+    flex-shrink: 0; /* Prevents the game from getting squished */
+}
+
+.game-card {
+    background: #1a1a1a;
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: 0.2s;
+    border: 1px solid #333;
+}
+
+.game-card:hover {
+    transform: scale(1.03);
+    border-color: #26ff9a;
+}
+
+.game-card img {
+    width: 100%;
+    aspect-ratio: 16/9;
+    object-fit: cover;
+    display: block;
+}
+
+.game-card h3 {
+    color: white;
+    font-size: 11px;
+    margin: 5px;
+    text-align: center;
+    font-family: sans-serif;
+}
   </style>
 </head>
 
@@ -133,6 +185,8 @@
   </div>
 
   <!-- Game Container -->
+   <div class="game-layout">
+    <div id="left-sidebar" class="sidebar1"></div>
   <div id="game-container">
     <iframe 
       id="game-iframe" 
@@ -147,13 +201,20 @@
       </svg>
     </button>
   </div>
+  <div id="right-sidebar" class="sidebar1"></div>
+</div>
 
   <!-- Iframe Navigation -->
   <div id="iframe-nav">
     <button class="button" onclick="closeGame()">✗ Close</button>
   </div>
+  <div class="game-layout">
+    <div id="left-sidebar" class="sidebar1"></div>
 
+    <div id="right-sidebar" class="sidebar1"></div>
+</div>
   <!-- ---------- Scripts ---------- -->
+
   <script>
       function closeGame() {
     sessionStorage.removeItem('currentGameUrl'); // remove the stored game URL
@@ -206,13 +267,60 @@
     });
     
   </script>
+<script src="./era10.js"></script>
+<script>
+  window.addEventListener('load', () => {
+      // 1. Get the iframe by the CORRECT ID used in your HTML
+      const frame = document.getElementById('game-iframe');
+      const currentGameUrl = sessionStorage.getItem('currentGameUrl');
+      
+      // Only update if frame exists and src is empty
+      if (currentGameUrl && frame && !frame.srcdoc && !frame.src) {
+          frame.src = currentGameUrl;
+      }
 
+      const BASE_URL = `https://cdn.jsdelivr.net/gh/PopAnynomous234/Goodboy@main/`;
+
+      // 2. Check if 'games' array exists from era10.js
+      if (typeof games !== 'undefined') {
+          // Clear existing sidebars to prevent duplicates
+          const leftSidebar = document.getElementById('left-sidebar');
+          const rightSidebar = document.getElementById('right-sidebar');
+          leftSidebar.innerHTML = '';
+          rightSidebar.innerHTML = '';
+
+          // Shuffle and pick 10
+          const randomTen = [...games].sort(() => 0.5 - Math.random()).slice(0, 10);
+
+          randomTen.forEach((game, index) => {
+              const card = document.createElement('div');
+              card.className = 'game-card';
+              card.innerHTML = `
+                  <img src="${game.image}" alt="${game.title}">
+                  <h3>${game.title}</h3>
+              `;
+              
+              card.onclick = () => {
+                  sessionStorage.setItem('currentGameUrl', BASE_URL + game.url);
+                  window.location.reload(); 
+              };
+
+              // Logic to split 5 left and 5 right
+              if (index < 5) {
+                  leftSidebar.appendChild(card);
+              } else {
+                  rightSidebar.appendChild(card);
+              }
+          });
+      }
+  });
+</script>
   <!-- Extra Scripts -->
   <script src="era4.js"></script>
   <script src="era5.js"></script>
   <script src="pe.js"></script>
+  <script src="era10.js"></script>
   <script src="warn.js"></script>
-  <script src="fu.js"></script>
   <script src="cursor.js"></script>
   <script src="widget.js"></script>
 
