@@ -1,249 +1,292 @@
 <!DOCTYPE html>
-    <head>
-      <meta name="description" content="Codelistener is a website with a lot of stuff, like games, tools, settings, music, chat, AI, and more. This website is used mostly for games.If anyone types 'Codelistener games', this website may appear. ">
-        <title>Codelistener | Home</title>
-        <link rel="preconnect" href="https://fonts.googleapis.com"> 
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&display=swap" rel="stylesheet">
-        <link href="https://fonts.cdnfonts.com/css/minecraft-3" rel="stylesheet">
-        <link href="https://fonts.cdnfonts.com/css/minecrafter-alt" rel="stylesheet">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-        <link rel="stylesheet" href="styles.css">
-         <link rel="stylesheet" href="st.css">
-         <link rel="icon" href="https://www.dropbox.com/scl/fi/vnz4rs2sjz6g4tal3j714/dhd-removebg-preview.png?rlkey=15d0v2yhflsimksh23ofvzzli&st=q5mgrxlo&raw=1" type="image/svg+xml">
-         <style>
-             button {
-                 border-radius:3px;
-                 width:145px;
-                 height:50px;
-                 font-weight:bold;
-                 font-size:25px;
-                 color:white;
-                 transition:background-color 0.3s ease-in-out;
-             }
-             
-             button:hover {
-                 background-color:#78FFBD;
-             }
-              
-             .main-content {
-  display: none; 
-}
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="description" content="Codelistener is a website with a lot of stuff, like games, tools, settings, music, chat, AI, and more. This website is used mostly for games.If anyone types 'Codelistener games', this website may appear. ">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-.timeline {
-  position: relative;
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 20px 0;
-}
+  <title>Codelistener | Home</title>
 
-.timeline-event {
-  position: relative;
-  padding: 15px 40px;
-  margin: 20px 0;
-  background: #001A0E;
-  border-radius: 10px;
-  box-shadow: 0 0 10px #26ff9a44;
-  border: 1px solid #26ff9a66;
-  width: 45%;
-  left: 0;
-  transition: box-shadow 0.3s ease;
-}
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com"> 
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&display=swap" rel="stylesheet">
+  <link href="https://fonts.cdnfonts.com/css/minecraft-3" rel="stylesheet">
+  <link href="https://fonts.cdnfonts.com/css/minecrafter-alt" rel="stylesheet">
 
-.timeline-event.right {
-  left: 55%;
-}
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-.timeline-event:hover {
-  box-shadow: 0 0 25px #26ff9a;
-  border-color: #26ff9a;
-}
+  <!-- Your External CSS -->
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="st.css">
 
-.timeline-marker {
-  position: absolute;
-  top: 21px;
-  left: -12px;
-  width: 20px;
-  height: 20px;
-  background-color: #26ff9a;
-  border-radius: 50%;
-  box-shadow:
-    0 0 10px #26ff9a,
-    0 0 20px #26ff9a;
-  border: 2px solid #111f35;
-  transition: background-color 0.3s ease, box-shadow 0.3s ease;
-}
+  <!-- Favicon -->
+  <link rel="icon" href="https://www.dropbox.com/scl/fi/vnz4rs2sjz6g4tal3j714/dhd-removebg-preview.png?rlkey=15d0v2yhflsimksh23ofvzzli&st=q5mgrxlo&raw=1" type="image/svg+xml">
 
-.timeline-event.right .timeline-marker {
-  left: -30px;
-}
+  <!-- ===================== -->
+  <!-- Startup Animations -->
+  <!-- ===================== -->
+  <style>
+    /* Global Page Fade */
+    body {
+      opacity: 0;
+      animation: pageFadeIn 0.8s ease forwards;
+    }
 
-.timeline-event:hover .timeline-marker {
-  background-color: #00ff99;
-  box-shadow:
-    0 0 15px #00ff99,
-    0 0 30px #00ff99;
-}
+    @keyframes pageFadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
 
-.timeline-content h3 {
-  color: #26ff9a;
-  margin: 0 0 5px 0;
-}
+    /* Hero Text Overlay Animation */
+    .text-overlay {
+      animation: heroIn 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+      animation-delay: 0.3s;
+    }
 
-.timeline-content p {
-  margin: 0;
-  color: #a0a0a0;
-  font-size: 0.9em;
-}
+    /* Soft Glow Pulse on Main Title */
+    .text-overlay h1 {
+      text-shadow: 0 0 15px #26ff9a55;
+      animation: titleGlow 2.5s ease-in-out infinite alternate;
+    }
 
-.timeline-content .date {
-  color: #26ff9a;
-  font-weight: bold;
-  text-shadow: 0 0 5px #26ff9a;
-}
-.trustpilot-btn {
-  /* Basic Button Styling */
-  display: inline-block;
-  padding: 10px 20px;
-  text-align: center;
-  text-decoration: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 16px;
-  font-weight: bold;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  transition: background-color 0.3s ease;
+    @keyframes titleGlow {
+      from { text-shadow: 0 0 10px #26ff9a55; }
+      to   { text-shadow: 0 0 25px #26ff9abb; }
+    }
 
-  /* Trustpilot Brand Colors (Example) */
-  background-color: #00b67a; /* Trustpilot green */
-  color: #ffffff; /* White text */
-  border: 1px solid #00895c;
+    /* Timeline Staggered Reveal */
+    .timeline-event {
+      opacity: 0;
+      transform: translateY(30px) scale(0.97);
+      animation: timelineIn 0.7s ease forwards;
+    }
 
-  /* Optional: Add a subtle shadow */
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
+    .timeline-event:nth-child(1) { animation-delay: 0.6s; }
+    .timeline-event:nth-child(2) { animation-delay: 0.8s; }
+    .timeline-event:nth-child(3) { animation-delay: 1s; }
+    .timeline-event:nth-child(4) { animation-delay: 1.2s; }
 
-.trustpilot-btn:hover,
-.trustpilot-btn:focus {
-  background-color: #00895c; /* Darker green on hover/focus */
-  color: #ffffff;
-  text-decoration: none;
-}
+    @keyframes timelineIn {
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
 
-         </style>
-    </head>
-    <body>
-<div class="sidebar">
-    <img src="https://cdn.jsdelivr.net/gh/PopAnynomous234/assets/logo.png" width=70px height=70px alt="logo">
-      <ul>
-          <li>
-          <a href="index.html">
-            <i class="fas fa-home icon"></i>
-            <span class="text">Home</span>
-          </a>
-        </li>
-        <li>
-          <a href="ai.html">
-            <i class="fas fa-robot icon"></i>
-            <span class="text">AI</span>
-          </a>
-        </li>
-        <li>
-          <a href="tools.html">
-        <i class="fa-solid fa-globe icon" style="color: #ffffff;"></i>
-            <span class="text">Tools</span>
-          </a>
-        </li>
-        <li>
-          <a href="games.html">
-            <i class="fas fa-gamepad icon"></i>
-            <span class="text">Games</span>
-          </a>
-        </li>
-              <li>
-          <a href="music.html">
-            <i class="fas fa-music icon"></i>
-            <span class="text">Music</span>
-          </a>
-        </li>
-                <li>
-          <a href="chat.html">
-            <i class="fa-regular fa-comments icon"></i>
-            <span class="text">Chat</span>
-          </a>
-        </li>
-        <li>
-          <a href="settings.html">
-            <i class="fas fa-cog icon"></i>
-            <span class="text">Settings</span>
-          </a>
-        </li>
-      </ul>
+    /* Buttons (your original styles kept) */
+    button {
+      border-radius: 3px;
+      width: 145px;
+      height: 50px;
+      font-weight: bold;
+      font-size: 25px;
+      color: white;
+      transition: background-color 0.3s ease-in-out;
+    }
+
+    button:hover {
+      background-color: #78FFBD;
+    }
+
+    /* Timeline Base (unchanged from you) */
+    .timeline {
+      position: relative;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px 0;
+    }
+
+    .timeline-event {
+      position: relative;
+      padding: 15px 40px;
+      margin: 20px 0;
+      background: #001A0E;
+      border-radius: 10px;
+      box-shadow: 0 0 10px #26ff9a44;
+      border: 1px solid #26ff9a66;
+      width: 45%;
+      left: 0;
+      transition: box-shadow 0.3s ease;
+    }
+
+    .timeline-event.right {
+      left: 55%;
+    }
+
+    .timeline-event:hover {
+      box-shadow: 0 0 25px #26ff9a;
+      border-color: #26ff9a;
+    }
+
+    .timeline-marker {
+      position: absolute;
+      top: 21px;
+      left: -12px;
+      width: 20px;
+      height: 20px;
+      background-color: #26ff9a;
+      border-radius: 50%;
+      box-shadow:
+        0 0 10px #26ff9a,
+        0 0 20px #26ff9a;
+      border: 2px solid #111f35;
+      transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .timeline-event.right .timeline-marker {
+      left: -30px;
+    }
+
+    .timeline-event:hover .timeline-marker {
+      background-color: #00ff99;
+      box-shadow:
+        0 0 15px #00ff99,
+        0 0 30px #00ff99;
+    }
+
+    .timeline-content h3 {
+      color: #26ff9a;
+      margin: 0 0 5px 0;
+    }
+
+    .timeline-content p {
+      margin: 0;
+      color: #a0a0a0;
+      font-size: 0.9em;
+    }
+
+    .timeline-content .date {
+      color: #26ff9a;
+      font-weight: bold;
+      text-shadow: 0 0 5px #26ff9a;
+    }
+
+    /* Trustpilot Button (unchanged) */
+    .trustpilot-btn {
+      display: inline-block;
+      padding: 10px 20px;
+      text-align: center;
+      text-decoration: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: bold;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      transition: background-color 0.3s ease;
+      background-color: #00b67a;
+      color: #ffffff;
+      border: 1px solid #00895c;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .trustpilot-btn:hover,
+    .trustpilot-btn:focus {
+      background-color: #00895c;
+      color: #ffffff;
+      text-decoration: none;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Sidebar (external CSS controls layout) -->
+  <div class="sidebar">
+    <img src="https://cdn.jsdelivr.net/gh/PopAnynomous234/assets/logo.png" width="70" height="70" alt="logo">
+    <ul>
+      <li><a href="index.html"><i class="fas fa-home icon"></i><span class="text">Home</span></a></li>
+      <li><a href="ai.html"><i class="fas fa-robot icon"></i><span class="text">AI</span></a></li>
+      <li><a href="tools.html"><i class="fa-solid fa-globe icon"></i><span class="text">Tools</span></a></li>
+      <li><a href="games.html"><i class="fas fa-gamepad icon"></i><span class="text">Games</span></a></li>
+      <li><a href="music.html"><i class="fas fa-music icon"></i><span class="text">Music</span></a></li>
+      <li><a href="chat.html"><i class="fa-regular fa-comments icon"></i><span class="text">Chat</span></a></li>
+      <li><a href="settings.html"><i class="fas fa-cog icon"></i><span class="text">Settings</span></a></li>
+    </ul>
+  </div>
+
+  <!-- Main Content -->
+  <div class="carousel-and-text">
+
+    <!-- Made by Coders Section (your external CSS handles it) -->
+    <div class="carousel-container">
+      <div class="carousel">
+        <h1>Made by Coders.</h1>
+        <br>
+        <h1>For Fans, kiddos.</h1> 
+      </div>
     </div>
 
-<div class="carousel-and-text">
-
-<div class="carousel-container" >
-  <div class="carousel">
-  <h1>Made by Coders.</h1>
-  <br>
-  <h1>For Fans, kiddos.</h1> 
-  </div>
-</div>
-<div class="text-overlay">
+    <!-- Hero Overlay -->
+    <div class="text-overlay">
       <h1>Codelistener</h1>
-        <p style="font-family:minecraft; color: white;">
-            Do anything you want! Pick Codelistener. Try out.
-        </p>
-        <a href="https://www.trustpilot.com/evaluate/codelistener.betteruptime.com" target="_blank" rel="noopener noreferrer" class="trustpilot-btn">
-          Rate us on Trustpilot </a>
-        
-  </div>
-<br>
-<p style="font-family:orbitron; font-size:17px;">Nervous? Or panicked? Use <span class="ast">Ctrl </span>  +  <span class="ast">Alt </span>  +  <span class="ast">J </span></p>
-<div class="timeline">
-  <div class="timeline-event">
-    <div class="timeline-marker"></div>
-    <div class="timeline-content">
-      <h3>Codelistener v1</h3>
-      <p><span class="date">Mid 2025</span> &bull; First Version &bull; CodeHS</p>
+      <p style="font-family:minecraft; color: white;">
+        Do anything you want! Pick Codelistener. Try out.
+      </p>
+      <a href="https://www.trustpilot.com/evaluate/codelistener.betteruptime.com"
+         target="_blank"
+         rel="noopener noreferrer"
+         class="trustpilot-btn">
+        Rate us on Trustpilot
+      </a>
+    </div>
+
+    <br>
+
+    <p style="font-family:orbitron; font-size:17px;">
+      Nervous? Or panicked? Use 
+      <span class="ast">Ctrl</span> + 
+      <span class="ast">Alt</span> + 
+      <span class="ast">J</span>
+    </p>
+
+    <!-- Timeline -->
+    <div class="timeline">
+
+      <div class="timeline-event">
+        <div class="timeline-marker"></div>
+        <div class="timeline-content">
+          <h3>Codelistener v1</h3>
+          <p><span class="date">Mid 2025</span> &bull; First Version &bull; CodeHS</p>
+        </div>
+      </div>
+
+      <div class="timeline-event right">
+        <div class="timeline-marker"></div>
+        <div class="timeline-content">
+          <h3>Codelistener v2</h3>
+          <p><span class="date">Mid 2025</span> &bull; Minor Release &bull; CodeHS</p>
+        </div>
+      </div>
+
+      <div class="timeline-event">
+        <div class="timeline-marker"></div>
+        <div class="timeline-content">
+          <h3>Codelistener v3-v4</h3>
+          <p><span class="date">Late 2025</span> &bull; Minor Release &bull; CodeHS</p>
+        </div>
+      </div>
+
+      <div class="timeline-event right">
+        <div class="timeline-marker"></div>
+        <div class="timeline-content">
+          <h3>Codelistener V5</h3>
+          <p><span class="date">Now</span> &bull; Major Release &bull; Firebase</p>
+        </div>
+      </div>
+
     </div>
   </div>
 
-  <div class="timeline-event right">
-    <div class="timeline-marker"></div>
-    <div class="timeline-content">
-      <h3>Codelistener v2</h3>
-      <p><span class="date">Mid 2025</span> &bull; Minor Release &bull; CodeHS</p>
-    </div>
-  </div>
+  <!-- Your Scripts -->
+  <script src="about.js"></script>
+  <script src="era4.js"></script>
+  <script src="era5.js"></script>
+  <script src="pe.js"></script>
+  <script src="warn.js"></script>
+  <script src="cursor.js"></script>
+  <script src="widget.js"></script>
 
-  <div class="timeline-event">
-    <div class="timeline-marker"></div>
-    <div class="timeline-content">
-      <h3>Codelistener v3-v4</h3>
-      <p><span class="date">Late 2025</span> &bull; Minor Release &bull; CodeHS</p>
-    </div>
-  </div>
-
-  <div class="timeline-event right">
-    <div class="timeline-marker"></div>
-    <div class="timeline-content">
-      <h3>Codelistener V5</h3>
-      <p><span class="date">Now</span> &bull; Major Release &bull; Firebase</p>
-    </div>
-  </div>
-</div>
-
-</div>
-
-<script src="about.js"></script>
-<script src="era4.js"></script>
-<script src="era5.js"></script>
-<script src="pe.js"></script>
-<script src="warn.js"></script>
-<script src="cursor.js"></script>
-<script src="widget.js"></script>
-
-    </body>
+</body>
 </html>
