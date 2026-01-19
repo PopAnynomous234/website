@@ -153,7 +153,19 @@
   opacity: 1;
   transform: translateX(0);
 }
+    .sidebar {
+      transform: translateX(-40px);
+      opacity: 0;
+      animation: sidebarIn 0.7s ease-out forwards;
+      animation-delay: 0.2s;
+    }
 
+    @keyframes sidebarIn {
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
 /* ===========================
    FONT AWESOME FIX
 =========================== */
