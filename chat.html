@@ -1,732 +1,879 @@
-
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Codelistener Chat</title>
+    <link rel="stylesheet" href="st.css">
+    <link rel="stylesheet" href="styles.css">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="st.css">
+    <title>COdelistener Chat</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <style>
-        /* Basic CSS for a WhatsApp-like layout */
+        /* Startup Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: Arial, sans-serif;
             margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background-color: black;
-            color: #333;
-        }
-        .container {
-            display: flex;
-            width: 90%;
-            max-width: 1200px;
-            height: 90vh;
-            background-color: black;
-            border-radius: 8px;
-            box-shadow:      
-        0 0 10px #26FF9A,  /* Inner glow/sharper glow */
-        0 0 20px #26FF9A,  /* Medium glow */
-        0 0 50px #26FF9A;  /* Wider, softer glow */
-            overflow: scroll;
-        }
-        #auth-section {
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
             padding: 20px;
-            text-align: center;
+            background-color: #1a1a2e; /* Very dark background */
+            color: #e0e0e0; /* Light text color for contrast */
+            display: flex;
+            gap: 20px;
+            min-height: 100vh;
         }
-        #app-section {
-            display: none; /* Hidden by default, shown when logged in */
+
+        #app-container {
+            display: flex;
             width: 100%;
-            height: 100%;
-            display: flex;
+            max-width: 1200px;
+            margin: 0 auto;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Darker shadow */
+            background-color: #2e004a; /* Darker distinct background */
+            animation: slideInUp 0.8s ease-out forwards, fadeIn 0.8s ease-out forwards; /* Startup animations */
+            opacity: 0; /* Start invisible for animation */
         }
-        .sidebar1 {
-            width: 30%;
-            border-right: 1px solid #eee;
-            background-color: #010101;
+
+        #sidebar {
+            width: 250px;
+            background-color: #06120C; /* Dark blue background */
+            padding: 20px;
+            border-right: 1px solid #0f3460; /* Darker border */
             display: flex;
             flex-direction: column;
+            gap: 15px;
         }
-        .chat-area {
-            width: 70%;
+
+        #main-chat {
+            flex-grow: 1;
             display: flex;
             flex-direction: column;
-              background-image: url('https://www.dropbox.com/scl/fi/bu3237fbedngu4i5jlt85/downloaaaaaad.jpeg?rlkey=4z56tliexm8r79pmrs8zotk79&st=6talqqzd&raw=1'); /* Replace with your image path */
-  background-repeat: no-repeat; /* Prevents image from repeating */
-  background-size: cover; /* Scales image to cover the entire background */
-  background-attachment: fixed; /* Keeps image fixed while scrolling */
+            padding: 20px;
+            background-color: black; /* Slightly different dark purple */
         }
-        h1, h2 {
-            color: #fff;
-            margin-bottom: 20px;
+
+        h2, h3 {
+            color: #e0e0e0; /* Light color for headers */
+            margin-top: 0;
+            margin-bottom: 10px;
         }
-        input[type="email"], input[type="password"], input[type="text"] {
-            width: calc(100% - 20px);
-            padding: 10px;
-            margin: 8px 0;
-            border: 2px solid #26FF9A;
+
+        #username-display {
+            font-weight: bold;
+            color: #26ff9a; /* Accent color */
+            margin-bottom: 10px;
+        }
+
+        .online-users {
+            font-size: 0.9em;
+            color: #26ff9a; /* Accent color for online users */
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .room-item {
+            padding: 8px 12px;
             border-radius: 5px;
-            box-sizing: border-box;
-            Transition: box-shadow 0.5s ease-in-out;
-        }
-        
-        input[type="email"], input[type="password"], input[type="text"]:focus {
-                        box-shadow:      
-        0 0 2px #26FF9A,  /* Inner glow/sharper glow */
-        0 0 4px #26FF9A,  /* Medium glow */
-        0 0 8px #26FF9A;  /* Wider, softer glow */
-        }
-        button {
-            background-color: black;
-            color: white;
-            padding: 10px 15px;
-            border: 2px solid #26FF9A;
-            border-radius: 5px;
+            margin-bottom: 5px;
+            background-color: #16213e; /* Dark blue background */
             cursor: pointer;
-            margin: 5px;
-            font-size: 1rem;
-            transition: box-shadow 0.3s ease-in-out;
-        }
-        button:hover {
-         box-shadow: 
-        0 0 4px #26FF9A,  /* Inner glow/sharper glow */
-        0 0 8px #26FF9A,  /* Medium glow */
-        0 0 11px #26FF9A;  /* Wider, softer glow */;
-        }
-        #auth-status, #current-user-info {
-            margin-top: 15px;
-            font-weight: bold;
-        }
-        .sidebar1-header, .chat-header {
-            padding: 15px;
-            background-color: #27CF7F; /* WhatsApp header green */
-            color: white;
-            font-weight: bold;
+            transition: background-color 0.2s ease;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        .sidebar1-header button {
-            background-color: #dc3545; /* Red for sign out */
-            padding: 5px 10px;
-            font-size: 0.8rem;
-        }
-        .sidebar1-header button:hover {
-            background-color: #c82333;
-        }
-        .sidebar1-section-header { /* NEW STYLE */
-            padding: 10px 15px;
-            background-color: #040404; /* Light green for section headers */
-            font-weight: bold;
-            color: #008069;
-            border-bottom: 1px solid #ddd;
-            border-top: 1px solid #ddd;
-            margin-top: 10px;
-        }
-        .contacts-list {
-            flex-grow: 1;
-            overflow-y: auto;
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-        .contacts-list li {
-            padding: 15px;
-            border-bottom: 1px solid #eee;
-            cursor: pointer;
-            color:#5a5a5a;
-            display: flex;
-            align-items: center;
-        }
-        .contacts-list li.active, .contacts-list li:hover {
-            background-color: #2a2a2a; /* Light green for selected/hovered contact */
-        }
-        .contacts-list li span {
-            margin-left: 10px;
-            font-weight: 500;
-        }
-        .contacts-list li.disabled {
-            color: #aaa;
-            cursor: not-allowed;
-            background-color: #f0f0f0;
         }
 
-        .chat-messages {
-            flex-grow: 1;
-            overflow-y: auto;
-            padding: 16px;
+        .room-item.active, .room-item:hover {
+            background-color: #0f3460; /* Darker blue on hover/active */
+        }
+
+        .room-item span {
+            font-weight: bold;
+            color: #e0e0e0; /* Light text color */
+        }
+
+        .room-item-actions button {
+            background: none;
+            border: none;
+            color: #26ff9a; /* Accent color for action buttons */
+            padding: 0 5px;
+            cursor: pointer;
+            font-size: 0.8em;
+            transition: color 0.2s ease;
+        }
+        .room-item-actions button.delete-room-btn {
+            color: #ff4d4d; /* Red for delete button */
+        }
+        .room-item-actions button:hover {
+            color: #1ac77f;
+        }
+        .room-item-actions button.delete-room-btn:hover {
+            color: #cc0000;
+        }
+
+
+        form {
             display: flex;
             flex-direction: column;
             gap: 10px;
+            margin-bottom: 20px;
         }
+
+        input[type="text"], input[type="password"], textarea {
+            padding: 10px;
+            border: 1px solid #0f3460; /* Darker border */
+            border-radius: 4px;
+            font-size: 1em;
+            width: 100%;
+            box-sizing: border-box;
+            background-color: #1a1a2e; /* Dark input background */
+            color: #e0e0e0; /* Light text color */
+        }
+
+        button {
+            padding: 10px 15px;
+            background-color: #26ff9a; /* Accent color for buttons */
+            color: #1a1a2e; /* Dark text on accent button */
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.2s ease;
+        }
+
+        button:hover {
+            background-color: #1ac77f; /* Slightly darker accent on hover */
+        }
+
+        #messages-container {
+            flex-grow: 1;
+            border: 1px solid #0f3460; /* Darker border */
+            border-radius: 4px;
+            padding: 15px;
+            overflow-y: auto;
+            margin-bottom: 15px;
+            background-color: #1a1a2e; /* Dark background for messages area */
+        }
+
         .message {
-            max-width: 70%;
-            padding:5px;
-            max-height:70px;
-            border-radius: 10px;
-            box-shadow: 0 1px 1px rgba(0,0,0,0.1);
-            line-height: 1.4;
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 8px;
+            background:transparent; /* Dark blue message bubble */
             word-wrap: break-word;
         }
-        .message.sent {
-            align-self: flex-end;
-            background-color:transparent; /* WhatsApp sent message green */
-            color:#26FF9A;
+
+        .message.mine {
+            background:transparent; /* Even darker blue for own messages */
+            text-align: right;
             margin-left: auto;
         }
-        .message.received {
-            align-self: flex-start;
-            background-color: transparent; /* WhatsApp received message white */
-            color:#26FF9A;
-            margin-right: auto;
-        }
-        .message-sender {
-            font-size: 0.75em;
-            color: #666;
-            margin-bottom: 3px;
-        }
-        .message-timestamp {
-            font-size: 0.65em;
-            color: #999;
-            text-align: right;
-            margin-top: 5px;
-        }
-        .chat-input-area {
-            display: flex;
-            padding: 10px;
-            background-color: #030303;
-            border-top: 1px solid #eee;
-        }
-        .chat-input-area input {
-            flex-grow: 1;
-            margin-right: 10px;
-        }
-        .chat-input-area button {
-            margin: 0;
-        }
-        #no-chat-selected {
-            text-align: center;
-            margin-top: 50px;
-            color: #555;
-            font-size: 1.2rem;
-        }
-        .contact-avatar {
-            width: 40px;
-            height: 40px;
-            background-color: #012413;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: white;
+
+        .message .sender {
             font-weight: bold;
-            font-size: 1.2rem;
+            color: #26ff9a; /* Accent color for sender */
+            margin-bottom: 5px;
+            display: block;
         }
-        #user-invite-code {
-            padding: 8px;
-            background-color: #e9e9e9;
-            border-radius: 5px;
-            margin-top: 10px;
+
+        .message.mine .sender {
+            color: #26ff9a; /* Accent color for own sender */
+        }
+
+        .message .timestamp {
+            font-size: 0.8em;
+            color: #a0a0a0; /* Muted timestamp color */
+            margin-top: 5px;
+            display: block;
+        }
+
+        .message .text {
+            white-space: pre-wrap; /* Preserve newlines */
+            color: #e0e0e0; /* Light text */
+        }
+
+        .message .actions button {
+            background: none;
+            color: #26ff9a; /* Accent color for action buttons */
+            border: none;
+            padding: 0 5px;
+            font-size: 0.85em;
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+
+        .message .actions button:hover {
+            color: #1ac77f; /* Slightly darker accent on hover */
+        }
+
+        .message .reply-context {
+            background-color: #0d284a; /* Darker background for reply context */
+            border-left: 3px solid #26ff9a; /* Accent border */
+            padding: 5px 10px;
+            margin-bottom: 8px;
             font-size: 0.9em;
-            word-break: break-all;
+            color: #e0e0e0; /* Light text color */
+            border-radius: 4px;
+        }
+
+        #message-input-area {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        #message-input-area textarea {
+            flex-grow: 1;
+            resize: vertical;
+            min-height: 40px;
+            max-height: 150px;
+        }
+
+        #replying-to {
+            background-color: #0f3460; /* Dark blue background */
+            padding: 8px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            display: none; /* Hidden by default */
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        #replying-to span {
+            font-style: italic;
+            color: #e0e0e0; /* Light text */
+        }
+
+        #replying-to button {
+            background: none;
+            color: #ff4d4d; /* Red for cancel */
+            border: none;
+            padding: 0 5px;
+            cursor: pointer;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            #app-container {
+                flex-direction: column;
+            }
+            #sidebar {
+                width: 100%;
+                border-bottom: 1px solid #0f3460; /* Darker border */
+                border-right: none;
+            }
+            #main-chat {
+                padding: 15px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="sidebar">
         <img src="https://cdn.jsdelivr.net/gh/PopAnynomous234/assets/logo.png" width=70px height=70px alt="logo">
-        <ul>
-          <li>
-            <a href="index.html">
-              <i class="fas fa-home icon"></i><span class="text">Home</span>
-            </a>
-          </li>
-          <li>
-            <a href="ai.html">
-              <i class="fas fa-robot icon"></i><span class="text">AI</span>
-            </a>
-          </li>
-          <li>
-            <a href="tools.html">
-              <i class="fa-solid fa-screwdriver-wrench"></i>
-              ><span class="text">Tools</span>
-            </a>
-          </li>
-          <li>
-            <a href="games.html">
-              <i class="fas fa-gamepad icon"></i><span class="text">Games</span>
-            </a>
-          </li>
-          <li>
-            <a href="music.html">
-              <i class="fas fa-music icon"></i><span class="text">Music</span>
-            </a>
-          </li>
-          <li>
-            <a href="chat.html">
-              <i class="fa-regular fa-comment icon"></i><span class="text">Chat</span>
-            </a>
-          </li>
-          <li>
-            <a href="settings.html">
-              <i class="fas fa-cog icon"></i><span class="text">Settings</span>
-            </a>
-          </li>
-        </ul>
-      </div>
-    <div class="container">
-        <div id="auth-section">
-            <h1>Welcome to Codelistener chat!</h1>
-            <p>Log-in or Create Account to start chatting.📜</p>
-            <div>
-                <input type="email" id="emailInput" placeholder="Email">
-                <input type="password" id="passwordInput" placeholder="Password">
+            <ul>
+                <li>
+                <a href="index.html">
+                  <i class="fas fa-home icon"></i>
+                  <span class="text">Home</span>
+                </a>
+              </li>
+              <li>
+                <a href="ai.html">
+                  <i class="fas fa-robot icon"></i>
+                  <span class="text">AI</span>
+                </a>
+              </li>
+              <li>
+                <a href="tools.html">
+                    <i class="fa-solid fa-screwdriver-wrench"></i>
+                  <span class="text">Tools</span>
+                </a>
+              </li>
+              <li>
+                <a href="games.html">
+                  <i class="fas fa-gamepad icon"></i>
+                  <span class="text">Games</span>
+                </a>
+              </li>
+                    <li>
+                <a href="music.html">
+                  <i class="fas fa-music icon"></i>
+                  <span class="text">Music</span>
+                </a>
+              </li>
+                      <li>
+                <a href="chat.html">
+                  <i class="fa-regular fa-comment icon"></i>
+                  <span class="text">Chat</span>
+                </a>
+              </li>
+              <li>
+                <a href="settings.html">
+                  <i class="fas fa-cog icon"></i>
+                  <span class="text">Settings</span>
+                </a>
+              </li>
+            </ul>
+          </div>
+    <div id="app-container">
+        <div id="sidebar">
+            <h2>Codelistener Chat</h2>
+            <div id="username-display"></div>
+            <div id="online-users-count" class="online-users"></div>
+
+            <h3>Rooms</h3>
+            <div id="room-list">
+                <!-- Public channel will be injected here -->
             </div>
-            <div>
-                <button id="signUpButton">Create Account!</button>
-                <button id="signInButton">Log-in</button>
-            </div>
-            <p id="auth-status"></p>
+
+            <h3>Create Private Room</h3>
+            <form id="create-room-form">
+                <input type="text" id="new-room-name" placeholder="Room Name" required>
+                <button type="submit">Create Room</button>
+            </form>
+
+            <h3>Join Private Room</h3>
+            <form id="join-room-form">
+                <input type="text" id="join-room-code" placeholder="Join Code" required>
+                <button type="submit">Join Room</button>
+            </form>
         </div>
 
-        <div id="app-section">
-            <div class="sidebar1">
-                <div class="sidebar1-header">
-                    <span id="current-user-email"></span>
-                    <button id="signOutButton">Sign Out</button>
-                </div>
-                <div style="padding: 15px; border-bottom: 1px solid #eee;">
-                    <p style="margin-bottom: 5px; font-weight: bold;">Your Invite Code:</p>
-                    <div id="user-invite-code">Loading...</div>
-                    <hr style="margin: 15px 0;">
-                    <input type="text" id="addFriendInviteCodeInput" placeholder="Enter friend's invite code">
-                    <button id="addFriendByCodeButton">Add Friend</button>
-                </div>
-
-                <div class="sidebar1-section-header">My Contacts</div>
-                <ul id="contacts-list" class="contacts-list">
-                    <!-- Contacts will be loaded here -->
-                    <li style="padding:15px;">Loading contacts...</li>
-                </ul>
+        <div id="main-chat">
+            <h2 id="current-room-name"></h2>
+            <div id="messages-container">
+                <!-- Messages will be injected here -->
             </div>
 
-            <div class="chat-area">
-                <div class="chat-header">
-                    <span id="chat-partner-name">Select a contact to chat</span>
-                </div>
-                <div id="no-chat-selected">Please select a contact to start chatting.</div>
-                <div id="chat-messages" class="chat-messages">
-                    <!-- Messages will be loaded here -->
-                </div>
-                <div class="chat-input-area">
-                    <input type="text" id="messageInput" placeholder="Type a message..." disabled>
-                    <button id="sendMessageButton" disabled>Send</button>
-                </div>
+            <div id="replying-to">
+                <span>Replying to: <strong id="reply-context-text"></strong></span>
+                <button id="cancel-reply">X</button>
+            </div>
+
+            <div id="message-input-area">
+                <textarea id="message-input" placeholder="Send Message . Shift+ Enter for new line"></textarea>
+                <button id="send-button">Send</button>
             </div>
         </div>
     </div>
 
-    <script type="module">
-        // Import the functions you need from the SDKs you need
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
-        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-analytics.js";
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
-        // CORRECTED LINE: Added 'or' to the import list
-        import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, doc, getDoc, getDocs, updateDoc, where, or, and, arrayUnion, setDoc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
-
-        // Your web app's Firebase configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyCovpBzaIhzVmfUkX09xj-56b-HAZmWADs",
-            authDomain: "chat-283f4.firebaseapp.com",
-            projectId: "chat-283f4",
-            storageBucket: "chat-283f4.firebasestorage.app",
-            messagingSenderId: "585084707472",
-            appId: "1:585084707472:web:583439303827fe711eee15",
-            measurementId: "G-CM3S6PYDZ5"
-        };
+    <script>
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyAd-PM5QNtYuisjKCODf1iPk7OkhyCUaw4",
+  authDomain: "c0delistener.firebaseapp.com",
+  databaseURL: "https://c0delistener-default-rtdb.firebaseio.com",
+  projectId: "c0delistener",
+  storageBucket: "c0delistener.firebasestorage.app",
+  messagingSenderId: "124624934976",
+  appId: "1:124624934976:web:68ed31a7ad0a89e90827a5",
+  measurementId: "G-67JPFPJLS4"
+};
 
         // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const analytics = getAnalytics(app); // Google Analytics
-        const auth = getAuth(app);           // Firebase Authentication
-        const db = getFirestore(app);        // Cloud Firestore
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
 
-        // --- UI Element References ---
-        const authSection = document.getElementById('auth-section');
-        const appSection = document.getElementById('app-section');
-        const emailInput = document.getElementById('emailInput');
-        const passwordInput = document.getElementById('passwordInput');
-        const signUpButton = document.getElementById('signUpButton');
-        const signInButton = document.getElementById('signInButton');
-        const signOutButton = document.getElementById('signOutButton');
-        const authStatusElement = document.getElementById('auth-status');
-        const currentUserEmailElement = document.getElementById('current-user-email');
-        const userInviteCodeElement = document.getElementById('user-invite-code'); // NEW
+        // === Global Variables ===
+        let currentUser = '';
+        let currentRoomId = 'public_channel'; // Default to a public channel
+        let currentRoomRef = null;
+        let messagesRef = null;
+        let presenceRef = null;
+        let replyingToMessage = null; // Stores message data being replied to
+        let roomsListenerRef = null; // To manage the rooms listener
+        const roomElements = new Map(); // Store room ID -> DOM element for efficient updates
 
-        const addFriendInviteCodeInput = document.getElementById('addFriendInviteCodeInput'); // NEW
-        const addFriendByCodeButton = document.getElementById('addFriendByCodeButton');     // NEW
+        // === DOM Elements ===
+        const usernameDisplay = document.getElementById('username-display');
+        const onlineUsersCountElem = document.getElementById('online-users-count');
+        const roomListElem = document.getElementById('room-list');
+        const createRoomForm = document.getElementById('create-room-form');
+        const newRoomNameInput = document.getElementById('new-room-name');
+        const joinRoomForm = document.getElementById('join-room-form');
+        const joinRoomCodeInput = document.getElementById('join-room-code');
+        const currentRoomNameElem = document.getElementById('current-room-name');
+        const messagesContainer = document.getElementById('messages-container');
+        const messageInput = document.getElementById('message-input');
+        const sendButton = document.getElementById('send-button');
+        const replyingToElem = document.getElementById('replying-to');
+        const replyContextTextElem = document.getElementById('reply-context-text');
+        const cancelReplyButton = document.getElementById('cancel-reply');
 
-        const contactsList = document.getElementById('contacts-list');
-        const chatPartnerName = document.getElementById('chat-partner-name');
-        const noChatSelected = document.getElementById('no-chat-selected');
-        const chatMessagesDiv = document.getElementById('chat-messages');
-        const messageInput = document.getElementById('messageInput');
-        const sendMessageButton = document.getElementById('sendMessageButton');
+        // === Utility Functions ===
+        function getOrCreateUsername() {
+            let storedUsername = localStorage.getItem('chatUsername');
+            if (!storedUsername) {
+                while (!storedUsername || storedUsername.trim() === '') { // Keep prompting until a non-empty name is given
+                    storedUsername = prompt("Please enter your chat username:");
+                }
+                localStorage.setItem('chatUsername', storedUsername);
+            }
+            return storedUsername;
+        }
 
-        // --- Global State Variables ---
-        let currentUser = null;
-        let selectedFriend = null; // Stores the friend object { uid, email }
-        let unsubscribeFromMessages = null; // Function to stop listening to messages
-        let unsubscribeFromFriendsList = null; // Function to stop listening to accepted friends
+        function formatTimestamp(timestamp) {
+            if (!timestamp) return 'n/a';
+            const date = new Date(timestamp);
+            return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ' ' +
+                   date.toLocaleDateString([], { month: 'short', day: 'numeric' });
+        }
 
-        // --- Utility to generate a simple invite code ---
-        function generateInviteCode() {
-            // A simple, short alphanumeric code
+        function generateJoinCode() {
             return Math.random().toString(36).substring(2, 8).toUpperCase();
         }
 
-        // --- Firebase Authentication Listeners & Handlers ---
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                currentUser = {
-                    uid: user.uid,
-                    email: user.email,
-                    displayName: user.email.split('@')[0] // Simple display name
-                };
-                authSection.style.display = 'none';
-                appSection.style.display = 'flex';
-                currentUserEmailElement.textContent = `Hello, ${currentUser.displayName}!`;
+        // === Message Display and Actions ===
+        function createMessageElement(messageId, messageData) {
+            const messageElem = document.createElement('div');
+            messageElem.className = 'message';
+            messageElem.dataset.id = messageId;
 
-                // Load user data including invite code
-                const userDocSnap = await getDoc(doc(db, "users", currentUser.uid));
-                if (userDocSnap.exists()) {
-                    const userData = userDocSnap.data();
-                    userInviteCodeElement.textContent = userData.inviteCode || 'N/A';
-                    currentUser.inviteCode = userData.inviteCode; // Store invite code
-                } else {
-                    userInviteCodeElement.textContent = 'Error loading code.';
-                }
-
-                loadAndDisplayFriends();
-            } else {
-                currentUser = null;
-                selectedFriend = null;
-                authSection.style.display = 'flex';
-                appSection.style.display = 'none';
-                authStatusElement.textContent = 'No user signed in.';
-                currentUserEmailElement.textContent = '';
-                userInviteCodeElement.textContent = 'Loading...'; // Reset invite code display
-                addFriendInviteCodeInput.value = ''; // Clear invite code input
-
-                // Reset UI elements
-                contactsList.innerHTML = '<li style="padding:15px;">Loading contacts...</li>';
-                chatPartnerName.textContent = 'Select a contact to chat';
-                noChatSelected.style.display = 'block';
-                chatMessagesDiv.style.display = 'none';
-                messageInput.disabled = true;
-                sendMessageButton.disabled = true;
-                if (unsubscribeFromMessages) {
-                    unsubscribeFromMessages();
-                    unsubscribeFromMessages = null;
-                }
-                if (unsubscribeFromFriendsList) {
-                    unsubscribeFromFriendsList();
-                    unsubscribeFromFriendsList = null;
-                }
-            }
-        });
-
-        signUpButton.addEventListener('click', async () => {
-            const email = emailInput.value;
-            const password = passwordInput.value;
-            if (!email || !password) {
-                authStatusElement.textContent = 'Please enter email and password.';
-                return;
-            }
-            try {
-                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                const newInviteCode = generateInviteCode(); // Generate invite code
-                await setDoc(doc(db, "users", userCredential.user.uid), {
-                    uid: userCredential.user.uid,
-                    email: email,
-                    displayName: email.split('@')[0],
-                    friends: [], // Initialize with an empty friends array
-                    inviteCode: newInviteCode, // Store invite code
-                    createdAt: serverTimestamp()
-                });
-                authStatusElement.textContent = `Signed up and logged in as ${email}. Your invite code is: ${newInviteCode}`;
-            } catch (error) {
-                authStatusElement.textContent = `Error signing up: ${error.message}`;
-                console.error("Sign up error:", error);
-            }
-        });
-
-        signInButton.addEventListener('click', async () => {
-            const email = emailInput.value;
-            const password = passwordInput.value;
-            if (!email || !password) {
-                authStatusElement.textContent = 'Please enter email and password.';
-                return;
-            }
-            try {
-                await signInWithEmailAndPassword(auth, email, password);
-                authStatusElement.textContent = `Logged in as ${email}.`;
-            } catch (error) {
-                authStatusElement.textContent = `Error signing in: ${error.message}`;
-                console.error("Sign in error:", error);
-            }
-        });
-
-        signOutButton.addEventListener('click', async () => {
-            try {
-                await signOut(auth);
-                authStatusElement.textContent = 'Signed out successfully.';
-            } catch (error) {
-                authStatusElement.textContent = `Error signing out: ${error.message}`;
-                console.error("Sign out error:", error);
-            }
-        });
-
-        // --- Accepted Friends List Management ---
-        async function loadAndDisplayFriends() {
-            if (!currentUser) return;
-
-            if (unsubscribeFromFriendsList) {
-                unsubscribeFromFriendsList();
-                unsubscribeFromFriendsList = null;
+            if (messageData.sender === currentUser) {
+                messageElem.classList.add('mine');
             }
 
-            const userDocRef = doc(db, "users", currentUser.uid);
+            let replyContextHtml = '';
+            if (messageData.replyToMessageId && messageData.replyToMessageText) {
+                replyContextHtml = `
+                    <div class="reply-context">
+                        Replying to ${messageData.replyToMessageSender}: "${messageData.replyToMessageText.substring(0, 50)}${messageData.replyToMessageText.length > 50 ? '...' : ''}"
+                    </div>
+                `;
+            }
 
-            unsubscribeFromFriendsList = onSnapshot(userDocRef, async (docSnap) => {
-                contactsList.innerHTML = ''; // Clear existing list
-                if (docSnap.exists()) {
-                    const userData = docSnap.data();
-                    const friendUids = userData.friends || [];
+            const actionsHtml = (messageData.sender === currentUser) ? `
+                <div class="actions">
+                    <button class="edit-btn">Edit</button>
+                    <button class="delete-btn">Delete</button>
+                    <button class="reply-btn">Reply</button>
+                </div>
+            ` : `
+                <div class="actions">
+                    <button class="reply-btn">Reply</button>
+                </div>
+            `;
 
-                    if (friendUids.length === 0) {
-                        contactsList.innerHTML = '<li style="padding:15px;">No contacts yet. Share your invite code or use someone else\'s!</li>';
-                        return;
-                    }
 
-                    // Fetch details for each friend UID
-                    const friendDetailsPromises = friendUids.map(uid => getDoc(doc(db, "users", uid)));
-                    const friendSnapshots = await Promise.all(friendDetailsPromises);
+            messageElem.innerHTML = `
+                ${replyContextHtml}
+                <span class="sender">${messageData.sender}</span>
+                <div class="text">${messageData.text}</div>
+                <span class="timestamp">${formatTimestamp(messageData.timestamp)}</span>
+                ${actionsHtml}
+            `;
 
-                    friendSnapshots.forEach(friendDocSnap => {
-                        if (friendDocSnap.exists()) {
-                            const friend = friendDocSnap.data();
-                            displayFriendInList(friend);
-                        } else {
-                            console.warn(`Friend with UID ${friendDocSnap.id} not found.`);
-                        }
-                    });
-                } else {
-                    console.error("Current user document disappeared for:", currentUser.uid);
-                    contactsList.innerHTML = '<li style="padding:15px;">Error loading contacts.</li>';
-                }
-            }, (error) => {
-                console.error("Error listening to user's friends list:", error);
-                contactsList.innerHTML = '<li style="padding:15px;">Error loading contacts.</li>';
-            });
+            // Add event listeners for buttons
+            if (messageData.sender === currentUser) {
+                messageElem.querySelector('.edit-btn').addEventListener('click', (e) => { e.stopPropagation(); editMessage(messageId, messageData); });
+                messageElem.querySelector('.delete-btn').addEventListener('click', (e) => { e.stopPropagation(); deleteMessage(messageId); });
+            }
+            // All messages can be replied to
+            messageElem.querySelector('.reply-btn').addEventListener('click', (e) => { e.stopPropagation(); startReply(messageId, messageData.sender, messageData.text); });
+
+            return messageElem;
         }
 
-        function displayFriendInList(friend) {
-            const li = document.createElement('li');
-            li.classList.add('contact-item');
-            li.dataset.uid = friend.uid;
-            li.dataset.email = friend.email;
-            li.dataset.displayName = friend.displayName;
-
-            const avatar = document.createElement('div');
-            avatar.classList.add('contact-avatar');
-            avatar.textContent = friend.displayName.charAt(0).toUpperCase();
-
-            const nameSpan = document.createElement('span');
-            nameSpan.textContent = friend.displayName;
-
-            li.appendChild(avatar);
-            li.appendChild(nameSpan);
-
-            if (selectedFriend && selectedFriend.uid === friend.uid) {
-                li.classList.add('active');
+        function deleteMessage(messageId) {
+            if (confirm("Are you sure you want to delete this message?")) {
+                database.ref(`rooms/${currentRoomId}/messages/${messageId}`).remove()
+                    .catch(error => console.error("Error deleting message:", error));
             }
-
-            li.addEventListener('click', () => selectFriend(friend));
-            contactsList.appendChild(li);
         }
 
-        // --- NEW: Add Friend by Invite Code Functionality ---
-        addFriendByCodeButton.addEventListener('click', async () => {
-            const inviteCode = addFriendInviteCodeInput.value.trim().toUpperCase();
-            if (!inviteCode) {
-                alert('Please enter an invite code.');
-                return;
+        function editMessage(messageId, originalMessageData) {
+            const newText = prompt("Edit your message:", originalMessageData.text);
+            if (newText !== null && newText.trim() !== '' && newText !== originalMessageData.text) {
+                database.ref(`rooms/${currentRoomId}/messages/${messageId}`).update({
+                    text: newText,
+                    edited: true // Optional: Add an edited flag
+                })
+                .catch(error => console.error("Error editing message:", error));
             }
-            if (!currentUser) {
-                alert('You must be signed in to add friends.');
-                return;
-            }
-            if (inviteCode === currentUser.inviteCode) { // Check against current user's invite code
-                alert("You cannot add yourself as a friend using your own invite code!");
-                return;
-            }
+        }
 
-            try {
-                // 1. Find the target user by invite code
-                const usersRef = collection(db, "users");
-                const q = query(usersRef, where("inviteCode", "==", inviteCode));
-                const querySnapshot = await getDocs(q);
-
-                if (querySnapshot.empty) {
-                    alert(`No user found with invite code "${inviteCode}".`);
-                    return;
-                }
-
-                const targetUserDoc = querySnapshot.docs[0];
-                const targetUserData = targetUserDoc.data();
-                const targetUserUid = targetUserData.uid;
-
-                // 2. Check if already friends
-                const currentUserDocSnap = await getDoc(doc(db, "users", currentUser.uid));
-                const currentUserFriends = currentUserDocSnap.exists() ? (currentUserDocSnap.data().friends || []) : [];
-                if (currentUserFriends.includes(targetUserUid)) {
-                    alert(`${targetUserData.displayName} is already in your contacts.`);
-                    addFriendInviteCodeInput.value = '';
-                    return;
-                }
-
-                // ***** CRITICAL SECURITY WARNING: These updates are allowed due to the insecure Firestore Rule. *****
-                // 3. Add each user to the other's friends array (direct client-side update)
-                // Current User (B) adds Target User (A)
-                await updateDoc(doc(db, "users", currentUser.uid), {
-                    friends: arrayUnion(targetUserUid)
-                });
-
-                // Target User (A) adds Current User (B)
-                await updateDoc(doc(db, "users", targetUserUid), {
-                    friends: arrayUnion(currentUser.uid)
-                });
-
-                alert(`You are now friends with ${targetUserData.displayName}!😃`);
-                addFriendInviteCodeInput.value = ''; // Clear input field
-            } catch (error) {
-                console.error("Error adding friend by invite code:", error);
-                alert(`Failed to add friend: ${error.message}`);
-            }
-        });
-
-
-        async function selectFriend(friend) {
-            if (unsubscribeFromMessages) {
-                unsubscribeFromMessages(); // Stop previous chat listener
-            }
-
-            selectedFriend = friend;
-            chatPartnerName.textContent = selectedFriend.displayName;
-            noChatSelected.style.display = 'none';
-            chatMessagesDiv.style.display = 'flex'; // Show chat messages area
-            messageInput.disabled = false;
-            sendMessageButton.disabled = false;
+        function startReply(messageId, sender, text) {
+            replyingToMessage = { id: messageId, sender: sender, text: text };
+            replyContextTextElem.textContent = `${sender}: "${text.substring(0, 50)}${text.length > 50 ? '...' : ''}"`;
+            replyingToElem.style.display = 'flex';
             messageInput.focus();
-
-            // Update active state in contacts list
-            document.querySelectorAll('.contact-item').forEach(item => {
-                item.classList.remove('active');
-                if (item.dataset.uid === selectedFriend.uid) {
-                    item.classList.add('active');
-                }
-            });
-
-            // Start listening for messages with this friend
-            listenForChatMessages(currentUser.uid, selectedFriend.uid);
         }
 
-        function listenForChatMessages(user1Id, user2Id) {
-            chatMessagesDiv.innerHTML = ''; // Clear previous messages
-
-            const messagesRef = collection(db, "chats");
-            const q = query(
-                messagesRef,
-                or(
-                    and(where("senderId", "==", user1Id), where("receiverId", "==", user2Id)),
-                    and(where("senderId", "==", user2Id), where("receiverId", "==", user1Id))
-                ),
-                orderBy("timestamp", "asc")
-            );
-
-            unsubscribeFromMessages = onSnapshot(q, (snapshot) => {
-                chatMessagesDiv.innerHTML = ''; // Clear before re-rendering
-                snapshot.forEach((doc) => {
-                    const message = doc.data();
-                    displayMessage(message);
-                });
-                chatMessagesDiv.scrollTop = chatMessagesDiv.scrollHeight; // Scroll to bottom
-            }, (error) => {
-                console.error("Error listening to messages:", error);
-            });
+        function cancelReply() {
+            replyingToMessage = null;
+            replyingToElem.style.display = 'none';
+            replyContextTextElem.textContent = '';
         }
 
-        function displayMessage(message) {
-            const messageDiv = document.createElement('div');
-            messageDiv.classList.add('message');
-            messageDiv.classList.add(message.senderId === currentUser.uid ? 'sent' : 'received');
-
-            const senderSpan = document.createElement('div');
-            senderSpan.classList.add('message-sender');
-            senderSpan.textContent = message.senderDisplayName || (message.senderId === currentUser.uid ? 'You' : selectedFriend.displayName);
-
-            const textP = document.createElement('p');
-            textP.textContent = message.text;
-
-            const timestampSpan = document.createElement('div');
-            timestampSpan.classList.add('message-timestamp');
-            if (message.timestamp) {
-                const date = message.timestamp.toDate();
-                timestampSpan.textContent = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            }
-
-            messageDiv.appendChild(senderSpan);
-            messageDiv.appendChild(textP);
-            messageDiv.appendChild(timestampSpan);
-            chatMessagesDiv.appendChild(messageDiv);
-        }
-
-        sendMessageButton.addEventListener('click', sendMessage);
-        messageInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                sendMessage();
-            }
-        });
-
-        async function sendMessage() {
-            const text = messageInput.value.trim();
-            if (text === '' || !currentUser || !selectedFriend) {
+        // === Room Management (Display, Edit, Delete) ===
+        function createOrUpdateRoomElement(room) {
+            // Ensure room has valid ID and name before displaying
+            if (!room || !room.id || !room.name) {
+                console.warn("Attempted to display an invalid room:", room);
                 return;
             }
 
-            try {
-                await addDoc(collection(db, "chats"), {
-                    senderId: currentUser.uid,
-                    senderDisplayName: currentUser.displayName,
-                    receiverId: selectedFriend.uid,
-                    receiverDisplayName: selectedFriend.displayName,
-                    text: text,
-                    timestamp: serverTimestamp()
+            let roomItem = roomElements.get(room.id);
+            if (!roomItem) {
+                roomItem = document.createElement('div');
+                roomItem.className = 'room-item';
+                roomItem.dataset.id = room.id;
+                roomElements.set(room.id, roomItem); // Store reference
+                roomListElem.appendChild(roomItem);
+            }
+
+            let roomNameSpan = document.createElement('span');
+            roomNameSpan.textContent = room.name;
+            if (room.type === 'private' && room.joinCode) {
+                roomNameSpan.textContent += ` (Code: ${room.joinCode})`;
+            }
+
+            let actionButtonsDiv = document.createElement('div');
+            actionButtonsDiv.className = 'room-item-actions';
+
+            // Only show edit/delete if current user is the owner
+            if (room.owner === currentUser) {
+                const editBtn = document.createElement('button');
+                editBtn.textContent = 'Edit';
+                editBtn.addEventListener('click', (e) => {
+                    e.stopPropagation(); // Prevent switchRoom from being called
+                    editRoomName(room.id, room.name);
                 });
-                messageInput.value = ''; // Clear input field
-            } catch (error) {
-                console.error("Error sending message:", error);
+                actionButtonsDiv.appendChild(editBtn);
+
+                const deleteBtn = document.createElement('button');
+                deleteBtn.textContent = 'Delete';
+                deleteBtn.className = 'delete-room-btn';
+                deleteBtn.addEventListener('click', (e) => {
+                    e.stopPropagation(); // Prevent switchRoom from being called
+                    deleteRoom(room.id, room.name);
+                });
+                actionButtonsDiv.appendChild(deleteBtn);
+            }
+
+            // Clear existing content and append new
+            roomItem.innerHTML = '';
+            roomItem.appendChild(roomNameSpan);
+            roomItem.appendChild(actionButtonsDiv);
+
+            // Attach click listener to the whole room item (excluding action buttons)
+            roomItem.addEventListener('click', () => switchRoom(room.id, room.name));
+
+            // Update active state
+            if (room.id === currentRoomId) {
+                roomItem.classList.add('active');
+            } else {
+                roomItem.classList.remove('active');
             }
         }
+
+        async function editRoomName(roomId, currentName) {
+            const newName = prompt(`Enter new name for room "${currentName}":`, currentName);
+            if (newName !== null && newName.trim() !== '' && newName !== currentName) {
+                try {
+                    await database.ref(`rooms/${roomId}`).update({ name: newName });
+                    alert(`Room name updated to "${newName}".`);
+                } catch (error) {
+                    console.error("Error updating room name:", error);
+                    alert("Failed to update room name.");
+                }
+            }
+        }
+
+        async function deleteRoom(roomId, roomName) {
+            if (confirm(`Are you sure you want to delete the room "${roomName}" and all its messages? This cannot be undone.`)) {
+                try {
+                    await database.ref(`rooms/${roomId}`).remove();
+                    alert(`Room "${roomName}" deleted.`);
+                    // If the deleted room was the current room, switch to public
+                    if (currentRoomId === roomId) {
+                        switchRoom('public_channel', 'Public Channel');
+                    }
+                    // The 'child_removed' listener in fetchAndDisplayRooms will handle updating the UI
+                } catch (error) {
+                    console.error("Error deleting room:", error);
+                    alert("Failed to delete room.");
+                }
+            }
+        }
+
+        async function switchRoom(newRoomId, newRoomName) {
+            // Detach previous message and presence listeners
+            if (messagesRef) {
+                messagesRef.off();
+            }
+            if (presenceRef && currentUser) {
+                // Remove user's presence from the old room immediately
+                presenceRef.child(currentUser).remove();
+                presenceRef.off(); // Detach presence listener for the old room
+            }
+
+            // Reset UI
+            messagesContainer.innerHTML = '';
+            cancelReply();
+            
+            // Set new current room
+            currentRoomId = newRoomId;
+            currentRoomNameElem.textContent = newRoomName;
+
+            // Update active room in sidebar
+            roomElements.forEach(roomItem => {
+                if (roomItem.dataset.id === newRoomId) {
+                    roomItem.classList.add('active');
+                } else {
+                    roomItem.classList.remove('active');
+                }
+            });
+
+            // Set up new room references
+            currentRoomRef = database.ref(`rooms/${currentRoomId}`);
+            messagesRef = currentRoomRef.child('messages');
+            presenceRef = currentRoomRef.child('presence');
+
+            // --- Set up Presence for the NEW room ---
+            if (currentUser) {
+                const userPresenceRef = presenceRef.child(currentUser);
+                userPresenceRef.set(true); // Mark user as online
+                userPresenceRef.onDisconnect().remove(); // Remove when user disconnects
+            }
+
+            // Listen for changes in online users in the NEW room
+            presenceRef.on('value', snapshot => {
+                const onlineUsers = snapshot.val();
+                const count = onlineUsers ? Object.keys(onlineUsers).length : 0;
+                onlineUsersCountElem.textContent = `Online: ${count} (${currentRoomNameElem.textContent})`;
+            });
+
+            // --- Listen for Messages in the NEW room ---
+            messagesRef.on('child_added', snapshot => {
+                const messageId = snapshot.key;
+                const messageData = snapshot.val();
+                const messageElem = createMessageElement(messageId, messageData);
+                messagesContainer.appendChild(messageElem);
+                messagesContainer.scrollTop = messagesContainer.scrollHeight; // Scroll to bottom
+            });
+
+            messagesRef.on('child_changed', snapshot => {
+                const messageId = snapshot.key;
+                const messageData = snapshot.val();
+                const existingMessageElem = messagesContainer.querySelector(`[data-id="${messageId}"]`);
+                if (existingMessageElem) {
+                    // Update the text and timestamp or re-create
+                    const updatedElem = createMessageElement(messageId, messageData);
+                    existingMessageElem.replaceWith(updatedElem);
+                }
+            });
+
+            messagesRef.on('child_removed', snapshot => {
+                const messageId = snapshot.key;
+                const existingMessageElem = messagesContainer.querySelector(`[data-id="${messageId}"]`);
+                if (existingMessageElem) {
+                    existingMessageElem.remove();
+                }
+            });
+        }
+
+        // === Event Listeners ===
+        createRoomForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const roomName = newRoomNameInput.value.trim();
+            if (roomName) {
+                const newRoomRef = database.ref('rooms').push();
+                const joinCode = generateJoinCode();
+                const roomId = newRoomRef.key;
+                await newRoomRef.set({
+                    id: roomId,
+                    name: roomName,
+                    type: 'private',
+                    joinCode: joinCode,
+                    owner: currentUser, // NEW: Store the owner
+                    createdAt: firebase.database.ServerValue.TIMESTAMP
+                });
+                // Add the creator as a member of the private room
+                await database.ref(`rooms/${roomId}/members/${currentUser}`).set(true);
+
+                newRoomNameInput.value = '';
+                alert(`Private room "${roomName}" created! Join code: ${joinCode}`);
+                // fetchAndDisplayRooms() will re-run and add it
+                switchRoom(roomId, roomName); // Switch to the newly created room
+            }
+        });
+
+        joinRoomForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const code = joinRoomCodeInput.value.trim().toUpperCase();
+            if (code) {
+                const roomsSnapshot = await database.ref('rooms').orderByChild('joinCode').equalTo(code).once('value');
+                const rooms = roomsSnapshot.val();
+                if (rooms) {
+                    const roomId = Object.keys(rooms)[0];
+                    const roomData = rooms[roomId];
+                    
+                    // Add the joining user as a member
+                    await database.ref(`rooms/${roomId}/members/${currentUser}`).set(true);
+
+                    alert(`Joined private room: ${roomData.name}`);
+                    joinRoomCodeInput.value = '';
+                    fetchAndDisplayRooms(); // Refresh room list after joining
+                    switchRoom(roomId, roomData.name); // Switch to the joined room
+                } else {
+                    alert('Invalid join code.');
+                }
+            }
+        });
+
+        sendButton.addEventListener('click', async () => {
+            const messageText = messageInput.value.trim();
+            if (messageText) {
+                const newMessage = {
+                    sender: currentUser,
+                    text: messageText,
+                    timestamp: firebase.database.ServerValue.TIMESTAMP,
+                    edited: false
+                };
+
+                if (replyingToMessage) {
+                    newMessage.replyToMessageId = replyingToMessage.id;
+                    newMessage.replyToMessageSender = replyingToMessage.sender;
+                    newMessage.replyToMessageText = replyingToMessage.text;
+                }
+
+                try {
+                    await messagesRef.push(newMessage);
+                    messageInput.value = '';
+                    cancelReply(); // Clear reply context after sending
+                } catch (error) {
+                    console.error("Error sending message:", error);
+                    alert("Failed to send message.");
+                }
+            }
+        });
+
+        messageInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) { // Send on Enter, allow Shift+Enter for newline
+                e.preventDefault();
+                sendButton.click();
+            }
+        });
+
+        cancelReplyButton.addEventListener('click', cancelReply);
+
+        // === Initialization ===
+        async function fetchAndDisplayRooms() {
+            // First, detach any existing listeners on the rooms reference
+            if (roomsListenerRef) {
+                roomsListenerRef.off();
+            }
+            roomListElem.innerHTML = ''; // Clear existing rooms to avoid duplicates on refresh
+            roomElements.clear(); // Clear the map of stored room elements
+
+            const publicChannelId = 'public_channel';
+            const publicChannelRef = database.ref(`rooms/${publicChannelId}`);
+            const publicChannelSnapshot = await publicChannelRef.once('value');
+            if (!publicChannelSnapshot.exists() || !publicChannelSnapshot.val().name) {
+                await publicChannelRef.set({
+                    id: publicChannelId,
+                    name: 'Public Channel',
+                    type: 'public',
+                    owner: 'system', // Public channel has a system owner
+                    createdAt: firebase.database.ServerValue.TIMESTAMP
+                });
+            }
+            // Always display the public channel
+            createOrUpdateRoomElement({ id: publicChannelId, name: 'Public Channel', type: 'public', owner: 'system' });
+
+            // Now, set up the listener for other rooms and store its reference
+            roomsListenerRef = database.ref('rooms').orderByChild('createdAt');
+            roomsListenerRef.on('child_added', async snapshot => {
+                const room = snapshot.val();
+                
+                if (!room || !room.id || !room.name) {
+                    console.warn("Invalid room data encountered:", room);
+                    return;
+                }
+
+                if (room.id === publicChannelId) {
+                    return; // Public channel is already displayed
+                }
+
+                if (room.type === 'private') {
+                    // Check if current user is a member of this private room
+                    const memberSnapshot = await database.ref(`rooms/${room.id}/members/${currentUser}`).once('value');
+                    if (memberSnapshot.exists() && memberSnapshot.val() === true) {
+                        createOrUpdateRoomElement(room);
+                    }
+                } else {
+                    // For any other room type (e.g., future public rooms, though currently only one public)
+                    createOrUpdateRoomElement(room);
+                }
+            });
+
+            roomsListenerRef.on('child_changed', async snapshot => {
+                const room = snapshot.val();
+                 if (!room || !room.id || !room.name) {
+                    console.warn("Invalid room data changed:", room);
+                    return;
+                }
+                // If it's a private room, re-check membership before updating display
+                if (room.type === 'private') {
+                    const memberSnapshot = await database.ref(`rooms/${room.id}/members/${currentUser}`).once('value');
+                    if (memberSnapshot.exists() && memberSnapshot.val() === true) {
+                        createOrUpdateRoomElement(room);
+                    } else {
+                        // If user is no longer a member, remove from list
+                        const roomElement = roomElements.get(room.id);
+                        if (roomElement) {
+                            roomElement.remove();
+                            roomElements.delete(room.id);
+                        }
+                    }
+                } else {
+                    createOrUpdateRoomElement(room);
+                }
+            });
+            
+            // Listener for rooms being removed
+            roomsListenerRef.on('child_removed', snapshot => {
+                const roomRemovedId = snapshot.key;
+                const roomElement = roomElements.get(roomRemovedId);
+                if (roomElement) {
+                    roomElement.remove(); // Remove from DOM
+                    roomElements.delete(roomRemovedId); // Remove from map
+                }
+                // If the deleted room was the current room, switch to public
+                if (currentRoomId === roomRemovedId) {
+                    switchRoom(publicChannelId, 'Public Channel');
+                }
+            });
+        }
+
+
+        window.onload = () => {
+            currentUser = getOrCreateUsername();
+            usernameDisplay.textContent = `Username: ${currentUser}`;
+            fetchAndDisplayRooms();
+            // Initially switch to the public channel
+            switchRoom('public_channel', 'Public Channel');
+        };
     </script>
 <script src="era4.js"></script>
 <script src="era5.js"></script>
