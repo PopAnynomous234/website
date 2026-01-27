@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Codelistener Prоxy</title>
+    <link href="https://fonts.googleapis.com" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <style>
+   
+        :root {
+            --accent: #26ff9a;
+            --bg-dark: #0f1113;
+            --surface: #1e1f22;
+            --toolbar: #2b2d31;
+            --text: #e0e0e0;
+            --text-dim: #888;
+            --tab-width: 180px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg-dark); color: var(--text); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+
+        /* --- UI: Tabs Bar --- */
+        /* --- UI: Tabs Bar --- */
+.tab-bar {
+    background: #000;
+    display: flex;
+    align-items: flex-end;
+    padding: 8px 8px 0;
+    gap: 4px;
+    overflow: hidden; /* Prevent scrollbars */
+}
+
+.tab {
+    background: #252629;
+    /* Flex logic: 0 grow, 1 shrink, 180px base width */
+    flex: 0 1 180px;
+    min-width: 40px; /* Minimum width before they stop shrinking */
+    padding: 8px 12px;    border-radius: 10px 10px 0 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+    font-size: 12px;
+    position: relative;
+    border: 1px solid transparent;
+}
+
+.tab.active {
+    background: #2e2e2e;
+    border-color: rgba(255,255,255,0.05);
+    border-bottom: none;
+    z-index: 50;
+    flex: 0 1 180px; /* Keeps active tab prioritized */
+}
+
+.tab span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex-grow: 1;
+}
+
+/* Ensure the plus button never shrinks */
+.add-tab-btn {
+    flex-shrink: 0;
+    padding: 8px 12px;
+    color: var(--text-dim);
+    cursor: pointer;
+    border-radius: 50%;
+    transition: all 0.2s ease-in-out;
+}
+        .tab .close-tab { opacity: 0; transition: 0.2s; font-size: 10px; }
+        .tab:hover .close-tab { opacity: 1; }
+        .add-tab-btn:hover { color: var(--accent); background: rgba(255,255,255,0.05); rotate: 90deg;; }
+
+        /* --- UI: Toolbar --- */
+        .browser-chrome {
+            background: var(--toolbar);
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+        .url-bar {
+            flex-grow: 1;
+            background: var(--surface);
+            border-radius: 20px;
+            padding: 6px 16px;
+            display: flex;
+            align-items: center;
+            border: 1px solid transparent;
+        }
+        .url-bar:focus-within { border-color: var(--accent); }
+        input#urlInput { background: transparent; border: none; color: var(--text); width: 100%; outline: none; font-size: 16px; color:#26ff9a; }
+        .nav-btn { color: var(--text-dim); cursor: pointer; transition: 0.2s; }
+        .nav-btn:hover { color: var(--accent); }
+
+        /* --- UI: Content Area --- */
+        .content-container { flex-grow: 1; position: relative; }
+        .viewport-wrapper {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: none; transition: opacity 0.3s ease;
+        }
+        .viewport-wrapper.active { display: block; animation: fadeIn 0.3s ease; }
+        iframe { width: 100%; height: 100%; border: none; background: #fff; }
+
+        /* --- UI: Home Screen --- */
+        .home-screen {
+    /* Combined: The gradient (top layer) and the Image (bottom layer) */
+    background: radial-gradient(circle at center, rgba(26, 28, 30, 0.4) 0%, rgba(15, 17, 19, 0.9) 100%),
+                url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTdOewc3ACIQP0iJOGfMCaFkqZTlUJV9-PW6Q&s');
+   
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+   
+    /* Layout */
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+        .home-screen h1 { font-size: 48px; margin-bottom: 30px; letter-spacing: -2px; }
+.home-screen h3 {
+   color:#26ff9a;
+   
+}
+.home-screen img {
+   width: 150px;
+   height: 150px;
+   /* A 1.2s total cycle (0.6s up, 0.6s down) works well for visibility */
+   animation: up-down-trail 2s ease-in-out infinite;
+}
+
+@keyframes up-down-trail {
+  /* 1. START AT BOTTOM: Moving UP */
+  0% {
+    transform: translateY(0);
+    filter: drop-shadow(0 5px 2px #26ff9A); /* Trail starts behind (at bottom) */
+  }
+
+  /* 2. MID-WAY UP: Peak speed upward */
+  25% {
+    filter: drop-shadow(0 25px 10px #26ff9A); /* Long trail at bottom */
+  }
+
+  /* 3. AT TOP: Switching directions */
+  50% {
+    transform: translateY(-50px);
+    filter: drop-shadow(0 0 5px #26ff9A); /* Trail resets as direction changes */
+  }
+
+  /* 4. MID-WAY DOWN: Peak speed downward */
+  75% {
+    filter: drop-shadow(0 -25px 10px #26ff9A); /* Long trail at TOP */
+  }
+
+  /* 5. BACK AT BOTTOM */
+  100% {
+    transform: translateY(0);
+    filter: drop-shadow(0 5px 2px #26ff9A);
+  }
+}
+
+
+        .home-screen h1 span { color: var(--accent); }
+        .bookmarks { display: grid; grid-template-columns: repeat(4, 1fr); gap: 25px; max-width: 600px; }
+        .bookmark {
+            display: flex; flex-direction: column; align-items: center; gap: 10px; cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .bookmark:hover { transform: translateY(-5px); }
+        .icon-box {
+            width: 64px; height: 64px; background: var(--surface); border-radius: 16px;
+            display: flex; align-items: center; justify-content: center; font-size: 24px;
+            border: 1px solid rgba(255,255,255,0.05); color: var(--accent);
+        }
+        .bookmark span { font-size: 12px; font-weight: 500; color: var(--text-dim); }
+
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.99); } to { opacity: 1; transform: scale(1); } }
+   
+    .input-container {
+    display: inline-flex;
+    align-items: center;
+    background: #1a1a1a; /* Match your UI background */
+    border: 1px solid #444;
+    padding: 8px 12px;
+    border-radius: 6px;    font-family: sans-serif;
+    cursor: text;
+}
+
+.prefix {
+    color: white; /* Dimmed color to show it's a prefix */
+    user-select: none; /* Prevents highlighting */
+    padding-right: 2px;
+    font-size:16px;
+    white-space: nowrap;
+}
+
+.input-container input {
+    background: transparent;
+    border: none;
+    outline: none;    color: white;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    font-size: inherit;
+}
+    </style>
+</head>
+<body>
+
+    <!-- Tabs Container -->
+    <div class="tab-bar" id="tabBar">
+        <!-- Tabs injected by JS -->
+        <div class="add-tab-btn" onclick="createNewTab()"><i class="fa-solid fa-plus"></i></div>
+    </div>
+
+    <!-- Navigation Control -->
+ <div class="browser-chrome">
+    <i class="fa-solid fa-house nav-btn" onclick="goHome()"></i>
+    <div class="url-bar">
+        <i class="fa-solid fa-lock" style="font-size: 12px; margin-right: 10px; color: var(--accent);"></i>
+        <div class="input-container" style="width: 100%;">
+            <span class="prefix">codelistener://</span>
+            <input type="text" id="urlInput" placeholder=" Search or type a URL..." spellcheck="false">
+        </div>
+    </div>
+    <i class="fa-solid fa-rotate-right nav-btn" onclick="reloadTab()"></i>
+</div>
+
+    <!-- Main Viewport -->
+    <div class="content-container" id="contentContainer">
+        <!-- Viewports injected by JS -->
+    </div>
+
+    <script>
+        const PROXY_BASE = "https://embeddrr.firebaseapp.com/embed#";
+        let tabs = [];
+        let activeTabId = null;
+
+        function createNewTab(targetUrl = null) {
+            const id = Date.now();
+            const tabData = { id, title: "New Tab", url: targetUrl };
+            tabs.push(tabData);
+           
+            // UI: Create Tab Element
+            const tabEl = document.createElement('div');
+            tabEl.className = 'tab';
+            tabEl.id = `tab-${id}`;
+            tabEl.onclick = () => switchTab(id);
+            tabEl.innerHTML = `
+                <i class="fa-regular fa-circle-dot"></i>
+                <span id="title-${id}">${targetUrl ? 'Loading...' : 'New Tab'}</span>
+                <i class="fa-solid fa-xmark close-tab" onclick="event.stopPropagation(); closeTab(${id})"></i>
+            `;
+            document.getElementById('tabBar').insertBefore(tabEl, document.querySelector('.add-tab-btn'));
+
+            // UI: Create Viewport Element
+            const viewEl = document.createElement('div');
+            viewEl.className = 'viewport-wrapper';
+            viewEl.id = `view-${id}`;
+           
+            if (targetUrl) {
+                viewEl.innerHTML = `<iframe src="${PROXY_BASE}${formatUrl(targetUrl)}"></iframe>`;
+            } else {
+                viewEl.innerHTML = createHomeScreenHtml(id);
+            }
+           
+            document.getElementById('contentContainer').appendChild(viewEl);
+            switchTab(id);
+        }
+
+        function createHomeScreenHtml(id) {
+            return `
+                <div class="home-screen">
+                <img src="https://cdn.jsdelivr.net/gh/PopAnynomous234/assets/logo.png">
+                    <h1>Codelistener <span>Browser</span></h1>
+                    <h3>Privacy is our Goal.</h3>
+                    <br>
+                    <div class="bookmarks">
+                        <div class="bookmark" onclick="loadUrl('google.com')"><div class="icon-box"><i class="fa-brands fa-google"></i></div><span>Google</span></div>
+                        <div class="bookmark" onclick="loadUrl('youtube.com')"><div class="icon-box"><i class="fa-brands fa-youtube"></i></div><span>YouTube</span></div>
+                        <div class="bookmark" onclick="loadUrl('tiktok.com')"><div class="icon-box"><i class="fa-brands fa-tiktok"></i></div><span>Tiktok</span></div>
+                        <div class="bookmark" onclick="loadUrl('github.com')"><div class="icon-box"><i class="fa-brands fa-github"></i></div><span>GitHub</span></div>
+                        <div class="bookmark" onclick="loadUrl('xbox.com/en-US/cloud-gaming')"><div class="icon-box"><i class="fa-brands fa-xbox"></i></div><span>Xbox Cloud Gaming</span></div>
+                        <div class="bookmark" onclick="loadUrl('vidplus.to')"><div class="icon-box"><i class="fa-solid fa-video"></i></div><span>Vidplus Movies</span></div>
+                        <div class="bookmark" onclick="loadUrl('twitch.tv')"><div class="icon-box"><i class="fa-brands fa-twitch"></i></div><span>Twitch</span></div>
+                        <div class="bookmark" onclick="loadUrl('discord.com')"><div class="icon-box"><i class="fa-brands fa-discord"></i></div><span>Discord</span></div>
+                     
+                    </div>
+                </div>`;
+        }
+
+        function switchTab(id) {
+            activeTabId = id;
+            document.querySelectorAll('.tab, .viewport-wrapper').forEach(el => el.classList.remove('active'));
+            document.getElementById(`tab-${id}`).classList.add('active');
+            document.getElementById(`view-${id}`).classList.add('active');
+           
+            // Update URL bar
+            const tab = tabs.find(t => t.id === id);
+            document.getElementById('urlInput').value = tab.url || "";
+        }
+
+        function closeTab(id) {
+            tabs = tabs.filter(t => t.id !== id);
+            document.getElementById(`tab-${id}`).remove();
+            document.getElementById(`view-${id}`).remove();
+            if (activeTabId === id && tabs.length > 0) switchTab(tabs[tabs.length - 1].id);
+            if (tabs.length === 0) createNewTab();
+        }
+
+        function formatUrl(input) {
+            let target = input.trim();
+            const urlPattern = /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/;
+            if (!urlPattern.test(target)) return `https://duckduckgo.com/?q=${encodeURIComponent(target)}`;
+            return target.startsWith('http') ? target : 'https://' + target;
+        }
+
+        function loadUrl(customUrl = null) {
+            const input = customUrl || document.getElementById('urlInput').value;
+            if (!input) return;
+           
+            const formatted = formatUrl(input);
+            const activeTab = tabs.find(t => t.id === activeTabId);
+            activeTab.url = input;
+           
+            document.getElementById(`title-${activeTabId}`).textContent = input;
+            document.getElementById(`view-${activeTabId}`).innerHTML = `<iframe src="${PROXY_BASE}${formatted}"></iframe>`;
+        }
+
+        function goHome() {
+            const activeTab = tabs.find(t => t.id === activeTabId);
+            activeTab.url = "";
+            document.getElementById(`title-${activeTabId}`).textContent = "New Tab";
+            document.getElementById(`view-${activeTabId}`).innerHTML = createHomeScreenHtml(activeTabId);
+            document.getElementById('urlInput').value = "";
+        }
+
+        document.getElementById('urlInput').addEventListener('keypress', (e) => { if (e.key === 'Enter') loadUrl(); });
+
+function reloadTab() {
+    // 1. Identify the current active viewport's iframe
+    const activeViewport = document.getElementById(`view-${activeTabId}`);
+    if (!activeViewport) return;
+
+    const iframe = activeViewport.querySelector('iframe');
+    if (!iframe) return;
+
+    // 2. Force a hard reload by resetting the source
+    // In 2026, browsers often cache hash-based URLs;
+    // appending a timestamp ensures the proxy fetch is fresh.
+    const currentSrc = iframe.src;
+    iframe.src = 'about:blank'; // Clear it first to trigger a visual reset
+   
+    setTimeout(() => {
+        // Restore the URL to trigger the actual reload
+        iframe.src = currentSrc;
+    }, 10);
+}
+window.addEventListener('keydown', function(e) {
+    // Check for Ctrl and the "=" key (or "+" key)
+    if (e.ctrlKey && (e.key === '=' || e.key === '+')) {
+        e.preventDefault();
+        createNewTab();           // Call your function that creates a new tab
+    }
+});
+window.addEventListener('keydown', function(e) {
+    if (e.ctrlKey && e.key === '-' || e.key === '_') {
+        e.preventDefault();
+        closeTab(activeTabId);        
+    }
+});
+   // Initialize first tab
+        createNewTab();
+    </script>
+</body>
+</html>
