@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Codelistener Call</title>
+    <style>
+        :root { --neon: #26ff9a; --bg: #0a0a0c; --card: #16161a; }
+        body { background: var(--bg); color: white; font-family: 'Inter', sans-serif; margin: 0; height: 100vh; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+        .hidden { display: none !important; }
+        .panel { background: var(--card); padding: 2.5rem; border-radius: 28px; border: 1px solid #333; width: 320px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.8); }
+        .label { color: var(--neon); font-size: 0.7rem; letter-spacing: 3px; margin-bottom: 10px; font-weight: 800; text-transform: uppercase; }
+        .id-box { background: #000; padding: 15px; border-radius: 15px; margin: 15px 0; font-family: 'Courier New', monospace; font-size: 3rem; color: var(--neon); border: 2px solid var(--neon); text-shadow: 0 0 15px var(--neon); cursor: pointer; }
+        input { width: 100%; background: #222; border: 1px solid #444; color: white; padding: 14px; border-radius: 12px; margin-bottom: 12px; box-sizing: border-box; outline: none; text-align: center; }
+        input:focus { border-color: var(--neon); }
+        .btn { width: 100%; padding: 14px; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 5px; font-size: 0.9rem; }
+        .btn-primary { background: var(--neon); color: #000; }
+        .btn-outline { background: transparent; border: 1px solid var(--neon); color: var(--neon); }
+        .call-screen { position: fixed; inset: 0; background: #000; z-index: 1000; display: flex; align-items: center; justify-content: center; }
+        .video-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; height: 100%; padding: 10px; box-sizing: border-box; }
+        .audio-grid { display: flex; justify-content: center; gap: 40px; align-items: center; }
+        .stream-box { position: relative; background: #111; border-radius: 20px; overflow: hidden; display: flex; align-items: center; justify-content: center; height: 100%; width: 100%; border: 1px solid #222; }
+        video { width: 100%; height: 100%; object-fit: cover; }
+        .stamp { width: 120px; height: 120px; background: var(--neon); color: #000; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 3.5rem; font-weight: bold; box-shadow: 0 0 30px rgba(38, 255, 154, 0.4); }
+        .name-tag { position: absolute; bottom: 20px; background: rgba(0,0,0,0.6); padding: 5px 15px; border-radius: 8px; color: var(--neon); font-size: 0.8rem; }
+        .btn-hangup { position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%); background: #ff4757; width: 65px; height: 65px; border-radius: 50%; border: none; cursor: pointer; z-index: 1100; display: flex; align-items: center; justify-content: center; }
+        #fix-audio-btn { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 2000; background: var(--neon); color: black; padding: 12px 24px; border-radius: 12px; font-weight: bold; border: none; cursor: pointer; box-shadow: 0 0 20px var(--neon); display: none; }
+    </style>
+</head>
+<body>
+
+    <button id="fix-audio-btn">TAP TO UNMUTE AUDIO</button>
+    <audio id="remote-audio-player" autoplay playsinline></audio>
+
+    <div id="screen-user" class="panel">
+        <div class="label">Identity</div>
+        <input type="text" id="username-input" placeholder="Enter Username">
+        <button class="btn btn-primary" onclick="saveUser()">CONTINUE</button>
+    </div>
+
+    <div id="screen-lobby" class="panel hidden">
+        <div class="label" id="welcome-msg">Lobby</div>
+        <div class="id-box" id="my-id" onclick="copyId()">..</div>
+        <input type="number" id="friend-id" placeholder="Code to Join">
+        <button class="btn btn-primary" onclick="startCall(true)">VIDEO CALL</button>
+        <br>
+        <h3>OR</h3>
+        <button class="btn btn-outline" style="margin-top:10px" onclick="startCall(false)">AUDIO CALL</button>
+    </div>
+
+    <div id="screen-call" class="call-screen hidden">
+        <div id="layout-video" class="video-grid hidden">
+            <div class="stream-box"><video id="local-video" autoplay muted playsinline></video><div class="name-tag">YOU</div></div>
+            <div class="stream-box"><video id="remote-video" autoplay playsinline></video><div class="name-tag" id="remote-name">FRIEND</div></div>
+        </div>
+        <div id="layout-audio" class="audio-grid hidden">
+            <div class="stream-box" style="width:200px; height:200px; border:none;"><div class="stamp" id="local-stamp">?</div></div>
+            <div class="stream-box" style="width:200px; height:200px; border:none;"><div class="stamp" id="remote-stamp">?</div></div>
+        </div>
+        <button class="btn-hangup" onclick="hangup()">
+            <svg viewBox="0 0 24 24" width="32" fill="white"><path d="M12 9c-1.6 0-3.15.25-4.6.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.15-2.67 1.95-.3.3-.7.42-1.1.42s-.81-.12-1.11-.42L.42 14.11c-.56-.56-.56-1.47 0-2.03C3.13 9.35 6.41 8 10 8h4c3.59 0 6.87 1.35 9.58 4.08.56.56.56 1.47 0 2.03l-1.53 1.53c-.3.3-.7.42-1.1.42s-.81-.12-1.11-.42c-.8-.8-1.69-1.46-2.67-1.95-.33-.16-.56-.51-.56-.9v-3.1C15.15 9.25 13.6 9 12 9z"/></svg>
+        </button>
+    </div>
+
+<script src="https://unpkg.com/peerjs@1.5.5/dist/peerjs.min.js"></script>
+
+<script>
+    let peer, localStream, currentCall;
+    let myUser = localStorage.getItem('neonUser') || "";
+    const audioPlayer = document.getElementById('remote-audio-player');
+    const fixBtn = document.getElementById('fix-audio-btn');
+
+    window.onload = () => { if(myUser) showLobby(); };
+
+    function saveUser() {
+        const val = document.getElementById('username-input').value;
+        if(!val) return alert("Username required");
+        localStorage.setItem('neonUser', val);
+        myUser = val;
+        showLobby();
+    }
+
+    function showLobby() {
+        document.getElementById('screen-user').classList.add('hidden');
+        document.getElementById('screen-lobby').classList.remove('hidden');
+        document.getElementById('welcome-msg').innerText = `Hello, ${myUser}`;
+       
+        // Generate a 3-digit numeric ID
+        const id = Math.floor(100 + Math.random() * 899).toString();
+        peer = new Peer(id, { config: {'iceServers': [{ url: 'stun:stun.l.google.com:19302' }]} });
+       
+        peer.on('open', id => document.getElementById('my-id').innerText = id);
+        peer.on('call', async call => {
+            if(confirm(`Incoming ${call.metadata.isVideo ? 'VIDEO' : 'AUDIO'} call from ${call.metadata.user}. Accept?`)) {
+                await joinStream(call, call.metadata.isVideo);
+            }
+        });
+        peer.on('error', err => { if(err.type === 'unavailable-id') location.reload(); });
+    }
+
+    async function startCall(video) {
+        const friendId = document.getElementById('friend-id').value;
+        if(!friendId) return alert("Enter code");
+        localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: video });
+        const call = peer.call(friendId, localStream, { metadata: { user: myUser, isVideo: video } });
+        joinStream(call, video);
+    }
+
+    async function joinStream(call, isVideo) {
+        currentCall = call;
+       
+        // RESET UI
+        document.getElementById('layout-video').classList.add('hidden');
+        document.getElementById('layout-audio').classList.add('hidden');
+        document.getElementById('screen-lobby').classList.add('hidden');
+        document.getElementById('screen-call').classList.remove('hidden');
+
+        if (!localStream) localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: isVideo });
+        if (!call.open) call.answer(localStream);
+
+        if (isVideo) {
+            document.getElementById('layout-video').classList.remove('hidden');
+            document.getElementById('local-video').srcObject = localStream;
+            document.getElementById('remote-name').innerText = call.metadata.user || "Friend";
+        } else {
+            document.getElementById('layout-audio').classList.remove('hidden');
+            document.getElementById('local-stamp').innerText = myUser.charAt(0).toUpperCase();
+            document.getElementById('remote-stamp').innerText = (call.metadata.user || "F").charAt(0).toUpperCase();
+        }
+
+        call.on('stream', rs => {
+            if (isVideo) {
+                document.getElementById('remote-video').srcObject = rs;
+            } else {
+                audioPlayer.srcObject = rs;
+                // 2026 AUTO-PLAY FIX
+                audioPlayer.play().catch(() => {
+                    fixBtn.style.display = "block";
+                    fixBtn.onclick = () => { audioPlayer.play(); fixBtn.style.display = "none"; };
+                });
+            }
+        });
+
+        call.on('close', hangup);
+        peer.on('disconnected', hangup);
+    }
+
+    function hangup() {
+        if(localStream) localStream.getTracks().forEach(t => t.stop());
+        location.reload();
+    }
+
+    function copyId() {
+        navigator.clipboard.writeText(document.getElementById('my-id').innerText);
+        alert("ID Copied!");
+    }
+</script>
+</body>
+</html>
