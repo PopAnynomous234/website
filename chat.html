@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,14 +8,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>COdelistener Chat</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <!-- Firebase SDKs -->
+    <!-- Scripts -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@3/dist/fp.min.js"></script>
     <style>
         /* Startup Animations */
         @keyframes fadeIn {
             from { opacity: 0; }
-            to { opacity: 1; }
+            to { opacity: 0.8; }
         }
 
         @keyframes slideInUp {
@@ -23,7 +25,7 @@
                 transform: translateY(20px);
             }
             to {
-                opacity: 1;
+                opacity: 0.8;
                 transform: translateY(0);
             }
         }
@@ -32,7 +34,7 @@
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 20px;
-            background-color: #1a1a2e; /* Very dark background */
+            background-color: black;
             color: #e0e0e0; /* Light text color for contrast */
             display: flex;
             gap: 20px;
@@ -40,6 +42,7 @@
         }
 
         #app-container {
+            border:2px solid #26ff9a;
             display: flex;
             width: 100%;
             max-width: 1200px;
@@ -47,17 +50,17 @@
             border-radius: 8px;
             overflow: hidden;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Darker shadow */
-            background-color: #2e004a; /* Darker distinct background */
+            background-color: black; /* Darker distinct background */
             animation: slideInUp 0.8s ease-out forwards, fadeIn 0.8s ease-out forwards; /* Startup animations */
             opacity: 0; /* Start invisible for animation */
         }
 
         #sidebar {
             width: 250px;
-            background-color: #06120C; /* Dark blue background */
+            background-color: #06120C;
             padding: 20px;
-            border-right: 1px solid #0f3460; /* Darker border */
             display: flex;
+            overflow:scroll;
             flex-direction: column;
             gap: 15px;
         }
@@ -93,16 +96,15 @@
             padding: 8px 12px;
             border-radius: 5px;
             margin-bottom: 5px;
-            background-color: #16213e; /* Dark blue background */
+            background-color: #1BB66E; /* Dark blue background */
             cursor: pointer;
-            transition: background-color 0.2s ease;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
-        .room-item.active, .room-item:hover {
-            background-color: #0f3460; /* Darker blue on hover/active */
+        .room-item.active {
+            background-color:#093E25;
         }
 
         .room-item span {
@@ -139,13 +141,13 @@
 
         input[type="text"], input[type="password"], textarea {
             padding: 10px;
-            border: 1px solid #0f3460; /* Darker border */
+            border: 1px solid #26ff9a; /* Darker border */
             border-radius: 4px;
             font-size: 1em;
             width: 100%;
             box-sizing: border-box;
-            background-color: #1a1a2e; /* Dark input background */
-            color: #e0e0e0; /* Light text color */
+            background-color: #03160D ; /* Dark input background */
+            color: #26ff9a; /* Light text color */
         }
 
         button {
@@ -165,28 +167,25 @@
 
         #messages-container {
             flex-grow: 1;
-            border: 1px solid #0f3460; /* Darker border */
+            border: 1px solid #03160D; /* Darker border */
             border-radius: 4px;
             padding: 15px;
             overflow-y: auto;
             margin-bottom: 15px;
-            background-color: #1a1a2e; /* Dark background for messages area */
+            background-color: #0a0a0a; /* Dark background for messages area */
         }
 
         .message {
             margin-bottom: 10px;
             padding: 10px;
             border-radius: 8px;
-            background:transparent; /* Dark blue message bubble */
+            background:transparent;
             word-wrap: break-word;
         }
 
         .message.mine {
-            background:transparent; /* Even darker blue for own messages */
             text-align: right;
-            margin-left: auto;
         }
-
         .message .sender {
             font-weight: bold;
             color: #26ff9a; /* Accent color for sender */
@@ -200,9 +199,9 @@
 
         .message .timestamp {
             font-size: 0.8em;
+            opacity: 0.8;
             color: #a0a0a0; /* Muted timestamp color */
-            margin-top: 5px;
-            display: block;
+            margin-bottom: 5px;
         }
 
         .message .text {
@@ -225,7 +224,7 @@
         }
 
         .message .reply-context {
-            background-color: #0d284a; /* Darker background for reply context */
+            background-color: #00160E; /* Darker background for reply context */
             border-left: 3px solid #26ff9a; /* Accent border */
             padding: 5px 10px;
             margin-bottom: 8px;
@@ -233,6 +232,7 @@
             color: #e0e0e0; /* Light text color */
             border-radius: 4px;
         }
+       
 
         #message-input-area {
             display: flex;
@@ -248,7 +248,7 @@
         }
 
         #replying-to {
-            background-color: #0f3460; /* Dark blue background */
+            background-color: #00160E;
             padding: 8px;
             border-radius: 5px;
             margin-bottom: 10px;
@@ -284,6 +284,149 @@
                 padding: 15px;
             }
         }
+/* The row underneath the bubble */
+.message-meta {
+    display: flex;
+    gap: 5px;
+    margin-top:10px;
+    font-size: 12px;
+    color: #a0a0a0; /* Grey text */
+}
+.sender {
+    font-weight: 500;
+}
+/* Container alignment for your messages */
+.message.mine {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    text-align: right;
+}
+
+/* Metadata alignment for your messages */
+.message.mine .message-meta {
+    justify-content: flex-end; /* Pushes flex items (sender/time) to the right */
+    width: 100%;
+    display: flex;
+    gap: 5px;
+}
+
+#typing-indicator {
+    height: 20px;
+    font-size: 12px;
+    color: #8e9297; /* A soft grey */
+    padding-left: 10px;
+    font-style: italic;
+    transition: all 0.2s ease; /* Makes it fade in/out smoothly */
+}
+/* Container for the dots */
+.typing-dots {
+    display: inline-flex;
+    align-items: center;
+    margin-left: 4px;
+}
+
+/* Individual dots */
+.typing-dots span {
+    font-weight: bold;
+    font-size: 20px;
+    line-height: 10px;
+    animation: bounceFade 1.4s infinite both;
+}
+
+/* Stagger the dots so they follow each other */
+.typing-dots span:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.typing-dots span:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+/* The Jump and Fade Animation */
+@keyframes bounceFade {
+    0%, 80%, 100% {
+        opacity: 0.2;
+        transform: translateY(0);
+    }
+    40% {
+        opacity: 1;
+        transform: translateY(-5px); /* This makes it "jump" */
+    }
+}
+
+.announcement-style {
+    background: linear-gradient(90deg, black, gray) !important;
+    color: black !important;
+    font-weight: bold !important;
+    text-align: center !important;
+    width: 100% !important;
+    border-radius: 10px;
+    padding: 15px !important;
+    margin: 20px 0 !important;
+    border: 2px solid #000;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.announcement-style .message-meta {
+    justify-content: center;
+}
+
+#visual-coin {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100px;
+    height: 100px;
+    z-index: 9999;
+    perspective: 1000px;
+}
+
+.coin-inner {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    transition: transform 2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transform-style: preserve-3d;
+    animation: flip-spin 2s forwards;
+}
+
+.front, .back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 40px;
+    font-weight: bold;
+    border-radius: 50%;
+    border: 5px solid #d4af37;
+    background: radial-gradient(circle, #f1c40f, #d4af37);
+    color: white;
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+}
+
+.back {
+    transform: rotateY(180deg);
+}
+
+/* If result is Tails, we add an extra half-turn */
+#visual-coin.tails .coin-inner {
+    animation: flip-spin-tails 2s forwards;
+}
+
+@keyframes flip-spin {
+    from { transform: rotateY(0); }
+    to { transform: rotateY(1800deg); } /* Spins 5 times and lands on Front */
+}
+
+@keyframes flip-spin-tails {
+    from { transform: rotateY(0); }
+    to { transform: rotateY(1980deg); } /* Spins 5.5 times and lands on Back */
+}
     </style>
 </head>
 <body>
@@ -334,10 +477,12 @@
               </li>
             </ul>
           </div>
+         
     <div id="app-container">
         <div id="sidebar">
             <h2>Codelistener Chat</h2>
             <div id="username-display"></div>
+            <button id="change-username-btn" onclick="changeUsername()">Change Name</button>
             <div id="online-users-count" class="online-users"></div>
 
             <h3>Rooms</h3>
@@ -363,7 +508,7 @@
             <div id="messages-container">
                 <!-- Messages will be injected here -->
             </div>
-
+<div id="typing-indicator" style="min-height: 20px; color: #888; font-size: 0.85em; padding: 5px 15px; font-style: italic;"></div>
             <div id="replying-to">
                 <span>Replying to: <strong id="reply-context-text"></strong></span>
                 <button id="cancel-reply">X</button>
@@ -371,11 +516,10 @@
 
             <div id="message-input-area">
                 <textarea id="message-input" placeholder="Send Message . Shift+ Enter for new line"></textarea>
-                <button id="send-button">Send</button>
+                <button id="send-button" style="color:white; background:transparent; rotate: 270deg;">⌲</button>
             </div>
         </div>
     </div>
-
     <script>
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
@@ -393,11 +537,17 @@ const firebaseConfig = {
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
+var PROTECTED_NAMES = ["Admin", "Staff", "Moderator", "Codelistener", "Boss", "owner"];
+var MASTER_KEY_B64 = "d2VydHl3ZXJ0eTMzMw==";
+var userPrivileges = "normal";
+var deviceFingerprint = ""; // Should be populated by FingerprintJS on load
         // === Global Variables ===
         let currentUser = '';
         let currentRoomId = 'public_channel'; // Default to a public channel
         let currentRoomRef = null;
         let messagesRef = null;
+        let typingTimeout = null;
+        let unreadCount = 0;
         let presenceRef = null;
         let replyingToMessage = null; // Stores message data being replied to
         let roomsListenerRef = null; // To manage the rooms listener
@@ -418,18 +568,420 @@ const firebaseConfig = {
         const replyingToElem = document.getElementById('replying-to');
         const replyContextTextElem = document.getElementById('reply-context-text');
         const cancelReplyButton = document.getElementById('cancel-reply');
+        const typingIndicatorElem = document.getElementById('typing-indicator');
+        const originalTitle = document.title;
 
-        // === Utility Functions ===
-        function getOrCreateUsername() {
-            let storedUsername = localStorage.getItem('chatUsername');
-            if (!storedUsername) {
-                while (!storedUsername || storedUsername.trim() === '') { // Keep prompting until a non-empty name is given
-                    storedUsername = prompt("Please enter your chat username:");
+function startFingerprint() {
+    if (typeof FingerprintJS !== 'undefined') {
+        FingerprintJS.load().then(function(fp) {
+            fp.get().then(function(result) {
+                deviceFingerprint = result.visitorId;
+                console.log("Hardware ID Verified: " + deviceFingerprint);
+            });
+        });
+    } else {
+        // If it's still missing, we wait 500ms and try again
+        console.warn("Library not ready yet, retrying...");
+        setTimeout(startFingerprint, 500);
+    }
+}
+function showLocalSystemMessage(htmlContent, color) {
+    const msgElem = document.createElement('div');
+    // We only give it the 'mute-alert-log' ID if it's actually a mute message
+    if (htmlContent.includes("muted")) {
+        msgElem.id = 'mute-alert-log';
+    }
+
+    msgElem.style.cssText = `
+        text-align: center;
+        margin: 15px auto;
+        width: 92%;
+        padding: 12px;
+        border-radius: 8px;
+        font-family: 'Courier New', Courier, monospace;
+        font-size: 0.85em;
+        color: ${color};
+        background: rgba(0, 0, 0, 0.8);
+        border: 1px solid ${color};
+        box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    `;
+   
+    msgElem.innerHTML = htmlContent;
+   
+    messagesContainer.appendChild(msgElem);
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+}
+function checkMuteStatus() {
+    if (deviceFingerprint) {
+        database.ref('hardware_mutes/' + deviceFingerprint).on('value', function(snap) {
+            var muteData = snap.val();
+            var isMutedNow = muteData && Date.now() < muteData.expiry;
+
+            if (isMutedNow) {
+                // Show the red message
+                showLocalSystemMessage("SYSTEM: You have been muted by an admin.", "red");
+               
+                messageInput.placeholder = "You are currently muted.";
+                messageInput.disabled = true;
+                sendButton.disabled = true;
+            } else {
+                // --- THE DISAPPEARING ACT ---
+                const existingAlert = document.getElementById('mute-alert-log');
+                if (existingAlert) {
+                    existingAlert.remove(); // This wipes the red text from the screen
                 }
-                localStorage.setItem('chatUsername', storedUsername);
+               
+                messageInput.placeholder = "Type a message...";
+                messageInput.disabled = false;
+                sendButton.disabled = false;
             }
-            return storedUsername;
+        });
+    }
+}
+// Add this helper function
+function registerUser(name) {
+    if (deviceFingerprint !== "" && name !== "") {
+        database.ref('registry/' + name).set({
+            hardwareId: deviceFingerprint,
+            timestamp: Date.now()
+        });
+    }
+}
+
+function showCoinAnimation(result) {
+    const coin = document.createElement('div');
+    coin.id = 'visual-coin';
+    coin.className = result.toLowerCase(); // 'heads' or 'tails'
+   
+    // Create the "Gold" look
+    coin.innerHTML = `
+        <div class="coin-inner">
+            <div class="front">H</div>
+            <div class="back">T</div>
+        </div>
+    `;
+   
+    document.body.appendChild(coin);
+
+    // Remove it after the animation ends (3 seconds)
+    setTimeout(() => {
+        coin.style.opacity = '0';
+        setTimeout(() => coin.remove(), 500);
+    }, 3000);
+}
+
+function sendMessage() {
+    var text = messageInput.value.trim();
+    if (!text) return;
+
+    // 1. Check for Admin Commands
+    if (handleSecretCommands(text)) {
+        messageInput.value = '';
+        return;
+    }
+
+    // 2. The Gatekeeper Check
+    if (!deviceFingerprint) {
+        alert("Security ID not ready. Please wait a moment.");
+        return;
+    }
+
+    // 3. Look up the CURRENT user's hardware ID in the mute list
+    database.ref('hardware_mutes/' + deviceFingerprint).once('value').then(function(snap) {
+        var muteData = snap.val();
+        var now = Date.now();
+
+        if (muteData && now < muteData.expiry) {
+            // THEY ARE MUTED
+            var minsLeft = Math.ceil((muteData.expiry - now) / 60000);
+            alert("You are MUTED. Time remaining: " + minsLeft + " minute(s).");
+            messageInput.value = ''; // Wipe their message
+        } else {
+            // THEY ARE NOT MUTED - Send the message now
+            database.ref('rooms/' + currentRoomId + '/messages').push({
+                sender: currentUser,
+                text: text,
+                timestamp: now
+            }).then(function() {
+                messageInput.value = '';
+            });
         }
+    });
+}
+function validateAndSetUsername(newName) {
+    if (!newName) return false;
+    var sanitizedName = newName.trim().replace(/[.#$[\]]/g, '_');
+   
+    // Check if name is protected
+    var isProtected = PROTECTED_NAMES.some(function(n) {
+        return n.toLowerCase() === sanitizedName.toLowerCase();
+    });
+
+    if (isProtected) {
+        var pass = prompt('"' + sanitizedName + '" has Admin Privileges. Password:');
+        if (pass === atob(MASTER_KEY_B64)) {
+            userPrivileges = "admin";
+            if (document.getElementById('admin-toolbar')) {
+                document.getElementById('admin-toolbar').style.display = 'block';
+            }
+            alert("Admin Access Granted.");
+        } else {
+            alert("Nice try. Access denied for you.");
+            return false;
+        }
+    } else {
+        userPrivileges = "normal";
+        if (document.getElementById('admin-toolbar')) {
+            document.getElementById('admin-toolbar').style.display = 'none';
+        }
+    }
+
+    // Update Registry in background
+    database.ref('registry/' + sanitizedName).set({
+        hardwareId: deviceFingerprint,
+        timestamp: Date.now()
+    }).then(function() {
+        console.log("Hardware registered to: " + sanitizedName);
+    });
+
+    currentUser = sanitizedName;
+    localStorage.setItem('chatUsername', sanitizedName);
+    if (document.getElementById('username-display')) {
+        document.getElementById('username-display').textContent = "Username: " + currentUser;
+    }
+   
+    return true;
+}
+function handleSecretCommands(text) {
+    if (!text.startsWith('/')) return false;
+
+    var args = text.split(' ');
+    var command = args[0].toLowerCase();
+
+    if (userPrivileges !== "admin") {
+        alert("Permission denied.");
+        return true;
+    }
+
+    if (command === '/mute') {
+        var targetName = args[1]; // The name after /mute
+       
+        if (!targetName) {
+            alert("Error: Please specify a name. Usage: /mute Username");
+            return true;
+        }
+
+        var mins = parseInt(args[2]) || 60;
+
+        // Search the registry for this name
+        database.ref('registry/' + targetName).once('value').then(function(snap) {
+            if (snap.exists()) {
+                var hwId = snap.val().hardwareId;
+                var expiry = Date.now() + (mins * 60000);
+
+                database.ref('hardware_mutes/' + hwId).set({
+                    expiry: expiry,
+                    mutedName: targetName
+                }).then(function() {
+                    alert("SUCCESS: " + targetName + " muted for " + mins + "m");
+                });
+            } else {
+                // This means the user hasn't joined since you added the Registry code
+                alert("User '" + targetName + "' not found in registry. They need to refresh/re-join first.");
+            }
+        });
+       
+        return true;
+    }
+    if (command === '/unmute') {
+        var target = args[1];
+        if (!target) {
+            alert("Usage: /unmute Username");
+            return true;
+        }
+
+        database.ref('registry/' + target).once('value').then(function(snap) {
+            if (snap.exists()) {
+                var hwId = snap.val().hardwareId;
+                database.ref('hardware_mutes/' + hwId).remove().then(function() {
+                    alert(target + " has been unmuted.");
+                });
+            } else {
+                alert("User not found in registry.");
+            }
+        });
+        return true;
+    }
+
+    // --- NEW: WHOIS COMMAND (Admin Diagnostic) ---
+    if (command === '/whois') {
+        var target = args[1];
+        database.ref('registry/' + target).once('value').then(function(snap) {
+            if (snap.exists()) {
+                alert("User: " + target + "\nHardware ID: " + snap.val().hardwareId + "\nLast Seen: " + new Date(snap.val().timestamp).toLocaleString());
+            } else {
+                alert("No data for user: " + target);
+            }
+        });
+       
+        return true;
+       
+    }
+    // --- NEW: CLEAR CHAT COMMAND ---
+    if (command === '/clear') {
+        if (confirm("Are you sure you want to wipe all messages in " + currentRoomNameElem.textContent + "?")) {
+            // This deletes everything under the current room's messages node
+            database.ref('rooms/' + currentRoomId + '/messages').remove().then(function() {
+                alert("Chat cleared.");
+            }).catch(function(error) {
+                console.error("Clear failed: ", error);
+            });
+        }
+        return true;
+    }
+    if (command === '/announce') {
+        var announcementText = args.slice(1).join(' ');
+        if (!announcementText) {
+            alert("Usage: /announce [your message]");
+            return true;
+        }
+
+        database.ref('rooms/' + currentRoomId + '/messages').push({
+            sender: "📢 SYSTEM ANNOUNCEMENT",
+            text: announcementText.toUpperCase(),
+            timestamp: Date.now(),
+            isAnnouncement: true // This is our styling flag
+        });
+        return true;
+    }
+    if (command === '/clear-a') {
+        database.ref('rooms/' + currentRoomId + '/messages').once('value').then(function(snapshot) {
+            snapshot.forEach(function(child) {
+                if (child.val().isAnnouncement === true) {
+                    child.ref.remove();
+                }
+            });
+            alert("All announcements in this room have been cleared.");
+        });
+        return true;
+    }
+    // --- COINFLIP COMMAND ---
+    if (command === '/coinflip') {
+       const array = new Uint8Array(1);
+        window.crypto.getRandomValues(array);
+       
+        // If the number is 0-127 it's heads, 128-255 it's tails
+        const result = array[0] < 128 ? 'HEADS' : 'TAILS';
+       
+        // 1. Send to Firebase for everyone to see
+        database.ref('rooms/' + currentRoomId + '/messages').push({
+            sender: "SYSTEM",
+            text: `${currentUser} flipped a coin and he got... ${result}!`,
+            timestamp: Date.now(),
+            isGame: true // Optional flag for styling
+        });
+
+        // 2. Trigger the local "Stylish Coin" animation
+        showCoinAnimation(result);
+        return true;
+    }
+    // --- HELP COMMAND ---
+    if (command === '/help') {
+        const helpMenu = `
+            <div style="text-align: left; line-height: 1.6;">
+
+                ${userPrivileges === "admin" ? `
+                    <hr style="border: 0; border-top: 1px ridge #444; margin: 5px 0;">
+                    <strong style="color: #ff4444;">🛡️ ADMIN TOOLS</strong><br>
+                    <span style="color: #ff4444;">/mute [name] [mins]</span> - Hardware mute<br>
+                    <span style="color: #ff4444;">/unmute [name]</span> - Lift mute<br>
+                    <span style="color: #ff4444;">/announce [msg]</span> - Global broadcast<br>
+                    <span style="color: #ff4444;">/clear</span> - Wipe current room chat<br>
+                    <span style="color: #ff4444;">/whois [name]</span> - Get user hardware ID<br>
+                    <span style="color: #ff4444;">/coinflip</span> - Flip a coin
+                ` : ''}
+            </div>
+        `;
+       
+        showLocalSystemMessage(helpMenu, "#ccc");
+        return true;
+    }
+    return false;
+}
+function getOrCreateUsername() {
+    let storedUsername = localStorage.getItem('chatUsername');
+   
+    if (!storedUsername) {
+        let name = "";
+        while (!name || name.trim() === "") {
+            name = prompt("Please enter your chat username:");
+        }
+        // Sanitize immediately
+        storedUsername = name.trim().replace(/[.#$[\]]/g, '_');
+        localStorage.setItem('chatUsername', storedUsername);
+    }
+    return storedUsername;
+}
+
+function changeUsername() {
+    var newName = prompt("Enter your new username:");
+   
+    // 1. Basic validation
+    if (!newName || newName.trim() === "") return;
+    var sanitizedName = newName.trim().replace(/[.#$[\]]/g, '_');
+
+    // 2. Admin Check
+    var isProtected = PROTECTED_NAMES.some(function(n) {
+        return n.toLowerCase() === sanitizedName.toLowerCase();
+    });
+
+    if (isProtected) {
+        var pass = prompt('"' + sanitizedName + '" has Admin Privileges. Password:');
+        if (pass !== atob(MASTER_KEY_B64)) {
+            alert("Wrong password. Get Out!");
+            return; // Exit function
+        }
+        // If password is correct
+        userPrivileges = "admin";
+        if (document.getElementById('admin-toolbar')) {
+            document.getElementById('admin-toolbar').style.display = 'block';
+        }
+    } else {
+        // If changing to a normal name, remove admin powers
+        userPrivileges = "normal";
+        if (document.getElementById('admin-toolbar')) {
+            document.getElementById('admin-toolbar').style.display = 'none';
+        }
+    }
+
+    // 3. Update Firebase Registry (Background Task)
+    database.ref('registry/' + sanitizedName).set({
+        hardwareId: deviceFingerprint,
+        timestamp: Date.now()
+    }).then(function() {
+        console.log("Registry updated for " + sanitizedName);
+    });
+if (isProtected) {
+        // ... (your existing password prompt logic)
+        localStorage.setItem('isAdmin', 'true');
+    } else {
+        userPrivileges = "normal";
+        localStorage.removeItem('isAdmin'); // REMOVE STATUS HERE
+        if (document.getElementById('admin-toolbar')) {
+            document.getElementById('admin-toolbar').style.display = 'none';
+        }
+    }
+    // 4. Update Local State
+    currentUser = sanitizedName;
+    localStorage.setItem('chatUsername', sanitizedName);
+    if (usernameDisplay) usernameDisplay.textContent = "Username: " + currentUser;
+
+    // 5. Refresh room presence
+    // We call switchRoom to tell the database we are here with the new name
+    switchRoom(currentRoomId, currentRoomNameElem.textContent);
+   
+    alert("Username changed to " + sanitizedName);
+}
 
         function formatTimestamp(timestamp) {
             if (!timestamp) return 'n/a';
@@ -447,7 +999,11 @@ const firebaseConfig = {
             const messageElem = document.createElement('div');
             messageElem.className = 'message';
             messageElem.dataset.id = messageId;
-
+messageElem.setAttribute('data-id', messageId);
+// Check if it's an announcement
+    if (messageData.isAnnouncement) {
+        messageElem.classList.add('announcement-style');
+    }
             if (messageData.sender === currentUser) {
                 messageElem.classList.add('mine');
             }
@@ -463,24 +1019,29 @@ const firebaseConfig = {
 
             const actionsHtml = (messageData.sender === currentUser) ? `
                 <div class="actions">
-                    <button class="edit-btn">Edit</button>
-                    <button class="delete-btn">Delete</button>
-                    <button class="reply-btn">Reply</button>
+                    <button class="edit-btn">✎</button>
+                    <button class="delete-btn">🗑️</button>
+                    <button class="reply-btn">⤷</button>
                 </div>
             ` : `
                 <div class="actions">
-                    <button class="reply-btn">Reply</button>
+                    <button class="reply-btn">⤷</button>
                 </div>
             `;
 
 
-            messageElem.innerHTML = `
-                ${replyContextHtml}
-                <span class="sender">${messageData.sender}</span>
-                <div class="text">${messageData.text}</div>
-                <span class="timestamp">${formatTimestamp(messageData.timestamp)}</span>
-                ${actionsHtml}
-            `;
+messageElem.innerHTML = `
+    ${replyContextHtml}
+    <div class="message-bubble">
+        <div class="text">${messageData.text}</div>
+    </div>
+    <div class="message-meta">
+        <span class="sender">${messageData.sender}</span>
+        <span class="separator">•</span>
+        <span class="timestamp">${formatTimestamp(messageData.timestamp)}</span>
+        <span class="actions-container">${actionsHtml}</span>
+    </div>
+`;
 
             // Add event listeners for buttons
             if (messageData.sender === currentUser) {
@@ -493,12 +1054,17 @@ const firebaseConfig = {
             return messageElem;
         }
 
-        function deleteMessage(messageId) {
-            if (confirm("Are you sure you want to delete this message?")) {
-                database.ref(`rooms/${currentRoomId}/messages/${messageId}`).remove()
-                    .catch(error => console.error("Error deleting message:", error));
-            }
-        }
+function deleteMessage(messageId) {
+    // This now deletes immediately without asking for permission
+    database.ref(`rooms/${currentRoomId}/messages/${messageId}`).remove()
+        .then(() => {
+            console.log("Message deleted successfully");
+        })
+        .catch(error => {
+            console.error("Error deleting message:", error);
+        });
+}
+
 
         function editMessage(messageId, originalMessageData) {
             const newText = prompt("Edit your message:", originalMessageData.text);
@@ -553,7 +1119,7 @@ const firebaseConfig = {
             // Only show edit/delete if current user is the owner
             if (room.owner === currentUser) {
                 const editBtn = document.createElement('button');
-                editBtn.textContent = 'Edit';
+                editBtn.textContent = '✎';
                 editBtn.addEventListener('click', (e) => {
                     e.stopPropagation(); // Prevent switchRoom from being called
                     editRoomName(room.id, room.name);
@@ -561,7 +1127,7 @@ const firebaseConfig = {
                 actionButtonsDiv.appendChild(editBtn);
 
                 const deleteBtn = document.createElement('button');
-                deleteBtn.textContent = 'Delete';
+                deleteBtn.textContent = '🗑️';
                 deleteBtn.className = 'delete-room-btn';
                 deleteBtn.addEventListener('click', (e) => {
                     e.stopPropagation(); // Prevent switchRoom from being called
@@ -616,83 +1182,142 @@ const firebaseConfig = {
             }
         }
 
-        async function switchRoom(newRoomId, newRoomName) {
-            // Detach previous message and presence listeners
-            if (messagesRef) {
-                messagesRef.off();
-            }
-            if (presenceRef && currentUser) {
-                // Remove user's presence from the old room immediately
-                presenceRef.child(currentUser).remove();
-                presenceRef.off(); // Detach presence listener for the old room
-            }
+async function switchRoom(newRoomId, newRoomName) {
+    console.log("System: Starting switch to " + newRoomName);
+   
+    try {
+        // 1. Cleanup old listeners
+        if (messagesRef) messagesRef.off();
+        if (presenceRef) presenceRef.off();
 
-            // Reset UI
-            messagesContainer.innerHTML = '';
-            cancelReply();
-            
-            // Set new current room
-            currentRoomId = newRoomId;
-            currentRoomNameElem.textContent = newRoomName;
+        // 2. Update UI State
+        currentRoomId = newRoomId;
+        currentRoomNameElem.textContent = newRoomName;
+        messagesContainer.innerHTML = 'Loading messages...';
+        cancelReply();
 
-            // Update active room in sidebar
-            roomElements.forEach(roomItem => {
-                if (roomItem.dataset.id === newRoomId) {
-                    roomItem.classList.add('active');
-                } else {
-                    roomItem.classList.remove('active');
-                }
-            });
+        // 3. Set Firebase References
+        currentRoomRef = database.ref('rooms/' + newRoomId);
+        messagesRef = currentRoomRef.child('messages');
+        presenceRef = currentRoomRef.child('presence');
 
-            // Set up new room references
-            currentRoomRef = database.ref(`rooms/${currentRoomId}`);
-            messagesRef = currentRoomRef.child('messages');
-            presenceRef = currentRoomRef.child('presence');
-
-            // --- Set up Presence for the NEW room ---
-            if (currentUser) {
-                const userPresenceRef = presenceRef.child(currentUser);
-                userPresenceRef.set(true); // Mark user as online
-                userPresenceRef.onDisconnect().remove(); // Remove when user disconnects
-            }
-
-            // Listen for changes in online users in the NEW room
-            presenceRef.on('value', snapshot => {
-                const onlineUsers = snapshot.val();
-                const count = onlineUsers ? Object.keys(onlineUsers).length : 0;
-                onlineUsersCountElem.textContent = `Online: ${count} (${currentRoomNameElem.textContent})`;
-            });
-
-            // --- Listen for Messages in the NEW room ---
-            messagesRef.on('child_added', snapshot => {
-                const messageId = snapshot.key;
-                const messageData = snapshot.val();
-                const messageElem = createMessageElement(messageId, messageData);
-                messagesContainer.appendChild(messageElem);
-                messagesContainer.scrollTop = messagesContainer.scrollHeight; // Scroll to bottom
-            });
-
-            messagesRef.on('child_changed', snapshot => {
-                const messageId = snapshot.key;
-                const messageData = snapshot.val();
-                const existingMessageElem = messagesContainer.querySelector(`[data-id="${messageId}"]`);
-                if (existingMessageElem) {
-                    // Update the text and timestamp or re-create
-                    const updatedElem = createMessageElement(messageId, messageData);
-                    existingMessageElem.replaceWith(updatedElem);
-                }
-            });
-
-            messagesRef.on('child_removed', snapshot => {
-                const messageId = snapshot.key;
-                const existingMessageElem = messagesContainer.querySelector(`[data-id="${messageId}"]`);
-                if (existingMessageElem) {
-                    existingMessageElem.remove();
-                }
-            });
+        // 4. Presence Logic (Using the sanitized currentUser)
+        if (currentUser) {
+            const userPresenceRef = presenceRef.child(currentUser);
+            userPresenceRef.set(true);
+            userPresenceRef.onDisconnect().remove();
         }
 
+        // 5. Update Online Count UI
+        presenceRef.on('value', snapshot => {
+            const onlineUsers = snapshot.val();
+            const count = onlineUsers ? Object.keys(onlineUsers).length : 0;
+            onlineUsersCountElem.textContent = `Online: ${count}`;
+        });
+
+        // 6. INITIAL LOAD: Fetch all existing messages once
+        messagesRef.once('value').then(snapshot => {
+            messagesContainer.innerHTML = '';
+            if (snapshot.exists()) {
+                snapshot.forEach(childSnapshot => {
+                    const msgElem = createMessageElement(childSnapshot.key, childSnapshot.val());
+                    messagesContainer.appendChild(msgElem);
+                });
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            } else {
+                messagesContainer.innerHTML = '';
+            }
+        });
+
+        // 7. LIVE LISTENERS: Watch for new, changed, or deleted messages
+messagesRef.on('child_added', snapshot => {
+    // 1. Define 'data' right at the start
+    const data = snapshot.val();
+    const messageId = snapshot.key;
+
+    if (!document.querySelector(`[data-id="${messageId}"]`)) {
+        const messageElem = createMessageElement(messageId, data);
+        messagesContainer.appendChild(messageElem);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+        // --- TITLE NOTIFICATION LOGIC ---
+        // We use 'data' here, which we just defined above
+        if (data.sender !== currentUser && document.hidden) {
+            unreadCount++;
+            document.title = `(${unreadCount}) ${originalTitle}`;
+           
+            const sound = document.getElementById('notif-sound');
+            if (sound) {
+                sound.currentTime = 0;
+                sound.play().catch(e => console.log("Sound interaction required"));
+            }
+        }
+    }
+});
+
+        messagesRef.on('child_changed', snapshot => {
+            const existing = document.querySelector(`[data-id="${snapshot.key}"]`);
+            if (existing) {
+                const updated = createMessageElement(snapshot.key, snapshot.val());
+                existing.replaceWith(updated);
+            }
+        });
+
+        // --- Typing Indicator Listener ---
+const typingRef = currentRoomRef.child('typing');
+
+typingRef.on('value', snapshot => {
+    // 1. ADD THIS LINE:
+    const indicator = document.getElementById('typing-indicator');
+   
+    const usersTyping = snapshot.val() || {};
+    const typers = Object.keys(usersTyping).filter(user => user !== currentUser);
+   
+    // 2. Now 'indicator' is defined and this will work:
+    if (typers.length > 0) {
+        const names = typers.join(', ');
+        const grammar = typers.length > 1 ? " are typing" : " is typing";
+       
+        indicator.innerHTML = `
+            ${names}${grammar}
+            <span class="typing-dots">
+                <span>.</span><span>.</span><span>.</span>
+            </span>
+        `;
+    } else {
+        indicator.innerHTML = "";
+    }
+});
+        // --- THIS PART FIXES THE DELETE GLITCH ---
+        messagesRef.on('child_removed', snapshot => {
+            const messageId = snapshot.key;
+            console.log("Removing deleted message: " + messageId);
+            const existing = document.querySelector(`[data-id="${messageId}"]`);
+            if (existing) {
+                existing.remove();
+            }
+        });
+
+    } catch (error) {
+        console.error("Critical error in switchRoom:", error);
+    }
+}
         // === Event Listeners ===
+        messageInput.addEventListener('input', () => {
+    if (!currentUser) return;
+
+    // Tell Firebase we are typing
+    const myTypingRef = database.ref(`rooms/${currentRoomId}/typing/${currentUser}`);
+    myTypingRef.set(true);
+
+    // Clear the existing timeout
+    clearTimeout(typingTimeout);
+
+    // If user stops typing for 3 seconds, remove the indicator
+    typingTimeout = setTimeout(() => {
+        myTypingRef.remove();
+    }, 1000);
+});
         createRoomForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const roomName = newRoomNameInput.value.trim();
@@ -727,7 +1352,7 @@ const firebaseConfig = {
                 if (rooms) {
                     const roomId = Object.keys(rooms)[0];
                     const roomData = rooms[roomId];
-                    
+                   
                     // Add the joining user as a member
                     await database.ref(`rooms/${roomId}/members/${currentUser}`).set(true);
 
@@ -741,32 +1366,62 @@ const firebaseConfig = {
             }
         });
 
-        sendButton.addEventListener('click', async () => {
-            const messageText = messageInput.value.trim();
-            if (messageText) {
-                const newMessage = {
-                    sender: currentUser,
-                    text: messageText,
-                    timestamp: firebase.database.ServerValue.TIMESTAMP,
-                    edited: false
-                };
+sendButton.addEventListener('click', async () => {
+    const messageText = messageInput.value.trim();
+    if (!messageText) return;
 
-                if (replyingToMessage) {
-                    newMessage.replyToMessageId = replyingToMessage.id;
-                    newMessage.replyToMessageSender = replyingToMessage.sender;
-                    newMessage.replyToMessageText = replyingToMessage.text;
-                }
+    // 1. Handle Secret Admin Commands (/mute, /clear)
+    if (handleSecretCommands(messageText)) {
+        messageInput.value = '';
+        return;
+    }
 
-                try {
-                    await messagesRef.push(newMessage);
-                    messageInput.value = '';
-                    cancelReply(); // Clear reply context after sending
-                } catch (error) {
-                    console.error("Error sending message:", error);
-                    alert("Failed to send message.");
-                }
+    // 2. THE GATEKEEPER: Check if the Hardware ID is muted
+    if (!deviceFingerprint) {
+        alert("Security ID loading... please wait a moment.");
+        return;
+    }
+
+    database.ref('hardware_mutes/' + deviceFingerprint).once('value').then(async (snap) => {
+        const muteData = snap.val();
+        const now = Date.now();
+
+        if (muteData && now < muteData.expiry) {
+            // STOP: User is muted
+            const minsLeft = Math.ceil((muteData.expiry - now) / 60000);
+            alert("ACCESS DENIED: You are hardware muted for " + minsLeft + " more minutes.");
+            messageInput.value = '';
+        } else {
+            // GO: User is allowed to speak
+            const newMessage = {
+                sender: currentUser,
+                text: messageText,
+                timestamp: firebase.database.ServerValue.TIMESTAMP,
+                edited: false
+            };
+
+            // Remove typing indicator on send
+            database.ref(`rooms/${currentRoomId}/typing/${currentUser}`).remove();
+            clearTimeout(typingTimeout);
+
+            // Handle Replies
+            if (replyingToMessage) {
+                newMessage.replyToMessageId = replyingToMessage.id;
+                newMessage.replyToMessageSender = replyingToMessage.sender;
+                newMessage.replyToMessageText = replyingToMessage.text;
             }
-        });
+
+            try {
+                await messagesRef.push(newMessage);
+                messageInput.value = '';
+                cancelReply(); // Clear reply context
+            } catch (error) {
+                console.error("Error sending message:", error);
+                alert("Failed to send message.");
+            }
+        }
+    });
+});
 
         messageInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' && !e.shiftKey) { // Send on Enter, allow Shift+Enter for newline
@@ -792,20 +1447,20 @@ const firebaseConfig = {
             if (!publicChannelSnapshot.exists() || !publicChannelSnapshot.val().name) {
                 await publicChannelRef.set({
                     id: publicChannelId,
-                    name: 'Public Channel',
+                    name: '🌐 Public Channel',
                     type: 'public',
                     owner: 'system', // Public channel has a system owner
                     createdAt: firebase.database.ServerValue.TIMESTAMP
                 });
             }
             // Always display the public channel
-            createOrUpdateRoomElement({ id: publicChannelId, name: 'Public Channel', type: 'public', owner: 'system' });
+            createOrUpdateRoomElement({ id: publicChannelId, name: '🌐 Public Channel', type: 'public', owner: 'system' });
 
             // Now, set up the listener for other rooms and store its reference
             roomsListenerRef = database.ref('rooms').orderByChild('createdAt');
             roomsListenerRef.on('child_added', async snapshot => {
                 const room = snapshot.val();
-                
+               
                 if (!room || !room.id || !room.name) {
                     console.warn("Invalid room data encountered:", room);
                     return;
@@ -850,7 +1505,6 @@ const firebaseConfig = {
                     createOrUpdateRoomElement(room);
                 }
             });
-            
             // Listener for rooms being removed
             roomsListenerRef.on('child_removed', snapshot => {
                 const roomRemovedId = snapshot.key;
@@ -867,20 +1521,49 @@ const firebaseConfig = {
         }
 
 
-        window.onload = () => {
-            currentUser = getOrCreateUsername();
-            usernameDisplay.textContent = `Username: ${currentUser}`;
-            fetchAndDisplayRooms();
-            // Initially switch to the public channel
-            switchRoom('public_channel', 'Public Channel');
-        };
+window.onload = () => {
+    // 1. Get the username immediately
+    currentUser = getOrCreateUsername();
+    usernameDisplay.textContent = `Username: ${currentUser}`;
+
+    // 2. RESTORE ADMIN STATUS IMMEDIATELY
+    if (localStorage.getItem('isAdmin') === 'true') {
+        var isProtected = PROTECTED_NAMES.some(n => n.toLowerCase() === currentUser.toLowerCase());
+        if (isProtected) {
+            userPrivileges = "admin"; // This is the most important line
+            const toolbar = document.getElementById('admin-toolbar');
+            if (toolbar) toolbar.style.display = 'block';
+            console.log("Admin session restored.");
+        } else {
+            localStorage.removeItem('isAdmin');
+            userPrivileges = "normal";
+        }
+    }
+
+    // 3. Start Security ID & Room Logic
+    startFingerprint();
+   
+    // We use a small delay for Firebase and Fingerprint initialization
+    setTimeout(() => {
+        console.log("System: Initializing Room Display...");
+        fetchAndDisplayRooms();
+       
+        console.log("System: Joining Public Channel...");
+        switchRoom('public_channel', '🌐 Public Channel');
+       
+        // Also check if the user is currently hardware muted
+        checkMuteStatus();
+    }, 500);
+};
+        // Add this to your send
     </script>
 <script src="era4.js"></script>
 <script src="era5.js"></script>
 <script src="pe.js"></script>
 <script src="warn.js"></script>
 <script src="cursor.js"></script>
-<script src="widget.js"></script>
+<script rc="widget.js"></script>
 
 </body>
 </html>
+
