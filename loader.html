@@ -28,28 +28,37 @@
 
     /* ---------- Game Container ---------- */
   /* Game Container */
-#game-container {
+  #game-container {
   margin-top: 30px;
   width: 1000px;
+  opacity:1 !important;
+  visibility:visible !important;
   height: 600px;
   background-color: #111;
   border: 2px solid #26FF9A;
   border-radius: 15px;
-  overflow: hidden;
   position: relative;
-  box-shadow: 0 0 40px rgba(38, 255, 154, 0.4);
-  transition: all 0.3s ease;
+  box-shadow: 10px 25px 40px rgba(38, 255, 154, 0.4);
+  
+  /* YouTube Expansion Setup */
+  transition: transform 0.4s cubic-bezier(0.075, 0.82, 0.165, 1), 
+              width 0.4s ease, height 0.4s ease;
+  transform-origin: top left; 
+  display: flex !important;
 }
 
-#game-container.is-fullscreen {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 10000;
-    margin-top: 0; /* remove gap */
-    border-radius: 0; /* optional: remove rounding */
+/* Ensure the iframe ALWAYS fills the container */
+#game-iframe {
+  display: block;
+}
+
+/* Specific Browser API Fix */
+#game-container:fullscreen {
+  width: 100vw !important;
+  height: 100vh !important;
+  margin: 0 !important;
+  border: none !important;
+  border-radius: 0 !important;
 }
 
 
@@ -216,17 +225,19 @@
   <!-- ---------- Scripts ---------- -->
 
   <script>
-      function closeGame() {
-    sessionStorage.removeItem('currentGameUrl'); // remove the stored game URL
-    window.location.href = 'games.html';        // redirect to games.html
-  }
+    function closeGame() {
+      sessionStorage.removeItem('currentGameUrl');
+      window.location.href = 'games.html';
+    }
+  
     document.addEventListener('DOMContentLoaded', async () => {
       const iframe = document.getElementById('game-iframe');
       const fullscreenButton = document.getElementById('fullscreen-button');
       const gameContainer = document.getElementById('game-container');
-
+      const iframeNav = document.getElementById('iframe-nav');
       const gameUrl = sessionStorage.getItem('currentGameUrl');
-
+  
+      // 1. Load the Game Content
       if (gameUrl) {
         try {
           const response = await fetch(gameUrl);
@@ -236,83 +247,82 @@
         } catch (error) {
           console.error('Game loading error:', error);
           iframe.srcdoc = `
-            <div style="padding: 20px; color: black; text-align:center; font-family: sans-serif;">
+            <div style="padding: 20px; color: white; text-align:center; font-family: sans-serif;">
               <h1>❌ Game Loading Failed</h1>
               <p>Error: ${error.message}</p>
-              <p><strong>Tip:</strong> Ensure all assets inside the game's HTML use absolute jsDelivr URLs.</p>
             </div>
           `;
         }
       } else {
         window.location.href = 'games.html';
       }
-
-      fullscreenButton.addEventListener('click', () => {
-  gameContainer.classList.toggle('is-fullscreen');
   
-  const iframeNav = document.getElementById('iframe-nav');
-  if (gameContainer.classList.contains('is-fullscreen')) {
-    iframeNav.style.display = 'none';
-  } else {
-    iframeNav.style.display = 'flex'; // restore layout
-  }
-});
-
-
-      document.addEventListener('keydown', (event) => {
-        if (event.key === 'Escape' && gameContainer.classList.contains('is-fullscreen')) {
-          gameContainer.classList.remove('is-fullscreen');
+      // 2. Fullscreen Logic (YouTube Style Expansion)
+      fullscreenButton.addEventListener('click', () => {
+        if (!document.fullscreenElement) {
+          gameContainer.style.transformOrigin = "top left";
+          if (gameContainer.requestFullscreen) {
+            gameContainer.requestFullscreen();
+          }
+        } else {
+          if (document.exitFullscreen) {
+            document.exitFullscreen();
+          }
         }
       });
+  
+      document.addEventListener('fullscreenchange', () => {
+      if (document.fullscreenElement) {
+        // Just entered fullscreen
+        gameContainer.classList.add('is-fullscreen');
+        if (iframeNav) iframeNav.style.display = 'none';
+      } else {
+        // Just exited fullscreen (Manual or ESC key)
+        gameContainer.classList.remove('is-fullscreen');
+        if (iframeNav) iframeNav.style.display = 'flex';
+
+        // 1. Reset Container Dimensions
+        gameContainer.style.width = "1000px";
+        gameContainer.style.height = "600px";
+        gameContainer.style.transform = "none";
+        
+        // 2. FORCE REDRAW (The fix for the disappearing iframe)
+        iframe.style.display = 'none'; // Hide it
+        iframe.offsetHeight;           // Force a layout calculation (the "magic" line)
+        
+        setTimeout(() => {
+          iframe.style.display = 'block'; // Show it again
+          iframe.style.width = "100%";
+          iframe.style.height = "100%";
+        }, 10); // A tiny 10ms delay is enough to wake up the rendering engine
+      }
     });
-    
+    }); // Fixed the missing closing brace and parenthesis here!
   </script>
+
 <script src="./era10.js"></script>
 <script>
   window.addEventListener('load', () => {
-      // 1. Get the iframe by the CORRECT ID used in your HTML
-      const frame = document.getElementById('game-iframe');
-      const currentGameUrl = sessionStorage.getItem('currentGameUrl');
-      
-      // Only update if frame exists and src is empty
-      if (currentGameUrl && frame && !frame.srcdoc && !frame.src) {
-          frame.src = currentGameUrl;
-      }
+    const leftSidebar = document.getElementById('left-sidebar');
+    const rightSidebar = document.getElementById('right-sidebar');
+    const BASE_URL = `https://cdn.jsdelivr.net/gh/PopAnynomous234/Goodboy@main/`;
 
-      const BASE_URL = `https://cdn.jsdelivr.net/gh/PopAnynomous234/Goodboy@main/`;
+    if (typeof games !== 'undefined' && leftSidebar && rightSidebar) {
+      leftSidebar.innerHTML = '';
+      rightSidebar.innerHTML = '';
+      const randomTen = [...games].sort(() => 0.5 - Math.random()).slice(0, 10);
 
-      // 2. Check if 'games' array exists from era10.js
-      if (typeof games !== 'undefined') {
-          // Clear existing sidebars to prevent duplicates
-          const leftSidebar = document.getElementById('left-sidebar');
-          const rightSidebar = document.getElementById('right-sidebar');
-          leftSidebar.innerHTML = '';
-          rightSidebar.innerHTML = '';
-
-          // Shuffle and pick 10
-          const randomTen = [...games].sort(() => 0.5 - Math.random()).slice(0, 10);
-
-          randomTen.forEach((game, index) => {
-              const card = document.createElement('div');
-              card.className = 'game-card';
-              card.innerHTML = `
-                  <img src="${game.image}" alt="${game.title}">
-                  <h3>${game.title}</h3>
-              `;
-              
-              card.onclick = () => {
-                  sessionStorage.setItem('currentGameUrl', BASE_URL + game.url);
-                  window.location.reload(); 
-              };
-
-              // Logic to split 5 left and 5 right
-              if (index < 5) {
-                  leftSidebar.appendChild(card);
-              } else {
-                  rightSidebar.appendChild(card);
-              }
-          });
-      }
+      randomTen.forEach((game, index) => {
+        const card = document.createElement('div');
+        card.className = 'game-card';
+        card.innerHTML = `<img src="${game.image}"><h3>${game.title}</h3>`;
+        card.onclick = () => {
+          sessionStorage.setItem('currentGameUrl', BASE_URL + game.url);
+          window.location.reload(); 
+        };
+        (index < 5 ? leftSidebar : rightSidebar).appendChild(card);
+      });
+    }
   });
 </script>
   <!-- Extra Scripts -->
