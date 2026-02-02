@@ -784,6 +784,51 @@ const games = [
         title: "Stickman Hook",
         image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRLCWdJ7OxBWOtsfvbsWMNE3a4lF2xd1onTGA&s",
         url: "stickmanh.html"
+    },
+        {
+        title: "House of Hazards",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRMZT-fW0-kYdKhBs3pSQhh12Xbdqtm1eEBRg&s",
+        url: "houseofh.html",
+    },
+    {
+        title: "FNAW",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRn2SbLYcNK-_pdZ_zmC2krsXIwW-g7RnUYMw&s",
+        url: "fnaw.html",
+    },
+    {
+        title: "Ragdoll Archers",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRg-08BxjorOyXwNYJNu-Ab_tm6dGU124_Qzg&s",
+        url: "ragdolla.html",
+    },
+    {
+        title: "Real Flight Simulator",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQV7Wgt_I-Xh10lwneougN2lkx0HwPxKVCWVA&s",
+        url: "realflightsim.html",
+    },
+    {
+        title: "We Become What We Behold",
+        image: "https://img.youtube.com/vi/-amgr2RgCBc/0.jpg",
+        url: "webecome.html",
+    }, 
+    {
+        title: "UGS Library",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQFFfpMZ2POZsgEjd3l1QjvNJw410x4zK9cGw&s",
+        url: "library.html",
+    }, 
+    {
+        title: "Granny",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTYg41d0mA8Q__ZdcPMu2Jufov4Dybznxz6tw&s",
+        url: "granny.html",
+    }, 
+    {
+        title: "FNF Vs FNAF",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSIzagY0XfBh05mYjRTWn9cJHUnxQqo2F6ufw&s",
+        url: "fnff.html",
+    }, 
+    {
+        title: "FNF Soft",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSLfc6dJMFHYvl_Y69u-zhbZu1BAnivpZ5pxQ&s",
+        url: "fnfs.html",
     }
 ];
 
