@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,11 +7,12 @@
     <link rel="stylesheet" href="styles.css">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>COdelistener Chat</title>
+    <title>Codelistener Chat</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <!-- Scripts -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-check-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@3/dist/fp.min.js"></script>
     <style>
         /* Startup Animations */
@@ -38,7 +40,7 @@
             color: #e0e0e0; /* Light text color for contrast */
             display: flex;
             gap: 20px;
-            min-height: 100vh;
+            height:700px;
         }
 
         #app-container {
@@ -170,7 +172,9 @@
             border: 1px solid #03160D; /* Darker border */
             border-radius: 4px;
             padding: 15px;
-            overflow-y: auto;
+overflow-y: scroll !important; /* Force Windows to render the track */
+    -webkit-overflow-scrolling: touch; 
+    display: block;
             margin-bottom: 15px;
             background-color: #0a0a0a; /* Dark background for messages area */
         }
@@ -427,6 +431,10 @@
     from { transform: rotateY(0); }
     to { transform: rotateY(1980deg); } /* Spins 5.5 times and lands on Back */
 }
+
+.admin-toolbar {
+    color:#26ff9a;
+}
     </style>
 </head>
 <body>
@@ -482,6 +490,9 @@
         <div id="sidebar">
             <h2>Codelistener Chat</h2>
             <div id="username-display"></div>
+            <div id="admin-toolbar" class="admin-toolbar" style="display:none;">
+    ⭐ SPECIAL PERSON     
+</div>
             <button id="change-username-btn" onclick="changeUsername()">Change Name</button>
             <div id="online-users-count" class="online-users"></div>
 
@@ -521,6 +532,7 @@
         </div>
     </div>
     <script>
+    self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
   apiKey: "AIzaSyAd-PM5QNtYuisjKCODf1iPk7OkhyCUaw4",
@@ -557,6 +569,11 @@ var deviceFingerprint = ""; // Should be populated by FingerprintJS on load
         const usernameDisplay = document.getElementById('username-display');
         const onlineUsersCountElem = document.getElementById('online-users-count');
         const roomListElem = document.getElementById('room-list');
+        const appCheck = firebase.appCheck();
+appCheck.activate(
+    '6LcDq2EsAAAAAPn2Pah4JM6xxhs-5JsRvYN6hqPJ', // Your Site Key
+    true // This enables auto-refresh of tokens
+);
         const createRoomForm = document.getElementById('create-room-form');
         const newRoomNameInput = document.getElementById('new-room-name');
         const joinRoomForm = document.getElementById('join-room-form');
@@ -916,10 +933,58 @@ function getOrCreateUsername() {
         while (!name || name.trim() === "") {
             name = prompt("Please enter your chat username:");
         }
-        // Sanitize immediately
+        
+        // 1. Sanitize and Save
         storedUsername = name.trim().replace(/[.#$[\]]/g, '_');
         localStorage.setItem('chatUsername', storedUsername);
+        
+        // 2. Update Registry (Use the correct variable name: storedUsername)
+        if (typeof database !== 'undefined') {
+            database.ref('registry/' + storedUsername).set({
+                hardwareId: deviceFingerprint || "pending", 
+                timestamp: Date.now()
+            }).then(function() {
+                console.log("Registry updated for " + storedUsername);
+            });
+        }
     }
+
+// 1. Check if the name is in the protected list
+var isProtected = PROTECTED_NAMES.some(function(n) {
+    return n.toLowerCase() === storedUsername.toLowerCase();
+});
+
+if (isProtected) {
+    // 2. CHECK: Are they already verified?
+    var alreadyVerified = localStorage.getItem('isAdminVerified') === 'true';
+
+    if (!alreadyVerified) {
+        var pass = prompt('"' + storedUsername + '" has Admin Privileges. Password:');
+        if (pass !== atob(MASTER_KEY_B64)) {
+            alert("Wrong password. Access Denied.");
+            localStorage.removeItem('chatUsername'); 
+            location.reload(); 
+            return null;
+        }
+        // 3. SET VERIFICATION: Only happens on successful password entry
+        localStorage.setItem('isAdminVerified', 'true');
+    }
+
+    // Grant powers
+    userPrivileges = "admin";
+    localStorage.setItem('isAdmin', 'true');
+    const toolbar = document.getElementById('admin-toolbar');
+    if (toolbar) toolbar.style.display = 'block';
+
+} else {
+    // Not a protected name
+    userPrivileges = "normal";
+    localStorage.removeItem('isAdmin');
+    localStorage.removeItem('isAdminVerified'); // Clear verification
+    const toolbar = document.getElementById('admin-toolbar');
+    if (toolbar) toolbar.style.display = 'none';
+}
+
     return storedUsername;
 }
 
@@ -1172,7 +1237,7 @@ function deleteMessage(messageId) {
                     alert(`Room "${roomName}" deleted.`);
                     // If the deleted room was the current room, switch to public
                     if (currentRoomId === roomId) {
-                        switchRoom('public_channel', 'Public Channel');
+                        switchRoom('public_channel', '🌐 Public Channel');
                     }
                     // The 'child_removed' listener in fetchAndDisplayRooms will handle updating the UI
                 } catch (error) {
@@ -1302,6 +1367,11 @@ typingRef.on('value', snapshot => {
         console.error("Critical error in switchRoom:", error);
     }
 }
+    window.addEventListener('focus', () => {
+    // This regex looks for "(any number)" followed by a space at the start of the title
+    // and replaces it with nothing.
+    document.title = document.title.replace(/^\(\d+\)\s?/, "");
+});
         // === Event Listeners ===
         messageInput.addEventListener('input', () => {
     if (!currentUser) return;
@@ -1515,7 +1585,7 @@ sendButton.addEventListener('click', async () => {
                 }
                 // If the deleted room was the current room, switch to public
                 if (currentRoomId === roomRemovedId) {
-                    switchRoom(publicChannelId, 'Public Channel');
+                    switchRoom(publicChannelId, '🌐 Public Channel');
                 }
             });
         }
@@ -1553,7 +1623,7 @@ window.onload = () => {
        
         // Also check if the user is currently hardware muted
         checkMuteStatus();
-    }, 500);
+    }, 1000);
 };
         // Add this to your send
     </script>
@@ -1566,4 +1636,3 @@ window.onload = () => {
 
 </body>
 </html>
-
