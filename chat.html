@@ -532,7 +532,6 @@ overflow-y: scroll !important; /* Force Windows to render the track */
         </div>
     </div>
     <script>
-    self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
   apiKey: "AIzaSyAd-PM5QNtYuisjKCODf1iPk7OkhyCUaw4",
@@ -571,8 +570,8 @@ var deviceFingerprint = ""; // Should be populated by FingerprintJS on load
         const roomListElem = document.getElementById('room-list');
         const appCheck = firebase.appCheck();
 appCheck.activate(
-    '6LcDq2EsAAAAAPn2Pah4JM6xxhs-5JsRvYN6hqPJ', // Your Site Key
-    true // This enables auto-refresh of tokens
+  new firebase.appCheck.ReCaptchaEnterpriseProvider('6LcDq2EsAAAAAPn2Pah4JM6xxhs-5JsRvYN6hqPJ'),
+  true // This 'true' allows the token to refresh automatically
 );
         const createRoomForm = document.getElementById('create-room-form');
         const newRoomNameInput = document.getElementById('new-room-name');
