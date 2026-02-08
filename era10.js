@@ -829,6 +829,56 @@ const games = [
         title: "FNF Soft",
         image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSLfc6dJMFHYvl_Y69u-zhbZu1BAnivpZ5pxQ&s",
         url: "fnfs.html",
+    },
+        {
+        title: "Tomb of the Mask",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSmkJllI-wE8T0q92etiav74apIKDHAyxSVnA&s",
+        url: "tomb.html"
+    },
+    {
+        title: "Rooftop Snipers",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTag63wCguBuuC0qpSFaTLJH4wZQoAxeuQ8-w&s",
+        url: "rooftop.html"
+    },
+    {
+        title: "Rooftop Snipers 2",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcROwpyb70B7A3Zv6gVATVN4rz_nd--rK3otaQ&s",
+        url: "rooftop2.html"
+    },
+    {
+        title: "Wrestle Bros",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTzp9Q6iTk9nWB6lUMTAiPoicoI0ugkfa_X-w&s",
+        url: "wrestlebros.html"
+    },
+    {
+        title: "Geometry Vibes",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSmkJllI-wE8T0q92etiav74apIKDHAyxSVnA&s",
+        url: "geo.html"
+    },
+    {
+        title: "3 Dash (FIXED)",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSmkJllI-wE8T0q92etiav74apIKDHAyxSVnA&s",
+        url: "3dash.html"
+    },
+    {
+        title: "Bottle Jump 3D 2",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTfurGbkxXlqet4thykpSloL334FTyHVYCyCw&s",
+        url: "bottlej.html"
+    },
+    {
+        title: "Block the Pig",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQANptG0byYTV2qrCKqCj9zeCxYSNnIUQss_w&s",
+        url: "blockpig.html"
+    },
+    {
+        title: "Geometry Arrow (IDK)",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQfKVTtY3_mCF3F88Q6YigvRXIw7xbFD--RKw&s",
+        url: "geometrya.html"
+    },
+    {
+        title: "Marble Race",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS0dJ9UR-tKm_MDcHeshIaHB7M0NDBhVyxZCQ&s",
+        url: "marbler.html"
     }
 ];
 
