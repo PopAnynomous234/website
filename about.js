@@ -1,25 +1,30 @@
-// ===== Core Logic: Runs on every page immediately =====
 (function() {
-    // Function to redirect to about:blank
-    function redirectToAboutBlank() {
-        // Avoid infinite loop
-        if (window.location.href !== 'about:blank') {
-            window.location.replace('about:blank');
+    const isActive = localStorage.getItem('aboutBlankActive') === 'true';
+
+    // 1️⃣ Automatic redirect to about:blank (current page)
+    if (isActive && window.location.href !== 'about:blank') {
+        window.location.replace('about:blank');
+    }
+
+    // 2️⃣ Mouse movement triggers new about:blank popup (once)
+    let popupOpened = false;
+    function openBlankPopup() {
+        if (isActive && !popupOpened) {
+            const newWin = window.open('about:blank', '_blank');
+            if (newWin) {
+                popupOpened = true; // ensure only one popup per page load
+            }
         }
     }
 
-    // Check if the feature is active
-    const isActive = localStorage.getItem('aboutBlankActive') === 'true';
-    if (isActive) {
-        redirectToAboutBlank();
-    }
+    document.addEventListener('mousemove', openBlankPopup, { once: true });
 
-    // ===== Optional: Settings Page UI =====
+    // 3️⃣ Optional: Settings page UI
     const toggleBtn = document.getElementById('toggleBtn');
     const statusDisplay = document.getElementById('status');
 
     if (toggleBtn && statusDisplay) {
-        let isActiveUI = localStorage.getItem('aboutBlankActive') === 'true';
+        let isActiveUI = isActive;
 
         function updateStatusUI() {
             if (isActiveUI) {
@@ -38,9 +43,9 @@
             localStorage.setItem('aboutBlankActive', isActiveUI);
             updateStatusUI();
 
-            // Immediately redirect if turning ON
-            if (isActiveUI) {
-                redirectToAboutBlank();
+            // Immediately redirect current page if turned ON
+            if (isActiveUI && window.location.href !== 'about:blank') {
+                window.location.replace('about:blank');
             }
         });
     }
