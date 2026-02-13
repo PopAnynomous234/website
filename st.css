@@ -1,19 +1,9 @@
 :root {
   --sidebar-expanded: 200px;
-  --sidebar-collapsed: 60px;
+  --sidebar-collapsed: 70px;
   --speed: 0.3s;
   --accent: #26ff9a;
-  --bg-dark: #111;
-  --bg-hover: #1a1a1a;
-}
-
-/* ===========================
-   ICON ANIMATION
-=========================== */
-@keyframes icon-pop {
-  0% { transform: scale(1) rotate(0deg); }
-  50% { transform: scale(1.15) rotate(-20deg); }
-  100% { transform: scale(1) rotate(0deg); }
+  --bg-dark: #01190E;
 }
 
 /* ===========================
@@ -24,26 +14,24 @@
   inset: 7px auto 10px 10px;
   width: var(--sidebar-collapsed);
   background: var(--bg-dark);
-  border-radius: 12px;
-  border: 1px solid #333;
+  border-radius: 25px;
+  margin-bottom:10px;
+    margin-top:10px;
   overflow: hidden;
   opacity: 0.8;
   z-index: 1000;
   transition:
-    width var(--speed) ease,
-    background var(--speed) ease,
-    box-shadow var(--speed) ease;
+  width var(--speed) ease,
+  border-color var(--speed) ease,
+  box-shadow 0.75s ease;
 }
 
 .sidebar:hover {
   width: var(--sidebar-expanded);
-  background: var(--bg-hover);
   border-color: var(--accent);
-  box-shadow:
-    0 0 25px rgba(38,255,154,0.35),
-    inset 0 0 10px rgba(38,255,154,0.2);
+box-shadow: 0 10px 25px 10px #069D57;
+  
 }
-
 /* ===========================
    LIST RESET
 =========================== */
@@ -57,7 +45,7 @@
    LIST ITEMS (NO GAPS)
 =========================== */
 .sidebar li {
-  border-bottom: 1px solid #333;
+  margin-bottom:5px;
   cursor: pointer;
 }
 
@@ -74,7 +62,6 @@
   height: 54px;
   padding: 0 20px;
   gap: 15px;
-
   color: #fff;
   text-decoration: none;
   position: relative;
@@ -112,7 +99,6 @@
    HOVER STATE
 =========================== */
 .sidebar li a:hover {
-  background: #222;
   box-shadow:
     inset 0 0 0 1px var(--accent),
     0 0 12px rgba(38,255,154,0.6);
@@ -126,6 +112,7 @@
   text-align: center;
   font-size: 1.5em;
   transition:
+    rotate var(--speed) ease,  
     color var(--speed) ease,
     filter var(--speed) ease;
 }
@@ -133,7 +120,7 @@
 .sidebar li a:hover .icon {
   color: var(--accent);
   filter: drop-shadow(0 0 8px rgba(38,255,154,0.9));
-  animation: icon-pop 0.4s ease;
+  rotate:-15deg;
 }
 
 /* ===========================
@@ -163,15 +150,51 @@
     @keyframes sidebarIn {
       to {
         transform: translateX(0);
-        opacity: 0.8;
+        opacity: 0.7;
       }
     }
+    
+    .sidebar::before {
+  content: "CODELISTENER"; 
+  position: absolute;
+  top: 25px; 
+  left: 65px; 
+  font-family: 'Segoe UI', sans-serif;
+  font-weight: 900;
+  font-size: 1rem;
+  color: var(--accent);
+  opacity: 0;
+  text-shadow:0px 0px 10px #35F89D;
+  pointer-events: none;
+  white-space: nowrap;
+  transition: opacity var(--speed) ease, transform var(--speed) ease;
+  transform: translateX(-10px);
+}
+
+/* 3. Reveal the text when the sidebar expands */
+.sidebar:hover::before {
+  opacity: 1;
+  transform: translateX(0);
+}
 /* ===========================
    FONT AWESOME FIX
 =========================== */
+.fa-screwdriver-wrench {
+    font-family: "Font Awesome 6 Free" !important;
+    font-weight: 900 !important;
+    width: 40px;
+    text-align: center;
+    font-size: 1.5em;
+    display: inline-block;
+}
+.sidebar li a:hover .fa-screwdriver-wrench {
+    color: var(--accent);
+    filter: drop-shadow(0 0 8px rgba(38,255,154,0.9));
+    rotate:-15deg;
+}
 .fa-home::before     { content: "\f015"; }
 .fa-gamepad::before  { content: "\f11b"; }
 .fa-cog::before      { content: "\f013"; }
 .fa-globe::before    { content: "\f0ac"; }
 .fa-comments::before { content: "\f075"; }
-
+.fa-screwdriver-wrench::before { content: "\f7d9"; }
