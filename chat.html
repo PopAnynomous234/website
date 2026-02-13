@@ -549,7 +549,12 @@ const firebaseConfig = {
         const database = firebase.database();
 
 var PROTECTED_NAMES = ["Admin", "Staff", "Moderator", "Codelistener", "Boss", "owner"];
-var MASTER_KEY_B64 = "d2VydHl3ZXJ0eTMzMw==";
+
+// 🔐 SECURITY SETTINGS
+var SALT = "c9f1e7a4b2d8f6e3";
+var ITERATIONS = 100000; 
+var HASHED_MASTER_PASSWORD = "e9924cce72737fe77b88325857f5e9de860dcedbde88f1aff9585142e172a54b";
+
 var userPrivileges = "normal";
 var deviceFingerprint = ""; // Should be populated by FingerprintJS on load
         // === Global Variables ===
@@ -601,6 +606,38 @@ function startFingerprint() {
         setTimeout(startFingerprint, 500);
     }
 }
+async function hashPasswordPBKDF2(password) {
+
+    const enc = new TextEncoder();
+
+    const keyMaterial = await crypto.subtle.importKey(
+        "raw",
+        enc.encode(password),
+        { name: "PBKDF2" },
+        false,
+        ["deriveBits"]
+    );
+
+    const derivedBits = await crypto.subtle.deriveBits(
+        {
+            name: "PBKDF2",
+            salt: enc.encode(SALT),
+            iterations: ITERATIONS,
+            hash: "SHA-256"
+        },
+        keyMaterial,
+        256
+    );
+
+    const hashArray = Array.from(new Uint8Array(derivedBits));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+async function verifyPassword(inputPassword) {
+    const hashedInput = await hashPasswordPBKDF2(inputPassword);
+    return hashedInput === HASHED_MASTER_PASSWORD;
+}
+
 function showLocalSystemMessage(htmlContent, color) {
     const msgElem = document.createElement('div');
     // We only give it the 'mute-alert-log' ID if it's actually a mute message
@@ -780,69 +817,97 @@ function handleSecretCommands(text) {
     }
 
     if (command === '/mute') {
-        var targetName = args[1]; // The name after /mute
-       
-        if (!targetName) {
-            alert("Error: Please specify a name. Usage: /mute Username");
-            return true;
-        }
 
-        var mins = parseInt(args[2]) || 60;
-
-        // Search the registry for this name
-        database.ref('registry/' + targetName).once('value').then(function(snap) {
-            if (snap.exists()) {
-                var hwId = snap.val().hardwareId;
-                var expiry = Date.now() + (mins * 60000);
-
-                database.ref('hardware_mutes/' + hwId).set({
-                    expiry: expiry,
-                    mutedName: targetName
-                }).then(function() {
-                    alert("SUCCESS: " + targetName + " muted for " + mins + "m");
-                });
-            } else {
-                // This means the user hasn't joined since you added the Registry code
-                alert("User '" + targetName + "' not found in registry. They need to refresh/re-join first.");
-            }
-        });
-       
+    if (args.length < 2) {
+        alert("Usage: /mute Username [minutes]");
         return true;
     }
+
+    // Check if last argument is a number (minutes)
+    let mins = 60;
+    let lastArg = args[args.length - 1];
+
+    if (!isNaN(parseInt(lastArg))) {
+        mins = parseInt(lastArg);
+        args.pop(); // remove minutes from array
+    }
+
+    // Everything after /mute is the full username
+    var targetName = args.slice(1).join(' ').trim();
+
+    if (!targetName) {
+        alert("Error: Please specify a username.");
+        return true;
+    }
+
+    database.ref('registry/' + targetName).once('value').then(function(snap) {
+        if (snap.exists()) {
+            var hwId = snap.val().hardwareId;
+            var expiry = Date.now() + (mins * 60000);
+
+            database.ref('hardware_mutes/' + hwId).set({
+                expiry: expiry,
+                mutedName: targetName
+            }).then(function() {
+                alert("SUCCESS: " + targetName + " muted for " + mins + "m");
+            });
+        } else {
+            alert("User '" + targetName + "' not found in registry.");
+        }
+    });
+
+    return true;
+}
+
     if (command === '/unmute') {
-        var target = args[1];
-        if (!target) {
-            alert("Usage: /unmute Username");
-            return true;
+
+    var target = args.slice(1).join(' ').trim();
+
+    if (!target) {
+        alert("Usage: /unmute Username");
+        return true;
+    }
+
+    database.ref('registry/' + target).once('value').then(function(snap) {
+        if (snap.exists()) {
+            var hwId = snap.val().hardwareId;
+            database.ref('hardware_mutes/' + hwId).remove().then(function() {
+                alert(target + " has been unmuted.");
+            });
+        } else {
+            alert("User not found in registry.");
         }
+    });
 
-        database.ref('registry/' + target).once('value').then(function(snap) {
-            if (snap.exists()) {
-                var hwId = snap.val().hardwareId;
-                database.ref('hardware_mutes/' + hwId).remove().then(function() {
-                    alert(target + " has been unmuted.");
-                });
-            } else {
-                alert("User not found in registry.");
-            }
-        });
-        return true;
-    }
+    return true;
+}
 
-    // --- NEW: WHOIS COMMAND (Admin Diagnostic) ---
+
     if (command === '/whois') {
-        var target = args[1];
-        database.ref('registry/' + target).once('value').then(function(snap) {
-            if (snap.exists()) {
-                alert("User: " + target + "\nHardware ID: " + snap.val().hardwareId + "\nLast Seen: " + new Date(snap.val().timestamp).toLocaleString());
-            } else {
-                alert("No data for user: " + target);
-            }
-        });
-       
+
+    var target = args.slice(1).join(' ').trim();
+
+    if (!target) {
+        alert("Usage: /whois Username");
         return true;
-       
     }
+
+    database.ref('registry/' + target).once('value').then(function(snap) {
+        if (snap.exists()) {
+            alert(
+                "User: " + target +
+                "\nHardware ID: " + snap.val().hardwareId +
+                "\nLast Seen: " +
+                new Date(snap.val().timestamp).toLocaleString()
+            );
+        } else {
+            alert("No data for user: " + target);
+        }
+    });
+
+    return true;
+}
+
     // --- NEW: CLEAR CHAT COMMAND ---
     if (command === '/clear') {
         if (confirm("Are you sure you want to wipe all messages in " + currentRoomNameElem.textContent + "?")) {
@@ -924,128 +989,123 @@ function handleSecretCommands(text) {
     }
     return false;
 }
-function getOrCreateUsername() {
+async function getOrCreateUsername() {
+
     let storedUsername = localStorage.getItem('chatUsername');
-   
+
     if (!storedUsername) {
+
         let name = "";
         while (!name || name.trim() === "") {
             name = prompt("Please enter your chat username:");
         }
-        
-        // 1. Sanitize and Save
+
         storedUsername = name.trim().replace(/[.#$[\]]/g, '_');
         localStorage.setItem('chatUsername', storedUsername);
-        
-        // 2. Update Registry (Use the correct variable name: storedUsername)
+
         if (typeof database !== 'undefined') {
             database.ref('registry/' + storedUsername).set({
-                hardwareId: deviceFingerprint || "pending", 
+                hardwareId: deviceFingerprint || "pending",
                 timestamp: Date.now()
-            }).then(function() {
-                console.log("Registry updated for " + storedUsername);
             });
         }
     }
 
-// 1. Check if the name is in the protected list
-var isProtected = PROTECTED_NAMES.some(function(n) {
-    return n.toLowerCase() === storedUsername.toLowerCase();
-});
+    var isProtected = PROTECTED_NAMES.some(function(n) {
+        return n.toLowerCase() === storedUsername.toLowerCase();
+    });
 
-if (isProtected) {
-    // 2. CHECK: Are they already verified?
-    var alreadyVerified = localStorage.getItem('isAdminVerified') === 'true';
+    if (isProtected) {
 
-    if (!alreadyVerified) {
-        var pass = prompt('"' + storedUsername + '" has Admin Privileges. Password:');
-        if (pass !== atob(MASTER_KEY_B64)) {
-            alert("Wrong password. Access Denied.");
-            localStorage.removeItem('chatUsername'); 
-            location.reload(); 
-            return null;
+        var alreadyVerified = localStorage.getItem('isAdminVerified') === 'true';
+
+        if (!alreadyVerified) {
+
+            var pass = prompt('"' + storedUsername + '" has Admin Privileges. Password:');
+
+            if (!(await verifyPassword(pass))) {
+                alert("Wrong password. Access Denied.");
+                localStorage.removeItem('chatUsername');
+                location.reload();
+                return null;
+            }
+
+            localStorage.setItem('isAdminVerified', 'true');
         }
-        // 3. SET VERIFICATION: Only happens on successful password entry
-        localStorage.setItem('isAdminVerified', 'true');
+
+        userPrivileges = "admin";
+        localStorage.setItem('isAdmin', 'true');
+
+        const toolbar = document.getElementById('admin-toolbar');
+        if (toolbar) toolbar.style.display = 'block';
+
+    } else {
+
+        userPrivileges = "normal";
+        localStorage.removeItem('isAdmin');
+        localStorage.removeItem('isAdminVerified');
+
+        const toolbar = document.getElementById('admin-toolbar');
+        if (toolbar) toolbar.style.display = 'none';
     }
-
-    // Grant powers
-    userPrivileges = "admin";
-    localStorage.setItem('isAdmin', 'true');
-    const toolbar = document.getElementById('admin-toolbar');
-    if (toolbar) toolbar.style.display = 'block';
-
-} else {
-    // Not a protected name
-    userPrivileges = "normal";
-    localStorage.removeItem('isAdmin');
-    localStorage.removeItem('isAdminVerified'); // Clear verification
-    const toolbar = document.getElementById('admin-toolbar');
-    if (toolbar) toolbar.style.display = 'none';
-}
 
     return storedUsername;
 }
 
-function changeUsername() {
+
+async function changeUsername() {
+
     var newName = prompt("Enter your new username:");
-   
-    // 1. Basic validation
     if (!newName || newName.trim() === "") return;
+
     var sanitizedName = newName.trim().replace(/[.#$[\]]/g, '_');
 
-    // 2. Admin Check
     var isProtected = PROTECTED_NAMES.some(function(n) {
         return n.toLowerCase() === sanitizedName.toLowerCase();
     });
 
     if (isProtected) {
+
         var pass = prompt('"' + sanitizedName + '" has Admin Privileges. Password:');
-        if (pass !== atob(MASTER_KEY_B64)) {
+
+        if (!(await verifyPassword(pass))) {
             alert("Wrong password. Get Out!");
-            return; // Exit function
+            return;
         }
-        // If password is correct
+
         userPrivileges = "admin";
+        localStorage.setItem('isAdmin', 'true');
+
         if (document.getElementById('admin-toolbar')) {
             document.getElementById('admin-toolbar').style.display = 'block';
         }
+
     } else {
-        // If changing to a normal name, remove admin powers
+
         userPrivileges = "normal";
+        localStorage.removeItem('isAdmin');
+
         if (document.getElementById('admin-toolbar')) {
             document.getElementById('admin-toolbar').style.display = 'none';
         }
     }
 
-    // 3. Update Firebase Registry (Background Task)
     database.ref('registry/' + sanitizedName).set({
         hardwareId: deviceFingerprint,
         timestamp: Date.now()
-    }).then(function() {
-        console.log("Registry updated for " + sanitizedName);
     });
-if (isProtected) {
-        // ... (your existing password prompt logic)
-        localStorage.setItem('isAdmin', 'true');
-    } else {
-        userPrivileges = "normal";
-        localStorage.removeItem('isAdmin'); // REMOVE STATUS HERE
-        if (document.getElementById('admin-toolbar')) {
-            document.getElementById('admin-toolbar').style.display = 'none';
-        }
-    }
-    // 4. Update Local State
+
     currentUser = sanitizedName;
     localStorage.setItem('chatUsername', sanitizedName);
-    if (usernameDisplay) usernameDisplay.textContent = "Username: " + currentUser;
 
-    // 5. Refresh room presence
-    // We call switchRoom to tell the database we are here with the new name
+    if (usernameDisplay)
+        usernameDisplay.textContent = "Username: " + currentUser;
+
     switchRoom(currentRoomId, currentRoomNameElem.textContent);
-   
+
     alert("Username changed to " + sanitizedName);
 }
+
 
         function formatTimestamp(timestamp) {
             if (!timestamp) return 'n/a';
@@ -1590,16 +1650,23 @@ sendButton.addEventListener('click', async () => {
         }
 
 
-window.onload = () => {
-    // 1. Get the username immediately
-    currentUser = getOrCreateUsername();
+window.onload = async () => {
+
+    // 1️⃣ WAIT for username (THIS FIXES EVERYTHING)
+    currentUser = await getOrCreateUsername();
+
+    if (!currentUser) return; // Stop if access denied
+
     usernameDisplay.textContent = `Username: ${currentUser}`;
 
-    // 2. RESTORE ADMIN STATUS IMMEDIATELY
+    // 2️⃣ Restore admin UI properly
     if (localStorage.getItem('isAdmin') === 'true') {
-        var isProtected = PROTECTED_NAMES.some(n => n.toLowerCase() === currentUser.toLowerCase());
+        const isProtected = PROTECTED_NAMES.some(
+            n => n.toLowerCase() === currentUser.toLowerCase()
+        );
+
         if (isProtected) {
-            userPrivileges = "admin"; // This is the most important line
+            userPrivileges = "admin";
             const toolbar = document.getElementById('admin-toolbar');
             if (toolbar) toolbar.style.display = 'block';
             console.log("Admin session restored.");
@@ -1609,23 +1676,26 @@ window.onload = () => {
         }
     }
 
-    // 3. Start Security ID & Room Logic
+    // 3️⃣ Start fingerprint AFTER username exists
     startFingerprint();
-   
-    // We use a small delay for Firebase and Fingerprint initialization
-    setTimeout(() => {
+
+    // 4️⃣ Initialize rooms AFTER username is ready
+    setTimeout(async () => {
+
         console.log("System: Initializing Room Display...");
-        fetchAndDisplayRooms();
-       
+        await fetchAndDisplayRooms();
+
         console.log("System: Joining Public Channel...");
-        switchRoom('public_channel', '🌐 Public Channel');
-       
-        // Also check if the user is currently hardware muted
+        await switchRoom('public_channel', '🌐 Public Channel');
+
         checkMuteStatus();
-    }, 1000);
+
+    }, 500);
 };
+
         // Add this to your send
     </script>
+    <script src="about.js"></script>
 <script src="era4.js"></script>
 <script src="era5.js"></script>
 <script src="pe.js"></script>
