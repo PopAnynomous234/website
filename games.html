@@ -359,24 +359,16 @@ h1 {
     let favorites = JSON.parse(localStorage.getItem('myFavGames')) || [];
     const container = document.getElementById('card-container');
 
+    // 1. A-Z Sorting Function
     function sortCardsAlphabetically() {
-    const cards = Array.from(document.querySelectorAll('.game-card'));
-    
-    cards.sort((a, b) => {
-        const titleA = a.querySelector('h2').innerText.toLowerCase().trim();
-        const titleB = b.querySelector('h2').innerText.toLowerCase().trim();
-
-        // 1. Force "ugs" to the absolute top left
-        if (titleA === "ugs") return -1; 
-        if (titleB === "FNAF World") return 1;
-
-        // 2. Sort everyone else A-Z
-        return titleA.localeCompare(titleB);
-    });
-
-    // 3. Re-attach to DOM in the new order
-    cards.forEach(card => container.appendChild(card));
-}
+        const cards = Array.from(document.querySelectorAll('.game-card'));
+        cards.sort((a, b) => {
+            const titleA = a.querySelector('h2').innerText.toLowerCase();
+            const titleB = b.querySelector('h2').innerText.toLowerCase();
+            return titleA.localeCompare(titleB);
+        });
+        cards.forEach(card => container.appendChild(card));
+    }
 
     // 2. Intersection Observer (Lazy Loading)
     const lazyLoadObserver = new IntersectionObserver((entries, observer) => {
@@ -425,39 +417,48 @@ h1 {
         updateDisplay();
     }
 
-   // 5. Initialize: Wait for cards, then Sort, Tag, and Observe
-   const initInterval = setInterval(() => {
-        const cards = document.querySelectorAll('.game-card');
-        if (cards.length > 0) {
-            clearInterval(initInterval);
+    const containerObserver = new MutationObserver((mutations) => {
+    // Check if new nodes were added
+    const cards = document.querySelectorAll('.game-card');
+    if (cards.length > 0) {
+        // Disconnect briefly to prevent infinite loop when we append sorted cards
+        containerObserver.disconnect();
 
-            // First, Sort A-Z
-            sortCardsAlphabetically();
+        // 1. Sort A-Z
+        sortCardsAlphabetically();
 
-            // Then, set up Hearts, Tags, and Observer
-            document.querySelectorAll('.game-card').forEach(card => {
-                const title = card.querySelector('h2').innerText;
-                
-                // --- NEW TAG LOGIC ---
-                // Find this game in the 'games' array from era10.js
-                if (typeof games !== 'undefined') {
-                    const gameData = games.find(g => g.title === title);
-                    // If the game exists in JSON and has a 'type' defined
-                    if (gameData && gameData.type && !card.querySelector('.type-tag')) {
-                        const tag = document.createElement('div');
-                        tag.className = 'type-tag';
-                        tag.innerText = gameData.type;
-                        card.appendChild(tag);
-                    }
-                }
+        // 2. Refresh Hearts and Observers
+        document.querySelectorAll('.game-card').forEach(card => {
+            const title = card.querySelector('h2').innerText;
+            
+            // Add Heart Button if it doesn't exist
+            if (!card.querySelector('.fav-btn')) {
+                const heart = document.createElement('i');
+                heart.className = `fas fa-heart fav-btn ${favorites.includes(title) ? 'active' : ''}`;
+                heart.onclick = (e) => {
+                    e.stopPropagation();
+                    toggleFav(title, heart);
+                };
+                card.appendChild(heart);
+            }
 
-                // Start observing for lazy load
-                lazyLoadObserver.observe(card);
-            });
+            // Start observing for lazy load animation
+            lazyLoadObserver.observe(card);
+        });
 
-            updateDisplay();
-        }
-    }, 500);
+        updateDisplay();
+
+        // Reconnect to watch for any future games being added
+        observeContainer();
+    }
+});
+
+function observeContainer() {
+    containerObserver.observe(container, { childList: true });
+}
+
+// Start watching the container
+observeContainer();
 
     // 6. UI Events
     document.getElementById('gameSearch').addEventListener('input', updateDisplay);
