@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <title>Game Selection</title>
-                    <link rel="stylesheet" href="st.css">
+    <link rel="stylesheet" href="st.css">
     <style>
     body {
         background-color: black;
@@ -214,7 +214,6 @@ h1 {
     background: #26FF9A;
     color: black;
 }
-/* Animation for Lazy Loading */
 .game-card {
     opacity: 0;
     transform: translateY(20px);
@@ -225,6 +224,52 @@ h1 {
     opacity: 1;
     transform: translateY(0);
 }
+
+/* The Type Tag Style */
+.type-tag {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: rgba(0, 0, 0, 0.6); 
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+    color: #26FF9A; 
+    border: 1px solid rgba(38, 255, 154, 0.5);
+    font-size: 13px;
+    font-weight: bold;
+    padding: 5px 10px;
+    border-radius: 6px;
+    text-transform: uppercase;
+    z-index: 15;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    pointer-events: none;
+}
+
+
+.view-counter {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid #26FF9A;
+    color: #26FF9A;
+    font-weight: bold;
+    font-family: monospace;
+    padding: 2px 6px;
+    border-radius: 12px;
+    font-size: 10px;
+    z-index: 20;
+}
+
+.view-counter i {
+    font-size: 10px; /* Eye smaller */
+}
+
+
+
     </style>
 </head>
 <body>
@@ -237,6 +282,7 @@ h1 {
             <span class="text">Home</span>
           </a>
         </li>
+      
         <li>
           <a href="ai.html">
             <i class="fas fa-robot icon"></i>
@@ -300,8 +346,8 @@ h1 {
     <div id="game-container">
     </div>
 
-<script src="about.js"></script>
-<script src="era10.js"></script>
+
+<script type="module" src="era10.js"></script>
 <script src="era4.js"></script>
 <script src="era5.js"></script>
 <script src="pe.js"></script>
@@ -313,16 +359,24 @@ h1 {
     let favorites = JSON.parse(localStorage.getItem('myFavGames')) || [];
     const container = document.getElementById('card-container');
 
-    // 1. A-Z Sorting Function
     function sortCardsAlphabetically() {
-        const cards = Array.from(document.querySelectorAll('.game-card'));
-        cards.sort((a, b) => {
-            const titleA = a.querySelector('h2').innerText.toLowerCase();
-            const titleB = b.querySelector('h2').innerText.toLowerCase();
-            return titleA.localeCompare(titleB);
-        });
-        cards.forEach(card => container.appendChild(card));
-    }
+    const cards = Array.from(document.querySelectorAll('.game-card'));
+    
+    cards.sort((a, b) => {
+        const titleA = a.querySelector('h2').innerText.toLowerCase().trim();
+        const titleB = b.querySelector('h2').innerText.toLowerCase().trim();
+
+        // 1. Force "ugs" to the absolute top left
+        if (titleA === "ugs") return -1; 
+        if (titleB === "FNAF World") return 1;
+
+        // 2. Sort everyone else A-Z
+        return titleA.localeCompare(titleB);
+    });
+
+    // 3. Re-attach to DOM in the new order
+    cards.forEach(card => container.appendChild(card));
+}
 
     // 2. Intersection Observer (Lazy Loading)
     const lazyLoadObserver = new IntersectionObserver((entries, observer) => {
@@ -371,8 +425,8 @@ h1 {
         updateDisplay();
     }
 
-    // 5. Initialize: Wait for era10.js, then Sort, Tag, and Observe
-    const initInterval = setInterval(() => {
+   // 5. Initialize: Wait for cards, then Sort, Tag, and Observe
+   const initInterval = setInterval(() => {
         const cards = document.querySelectorAll('.game-card');
         if (cards.length > 0) {
             clearInterval(initInterval);
@@ -380,19 +434,21 @@ h1 {
             // First, Sort A-Z
             sortCardsAlphabetically();
 
-            // Then, set up Hearts and Observer
+            // Then, set up Hearts, Tags, and Observer
             document.querySelectorAll('.game-card').forEach(card => {
                 const title = card.querySelector('h2').innerText;
                 
-                // Add Heart Button if it doesn't exist
-                if (!card.querySelector('.fav-btn')) {
-                    const heart = document.createElement('i');
-                    heart.className = `fas fa-heart fav-btn ${favorites.includes(title) ? 'active' : ''}`;
-                    heart.onclick = (e) => {
-                        e.stopPropagation();
-                        toggleFav(title, heart);
-                    };
-                    card.appendChild(heart);
+                // --- NEW TAG LOGIC ---
+                // Find this game in the 'games' array from era10.js
+                if (typeof games !== 'undefined') {
+                    const gameData = games.find(g => g.title === title);
+                    // If the game exists in JSON and has a 'type' defined
+                    if (gameData && gameData.type && !card.querySelector('.type-tag')) {
+                        const tag = document.createElement('div');
+                        tag.className = 'type-tag';
+                        tag.innerText = gameData.type;
+                        card.appendChild(tag);
+                    }
                 }
 
                 // Start observing for lazy load
