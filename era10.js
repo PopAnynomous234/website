@@ -1,3 +1,25 @@
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+import { 
+  getDatabase, 
+  ref, 
+  runTransaction, 
+  onValue 
+} from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDB2GVl8AdhQF-XMWSU3JvQ05Kb5Gp424s",
+  authDomain: "chat-283f4.firebaseapp.com",
+  databaseURL: "https://chat-283f4-default-rtdb.firebaseio.com",
+  projectId: "chat-283f4",
+  storageBucket: "chat-283f4.firebasestorage.app",
+  messagingSenderId: "585084707472",
+  appId: "1:585084707472:web:328cc1e40654787e1eee15",
+  measurementId: "G-0EP9CX2LX7"
+};
+
+const app = initializeApp(firebaseConfig);
+const database = getDatabase(app);
+console.log("era10.js loaded");
 // ====================
 // Configuration for jsDelivr CDN
 // ====================
@@ -897,22 +919,53 @@ const fullscreenIframe = document.getElementById('fullscreen-iframe');
 /**
  * Generates game cards based on the 'games' array.
  */
-function generateCards() {
-    cardContainer.innerHTML = '';
-    games.forEach(game => {
-        const gameCard = document.createElement('div');
-        gameCard.className = 'game-card';
-        // Store the relative game file path
-        gameCard.dataset.url = game.url; 
-        gameCard.innerHTML = `
+async function generateCards() {
+    const container = document.getElementById('card-container');
+    container.innerHTML = '';
+
+    for (const game of games) {
+        const gameId = game.url.replace('.html','');
+        const gameRef = ref(database, "gameViews/" + gameId);
+
+        // Get view count
+        const count = await new Promise(resolve => {
+            onValue(gameRef, snapshot => {
+                resolve(snapshot.exists() ? snapshot.val() : 0);
+            }, { onlyOnce: true });
+        });
+
+        const card = document.createElement('div');
+        card.className = 'game-card';
+        card.dataset.url = game.url;
+
+        card.innerHTML = `
             <img src="${game.image}" alt="${game.title}">
             <h2>${game.title}</h2>
+            ${game.type ? `<div class="type-tag">${game.type}</div>` : ''}
+            <div class="view-counter"><i class="fas fa-eye"></i> <span class="count">${count}</span></div>
         `;
-        gameCard.addEventListener('click', openGameInFullscreen);
-        cardContainer.appendChild(gameCard);
-    });
-}
 
+        // Observe for animation
+        lazyLoadObserver.observe(card);
+
+        // Click handler → loader.html
+        card.addEventListener('click', async () => {
+            await runTransaction(gameRef, (current) => (current||0)+1)
+            .then(()=> {
+                const counter = card.querySelector('.count');
+                counter.style.transform = 'scale(1.3)';
+                counter.style.transition = 'transform 0.2s ease';
+                setTimeout(()=> counter.style.transform='scale(1)',200);
+            });
+            sessionStorage.setItem('currentGameUrl', JSDELIVR_BASE_URL + game.url);
+            window.location.href = 'loader.html';
+        });
+
+        container.appendChild(card);
+    }
+
+    updateDisplay();
+}
 /**
  * Constructs the full jsDelivr URL, stores it in sessionStorage, and redirects
  * to the loader page.
@@ -969,11 +1022,4 @@ document.addEventListener('fullscreenchange', function() {
     }
 });
 
-// ====================
-// Initialization
-// ====================
-
-window.onload = () => {
-    // loadSettings(); // Uncomment if you are using the loadSettings function
     generateCards();
-};
