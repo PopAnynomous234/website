@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -29,11 +30,11 @@
     /* ---------- Game Container ---------- */
   /* Game Container */
   #game-container {
-  margin-top: 30px;
-  width: 1000px;
+  margin-top: 5px;
+  width: 90vw;
   opacity:1 !important;
   visibility:visible !important;
-  height: 600px;
+  height: 90vh;
   background-color: #111;
   border: 2px solid #26FF9A;
   border-radius: 15px;
@@ -120,61 +121,6 @@
   cursor: pointer;
   transition: 0.2s;
 }
-
-/* Container to hold sidebars + game */
-.game-layout {
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    gap: 20px;
-    width: 100%;
-    margin-top: 30px;
-}
-
-/* Make sure sidebars stay 160px wide */
-.sidebar1 {
-    width: 160px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    padding-top: 10px;
-}
-
-/* Adjust the game container to NOT have a top margin anymore 
-   since the layout container handles it */
-#game-container {
-    margin-top: 0 !important; 
-    flex-shrink: 0; /* Prevents the game from getting squished */
-}
-
-.game-card {
-    background: #1a1a1a;
-    border-radius: 8px;
-    overflow: hidden;
-    cursor: pointer;
-    transition: 0.2s;
-    border: 1px solid #333;
-}
-
-.game-card:hover {
-    transform: scale(1.03);
-    border-color: #26ff9a;
-}
-
-.game-card img {
-    width: 100%;
-    aspect-ratio: 16/9;
-    object-fit: cover;
-    display: block;
-}
-
-.game-card h3 {
-    color: white;
-    font-size: 11px;
-    margin: 5px;
-    text-align: center;
-    font-family: sans-serif;
-}
   </style>
 </head>
 
@@ -195,7 +141,6 @@
 
   <!-- Game Container -->
    <div class="game-layout">
-    <div id="left-sidebar" class="sidebar1"></div>
   <div id="game-container">
     <iframe 
       id="game-iframe" 
@@ -210,7 +155,6 @@
       </svg>
     </button>
   </div>
-  <div id="right-sidebar" class="sidebar1"></div>
 </div>
 
   <!-- Iframe Navigation -->
@@ -282,8 +226,8 @@
         if (iframeNav) iframeNav.style.display = 'flex';
 
         // 1. Reset Container Dimensions
-        gameContainer.style.width = "1000px";
-        gameContainer.style.height = "600px";
+        gameContainer.style.width = "90vw";
+        gameContainer.style.height = "80vh";
         gameContainer.style.transform = "none";
         
         // 2. FORCE REDRAW (The fix for the disappearing iframe)
@@ -299,38 +243,11 @@
     });
     }); // Fixed the missing closing brace and parenthesis here!
   </script>
-
-<script src="./era10.js"></script>
-<script>
-  window.addEventListener('load', () => {
-    const leftSidebar = document.getElementById('left-sidebar');
-    const rightSidebar = document.getElementById('right-sidebar');
-    const BASE_URL = `https://cdn.jsdelivr.net/gh/PopAnynomous234/Goodboy@main/`;
-
-    if (typeof games !== 'undefined' && leftSidebar && rightSidebar) {
-      leftSidebar.innerHTML = '';
-      rightSidebar.innerHTML = '';
-      const randomTen = [...games].sort(() => 0.5 - Math.random()).slice(0, 10);
-
-      randomTen.forEach((game, index) => {
-        const card = document.createElement('div');
-        card.className = 'game-card';
-        card.innerHTML = `<img src="${game.image}"><h3>${game.title}</h3>`;
-        card.onclick = () => {
-          sessionStorage.setItem('currentGameUrl', BASE_URL + game.url);
-          window.location.reload(); 
-        };
-        (index < 5 ? leftSidebar : rightSidebar).appendChild(card);
-      });
-    }
-  });
-</script>
   <!-- Extra Scripts -->
   <script src="about.js"></script>
   <script src="era4.js"></script>
   <script src="era5.js"></script>
   <script src="pe.js"></script>
-  <script src="era10.js"></script>
   <script src="warn.js"></script>
   <script src="cursor.js"></script>
   <script src="widget.js"></script>
