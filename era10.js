@@ -233,11 +233,6 @@ const games = [
         url: "capybaraclicker.html"
     },
     {
-        title: "Archer Random",
-        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTOX8mPU6IEjGZi9DIa2ETXqriMdPjEw6sPpQ&s", 
-        url: "archerrandom.html"
-    },
-    {
         title: "Stickman Duel",
         image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQFTNe_kQzXFhS29sd9ab-iLpDxZy7yl2NHtA&s", 
         url: "stickmanduel.html"
@@ -271,11 +266,6 @@ const games = [
         title: "Car King Arena",
         image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR2DN6XweHTtDX6MunzbJBvUHJ8c4vJKuoOiw&s", 
         url: "carkingarena.html"
-    },
-    {
-        title: "Gemetry Vibes X-Arrow",
-        image: "https://cdn.jsdelivr.net/gh/PopAnynomous234/goodboy/99423a2819a14804a12f30557091d567-1280x720.jpg", 
-        url: "geometryvibes.html"
     },
     {
         title: "Google Dino",
@@ -733,16 +723,6 @@ const games = [
         url: "pepsiman.html"
     },
     {
-        title: "Cricket Legends",
-        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSaP04JrAe497L7vgFtwJ4fMOmTgf__Q-PyCA&s", 
-        url: "cricket.html"
-    },
-    {
-        title: "City Driver",
-        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSJh3tTVcsDa2MCvuLkDEWQFJfRAmneXXUNuA&s", 
-        url: "citydriver.html"
-    },
-        {
         title: "FNAF 2",
         image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT3wghs5HzMbAW9gkmS3Nkc5wNkY4pdzeSFWw&s",
         url: "fnaf2.html"
@@ -873,13 +853,8 @@ const games = [
         url: "wrestlebros.html"
     },
     {
-        title: "Geometry Vibes",
-        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSmkJllI-wE8T0q92etiav74apIKDHAyxSVnA&s",
-        url: "geo.html"
-    },
-    {
         title: "3 Dash (FIXED)",
-        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSmkJllI-wE8T0q92etiav74apIKDHAyxSVnA&s",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT9aIyH4UIZtEXCjJCnGNVbjMBIRZROk6hNdQ&s",
         url: "3dash.html"
     },
     {
@@ -893,17 +868,36 @@ const games = [
         url: "blockpig.html"
     },
     {
-        title: "Geometry Arrow (IDK)",
-        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQfKVTtY3_mCF3F88Q6YigvRXIw7xbFD--RKw&s",
-        url: "geometrya.html"
-    },
-    {
         title: "Marble Race",
         image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS0dJ9UR-tKm_MDcHeshIaHB7M0NDBhVyxZCQ&s",
         url: "marbler.html"
+    },
+    {
+        title: "Block Blast",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSPeDHw2ZglbHYznFItvZ3T3I0aI-_aySuXsg&s",
+        url: "blockblast.html"
+    },
+    {
+        title: "Brawl Stars",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTXyvxgz9hdlDbimAoCEbDe7gIy2q3YEpNu1Q&s",
+        url: "brawl.html"
+    },
+    {
+        title: "2PlayerGames.org",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTa2b2-Mv6owfqjeOQU6IUwg4mpP2X328QxiQ&s",
+        url: "2player.html"
+    },
+    {
+        title: "99 Nights in the forest",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTmBAWM38pvyW1KbRrIq2Xqn1LhQkfonZ7mIw&s",
+        url: "99nights.html"
+    },
+        {
+        title: "Geometry Dash Subzero",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRgfwAxV9ehfW5YL1mtacnfvlJUsiXQGjw1Pw&s",
+        url: "geometryd.html"
     }
 ];
-
 // ====================
 // DOM Elements
 // ====================

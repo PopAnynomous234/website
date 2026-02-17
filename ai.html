@@ -1,88 +1,286 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
-  <link rel="stylesheet" href="ai.css" />
-  <link rel="stylesheet" href="st.css">
-  <link rel="stylesheet" href="styles.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  <title>Codelistener AI</title>
-</head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="st.css">
+    <link rel="stylesheet" href="styles.css">    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify/dist/purify.min.js"></script>
 
+<style>
+    :root {
+        --primary: #26ff9a;
+        --bg: #0f0f0f;
+        --surface: #1a1a1a;
+        --user-bubble: #252525;
+        --text: #e0e0e0;
+    }
+
+    * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+
+    /* The Floating Container */
+    #chat-widget {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 90%;
+        height: 95%;
+        background-color: var(--bg);
+        color: var(--text);
+        display: flex;
+        flex-direction: column;
+        border-radius: 15px;
+        border: 1px solid #333;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 10px var(--primary);
+        z-index: 5;
+        overflow: hidden;
+    }
+
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 10px; }
+
+    header {
+        padding: 15px;
+        background: var(--surface);
+        border-bottom: 1px solid #333;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .show { display: block !important; }
+
+    #chat-container {
+        flex: 1;
+        overflow-y: auto;
+        padding: 15px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .msg {
+        max-width: 85%;
+        padding: 10px 14px;
+        border-radius: 12px;
+        line-height: 1.4;
+        font-size: 14px;
+        word-wrap: break-word;
+    }
+
+    .msg.user {
+        align-self: flex-end;
+        background: var(--user-bubble);
+        border-bottom-right-radius: 2px;
+        border-right: 2px solid var(--primary);
+    }
+
+    .msg.model {
+        align-self: flex-start;
+        background: var(--surface);
+        border-bottom-left-radius: 2px;
+    }
+
+    .input-area {
+        padding: 15px;
+        background: var(--surface);
+        display: flex;
+        gap: 8px;
+    }
+
+    input {
+        flex: 1;
+        background: #111;
+        border: 1px solid #333;
+        color: white;
+        padding: 10px;
+        border-radius: 8px;
+        outline: none;
+        font-size: 14px;
+    }
+
+    button#send-btn {
+        background: var(--primary);
+        border: none;
+        color: black;
+        padding: 0 15px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: bold;
+    }
+
+    .clear-btn {
+        background: transparent;
+        color: #666;
+        border: none;
+        cursor: pointer;
+        font-size: 11px;
+        text-decoration: underline;
+    }
+</style>
+</head>
 <body>
-<div class="sidebar">
-  <img src="https://cdn.jsdelivr.net/gh/PopAnynomous234/assets/logo.png" width=70px height=70px alt="logo">
-      <ul>
-          <li>
-          <a href="index.html">
-            <i class="fas fa-home icon"></i>
-            <span class="text">Home</span>
-          </a>
-        </li>
-        <li>
-          <a href="ai.html">
-            <i class="fas fa-robot icon"></i>
-            <span class="text">AI</span>
-          </a>
-        </li>
-        <li>
-          <a href="tools.html">
-        <i class="fa-solid fa-screwdriver-wrench"></i>
-            <span class="text">Tools</span>
-          </a>
-        </li>
-        <li>
-          <a href="games.html">
-            <i class="fas fa-gamepad icon"></i>
-            <span class="text">Games</span>
-          </a>
-        </li>
-              <li>
-          <a href="music.html">
-            <i class="fas fa-music icon"></i>
-            <span class="text">Music</span>
-          </a>
-        </li>
+    <div class="sidebar">
+        <img src="https://cdn.jsdelivr.net/gh/PopAnynomous234/assets/logo.png" width=70px height=70px alt="logo">
+            <ul>
                 <li>
-          <a href="chat.html">
-            <i class="fa-regular fa-comment icon"></i>
-            <span class="text">Chat</span>
-          </a>
-        </li>
-        <li>
-          <a href="settings.html">
-            <i class="fas fa-cog icon"></i>
-            <span class="text">Settings</span>
-          </a>
-        </li>
-      </ul>
-    </div>
-    <div class="codlk">
-      <div class="app">
-        <div class="chat">
-          <button id="reset-chat" class="reset-btn" title="Reset chat" aria-label="Reset chat"><i class="fa fa-refresh" aria-hidden="true"></i> Reset</button>
-          <div class="intro" id="intro"><h1>Ask me anything! Literally Anything!</h1></div>
-          <div class="scroll" id="scroll" aria-live="polite"></div>
-        </div>
-  
-        <div class="footer">
-          <div class="input-row">
-            <input id="prompt" class="input" placeholder="Message AI. Dont abuse the chatbot..." autocomplete="off" />
-            <button id="send" class="send" title="Send" aria-label="Send message">↑</button>
+                <a href="index.html">
+                  <i class="fas fa-home icon"></i>
+                  <span class="text">Home</span>
+                </a>
+              </li>
+              <li>
+                <a href="ai.html">
+                  <i class="fas fa-robot icon"></i>
+                  <span class="text">AI</span>
+                </a>
+              </li>
+              <li>
+                <a href="tools.html">
+                    <i class="fa-solid fa-screwdriver-wrench"></i>
+                  <span class="text">Tools</span>
+                </a>
+              </li>
+              <li>
+                <a href="games.html">
+                  <i class="fas fa-gamepad icon"></i>
+                  <span class="text">Games</span>
+                </a>
+              </li>
+                    <li>
+                <a href="music.html">
+                  <i class="fas fa-music icon"></i>
+                  <span class="text">Music</span>
+                </a>
+              </li>
+                      <li>
+                <a href="chat.html">
+                  <i class="fa-regular fa-comment icon"></i>
+                  <span class="text">Chat</span>
+                </a>
+              </li>
+              <li>
+                <a href="settings.html">
+                  <i class="fas fa-cog icon"></i>
+                  <span class="text">Settings</span>
+                </a>
+              </li>
+            </ul>
           </div>
-        </div>
-      </div>
+<div id="chat-widget">
+    <header>
+        <button class="clear-btn" onclick="clearChat()">Clear</button>
+    </header>
+
+    <div id="chat-container"></div>
+
+    <div class="input-area">
+        <input type="text" id="prompt-input" placeholder="Type..." onkeydown="if(event.key==='Enter') sendMessage()">
+        <button id="send-btn" onclick="sendMessage()">Send</button>
     </div>
-  
-    <script src="widget.js"></script>
-  <script src="about.js"></script>
-<script src="era4.js"></script>
-<script src="era5.js"></script>
-<script src="pe.js"></script>
-<script src="warn.js"></script>
-<script src="cursor.js"></script>
-<script type="module" src="ai.js"></script>
+</div>
+
+<script>
+// YOUR DEPLOYED GOOGLE PROXY URL
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxJuTi1kjlVIFsdBHZis_pp-AXwSaxxa6hmgmM8zOXbevupfl42wugnPLt9J_7CxywH/exec";
+
+let chatHistory = JSON.parse(localStorage.getItem('gemini_chat_store')) || [];
+let currentTopic = 'general';
+
+window.onload = () => {
+    const container = document.getElementById('chat-container');
+    chatHistory.forEach(msg => {
+        const div = appendMessage(msg.role, "");
+        div.innerHTML = DOMPurify.sanitize(marked.parse(msg.text)); // Load history instantly
+    });
+    container.scrollTop = container.scrollHeight;
+};
+
+function appendMessage(role, text) {
+    const container = document.getElementById('chat-container');
+    const msgDiv = document.createElement('div');
+    msgDiv.className = `msg ${role}`;
+    msgDiv.innerHTML = text;
+    container.appendChild(msgDiv);
+    container.scrollTop = container.scrollHeight;
+    return msgDiv;
+}
+
+// THE TYPEWRITER ENGINE
+async function typeWriter(text, element) {
+    let displayedText = "";
+    const speed = 2; // Speed in milliseconds (lower = faster)
+
+    for (let i = 0; i < text.length; i++) {
+        displayedText += text.charAt(i);
+        // We re-parse Markdown on every letter so bold/code blocks appear correctly
+        element.innerHTML = DOMPurify.sanitize(marked.parse(displayedText));
+        document.getElementById('chat-container').scrollTop = document.getElementById('chat-container').scrollHeight;
+        await new Promise(resolve => setTimeout(resolve, speed));
+    }
+}
+
+async function sendMessage() {
+    const input = document.getElementById('prompt-input');
+    const btn = document.getElementById('send-btn');
+    const message = input.value.trim();
+
+    if (!message || btn.disabled) return;
+
+    // UI: Add User Message
+    appendMessage('user', message);
+    chatHistory.push({ role: 'user', text: message });
+    localStorage.setItem('gemini_chat_store', JSON.stringify(chatHistory));
+    
+    input.value = '';
+    btn.disabled = true;
+
+    // UI: Add Placeholder for AI
+    const modelDiv = appendMessage('model', "<i>Typing...</i>");
+
+    try {
+        const response = await fetch(SCRIPT_URL, {
+            method: 'POST',
+            mode: 'cors',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({ message: message }),
+            redirect: 'follow'
+        });
+
+        const data = await response.json();
+        const aiText = data.choices[0].message.content;
+
+        // Trigger the Typewriter Effect
+        modelDiv.innerHTML = ""; // Clear the "Typing..." placeholder
+        await typeWriter(aiText, modelDiv);
+        
+        chatHistory.push({ role: 'model', text: aiText });
+        localStorage.setItem('gemini_chat_store', JSON.stringify(chatHistory));
+
+    } catch (e) {
+        console.error(e);
+        modelDiv.innerHTML = "⚠️ Error: Check your Google Script deployment.";
+    } finally {
+        btn.disabled = false;
+    }
+}
+
+function toggleDropdown() { document.getElementById("topic-dropdown").classList.toggle("show"); }
+function selectTopic(id, name) {
+    currentTopic = id;
+    document.getElementById("current-topic-text").textContent = name;
+    toggleDropdown();
+}
+function clearChat() {
+    if (confirm("Clear all history?")) {
+        localStorage.removeItem('gemini_chat_store');
+        chatHistory = [];
+        document.getElementById('chat-container').innerHTML = '';
+    }
+}
+</script>
+
 </body>
 </html>
