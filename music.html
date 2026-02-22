@@ -72,7 +72,56 @@
         /* --- Row Layout --- */
         .row { margin: 30px 0 30px 100px; padding-left: 4%; }
         .row-title { font-size: 22px; margin-bottom: 15px; color: #fff; font-weight: 700; }
-        .track-container { display: flex; overflow-x: auto; gap: 15px; padding-bottom: 20px; scrollbar-width: none; }
+
+        /* --- Scroll Wrapper --- */
+        .scroll-wrapper {
+            position: relative;
+        }
+
+        .scroll-arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 10;
+            background: rgba(10, 10, 10, 0.85);
+            border: 1px solid rgba(38, 255, 154, 0.4);
+            color: var(--mint);
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 16px;
+            transition: 0.25s;
+            backdrop-filter: blur(8px);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .scroll-wrapper:hover .scroll-arrow {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .scroll-arrow:hover {
+            background: rgba(38, 255, 154, 0.15);
+            border-color: var(--mint);
+            box-shadow: 0 0 12px rgba(38, 255, 154, 0.4);
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .scroll-arrow.left { left: -20px; }
+        .scroll-arrow.right { right: 10px; }
+
+        .scroll-arrow.hidden {
+            opacity: 0 !important;
+            pointer-events: none !important;
+        }
+
+        .track-container { display: flex; overflow-x: auto; gap: 15px; padding-bottom: 20px; scrollbar-width: none; scroll-behavior: smooth; }
+        .track-container::-webkit-scrollbar { display: none; }
         
         .track-card {
             flex: 0 0 220px; aspect-ratio: 1/1; background: var(--card-bg);
@@ -144,17 +193,29 @@
 
     <div class="row" id="fav-row" style="display: none;">
         <div class="row-title" style="color: var(--mint);">❤ My List</div>
-        <div class="track-container" id="favorites-container"></div>
+        <div class="scroll-wrapper">
+            <button class="scroll-arrow left" onclick="scrollRow('favorites-container', -1)"><i class="fas fa-chevron-left"></i></button>
+            <div class="track-container" id="favorites-container"></div>
+            <button class="scroll-arrow right" onclick="scrollRow('favorites-container', 1)"><i class="fas fa-chevron-right"></i></button>
+        </div>
     </div>
 
     <div class="row">
         <div class="row-title">Global Trending</div>
-        <div class="track-container" id="trending-container"></div>
+        <div class="scroll-wrapper">
+            <button class="scroll-arrow left hidden" id="trending-arrow-left" onclick="scrollRow('trending-container', -1)"><i class="fas fa-chevron-left"></i></button>
+            <div class="track-container" id="trending-container"></div>
+            <button class="scroll-arrow right" id="trending-arrow-right" onclick="scrollRow('trending-container', 1)"><i class="fas fa-chevron-right"></i></button>
+        </div>
     </div>
 
     <div class="row" id="search-row" style="display: none;">
         <div class="row-title">Search Results</div>
-        <div class="track-container" id="search-container"></div>
+        <div class="scroll-wrapper">
+            <button class="scroll-arrow left hidden" id="search-arrow-left" onclick="scrollRow('search-container', -1)"><i class="fas fa-chevron-left"></i></button>
+            <div class="track-container" id="search-container"></div>
+            <button class="scroll-arrow right" id="search-arrow-right" onclick="scrollRow('search-container', 1)"><i class="fas fa-chevron-right"></i></button>
+        </div>
     </div>
 
     <div class="player-bar">
@@ -191,6 +252,40 @@
     const audio = document.getElementById('mainAudio');
     let currentTrackData = null;
     let favorites = JSON.parse(localStorage.getItem('cl-favs')) || [];
+
+    // --- SCROLL ARROWS ---
+    function scrollRow(containerId, direction) {
+        const container = document.getElementById(containerId);
+        container.scrollBy({ left: direction * 700, behavior: 'smooth' });
+    }
+
+    function updateArrows(containerId) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+
+        // Map container IDs to arrow IDs
+        const map = {
+            'trending-container': ['trending-arrow-left', 'trending-arrow-right'],
+            'search-container': ['search-arrow-left', 'search-arrow-right'],
+        };
+        const arrows = map[containerId];
+        if (!arrows) return;
+
+        const leftArrow = document.getElementById(arrows[0]);
+        const rightArrow = document.getElementById(arrows[1]);
+        if (!leftArrow || !rightArrow) return;
+
+        leftArrow.classList.toggle('hidden', container.scrollLeft <= 10);
+        rightArrow.classList.toggle('hidden', container.scrollLeft + container.clientWidth >= container.scrollWidth - 10);
+    }
+
+    function attachScrollListener(containerId) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        container.addEventListener('scroll', () => updateArrows(containerId));
+        // Initial check after content loads
+        setTimeout(() => updateArrows(containerId), 500);
+    }
 
     // --- TUNNEL ENGINE ---
     async function getTunneledBlob(url, type) {
@@ -363,6 +458,10 @@
                 const img = t.artwork_url ? t.artwork_url.replace('-large', '-t500x500') : 'https://i1.sndcdn.com/avatars-000433604313-uuzpva-t500x500.jpg';
                 target.appendChild(createCard({apiUrl: prog.url, title: t.title, artist: t.user.username, img}));
             });
+
+            // Update arrow states after tracks load
+            const containerId = mode === 'search' ? 'search-container' : 'trending-container';
+            setTimeout(() => updateArrows(containerId), 300);
         } catch (err) { console.error(err); }
     }
 
@@ -375,7 +474,20 @@
         document.getElementById('progress-path').style.strokeDasharray = `${pct * 10}, 1000`;
     };
 
-    window.onload = () => { fetchMusic('trending'); updateFavUI(); };
+    window.onload = () => {
+        fetchMusic('trending');
+        updateFavUI();
+        attachScrollListener('trending-container');
+        attachScrollListener('search-container');
+    };
 </script>
+  <!-- Your Scripts -->
+  <script src="about.js"></script>
+  <script src="era4.js"></script>
+  <script src="era5.js"></script>
+  <script src="pe.js"></script>
+  <script src="warn.js"></script>
+  <script src="cursor.js"></script>
+  <script src="widget.js"></script>
 </body>
 </html>
