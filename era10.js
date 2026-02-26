@@ -853,7 +853,7 @@ const games = [
         url: "wrestlebros.html"
     },
     {
-        title: "3 Dash (FIXED)",
+        title: "3 Dash",
         image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT9aIyH4UIZtEXCjJCnGNVbjMBIRZROk6hNdQ&s",
         url: "3dash.html"
     },
@@ -896,7 +896,38 @@ const games = [
         title: "Geometry Dash Subzero",
         image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRgfwAxV9ehfW5YL1mtacnfvlJUsiXQGjw1Pw&s",
         url: "geometryd.html"
+    },
+    {
+        title: "Blackjack",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTqrve6NJuvXJEa2KYZ8kZsF3j7H30CLgsEdw&s",
+        url: "blackjack.html"
+    },
+    {
+        title: "Geometry Dash Lite",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQskfP3QSLz4ccJ3IUBqnmjzPZzDgCpCqsbpw&s",
+        url: "geometryda.html"
+    },
+    {
+        title: "Indian Truck Simulator",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSl8gEvGBZz6TQYf2LAP37GKIg2tqYlAjkPbA&s",
+        url: "indian.html"
+    },
+    {
+        title: "Airline Tycoon",
+        image: "data:image/png;base64,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",
+        url: "airline.html"
+    },
+     {
+        title: "Geometry Dash Lite",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQskfP3QSLz4ccJ3IUBqnmjzPZzDgCpCqsbpw&s",
+        url: "geometryda.html"
+    },
+    {
+        title: "Hollow knight",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS5R6yPD79p50UfhaliNUVRnsIUEm8Crh0-2w&s",
+        url: "hollowk.html"
     }
+
 ];
 // ====================
 // DOM Elements
@@ -989,7 +1020,4 @@ function openGameInFullscreen(event) {
     window.location.href = 'loader.html';
 }
 
-window.onload = () => {
-    // loadSettings(); // Uncomment if you are using the loadSettings function
     generateCards();
-};
