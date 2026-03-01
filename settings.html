@@ -589,30 +589,44 @@ input[type=range]::-ms-fill-upper {
             <h3>About</h3>
             <h4>About the Creator</h4>
             <p>
-              This webpage was actually created by Thomas. Pop_Playz is removed permamantly from the project and all credits go to Thomas. 
-            <h3>Export & Import Cookies</h3>
-            <p>
-              Download Cookies to access in other sites or to access them in a
-              different computer!
-            </p>
-            <button class="se" onclick="downloadCookies()">Download</button>
+              This webpage was actually created by Thomas and all credits go to Thomas. 
+              </p>
+<div id="toast" style="
+      position: absolute;
+      top: 20px;
+      background: #111111;
+      color: #26ff9a;
+      border: 1px solid #26ff9a;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-family: monospace;
+      font-weight: bold;
+      box-shadow: 0 0 20px rgba(38, 255, 154, 0.2);
+      opacity: 0;
+      transition: opacity 0.5s ease;
+      pointer-events: none;
+      z-index: 100;
+  ">
+    COMMAND_SUCCESSFUL
+  </div>
 
-            <button
-              type="button"
-              class="se"
-              id="uploadButton"
-              onclick="triggerFileInput()"
-            >
-              Upload and Apply Cookies
-            </button>
+  <div id="sync-card" style="font-family: 'Inter', sans-serif; background: #111111; padding: 40px; border-radius: 20px; box-shadow: 0 0 30px rgba(38, 255, 154, 0.05); width: 340px; text-align: center; border: 1px solid #222222;">
+    <h3 style="margin: 0 0 8px 0; color: #26ff9a; font-size: 24px; font-weight: 800; letter-spacing: -0.05em; text-transform: uppercase;">Sync Game Data</h3>
+    
+    <input type="text" id="username" placeholder="Enter Username" style="width: 100%; padding: 16px; margin-bottom: 20px; border: 1px solid #333333; border-radius: 8px; box-sizing: border-box; outline: none; font-family: monospace; font-size: 16px; background: #000000; color: #26ff9a; transition: 0.3s;">
+    
+    <div style="display: flex; flex-direction: column; gap: 14px;">
+      <button onclick="pushData()" style="background: #26ff9a; color: #000000; border: none; padding: 16px; border-radius: 8px; font-weight: 900; cursor: pointer; box-shadow: 0 0 15px rgba(38, 255, 154, 0.4); text-transform: uppercase;">
+        Upload to Cloud
+      </button>
 
-            <p id="statusMessage"></p>
-            <input
-              type="file"
-              id="cookieFileInput"
-              accept=".json"
-              onchange="uploadAndSetCookies(event)"
-            />
+      <button onclick="pullData()" style="background: transparent; color: #26ff9a; border: 2px solid #26ff9a; padding: 14px; border-radius: 8px; font-weight: 900; cursor: pointer; text-transform: uppercase;">
+        Download from Cloud
+      </button>
+    </div>
+    
+    <p id="status" style="margin-top: 24px; font-size: 11px; color: #444444; font-weight: 700; font-family: monospace;">READY</p>
+  </div>
             <h3>Uptime Status Page</h3>
             <p>
               Open the project's uptime status page to view current availability,
@@ -686,6 +700,65 @@ input[type=range]::-ms-fill-upper {
     <script src="era21.js"></script>
     <script src="cursor.js"></script>
     <script src="widget.js"></script>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
+  import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDs_MC68gPRLluQXLaappyYwlMbROGiODM",
+    authDomain: "chat-67-67.firebaseapp.com",
+    databaseURL: "https://chat-67-67-default-rtdb.firebaseio.com",
+    projectId: "chat-67-67",
+    storageBucket: "chat-67-67.firebasestorage.app",
+    messagingSenderId: "133713228059",
+    appId: "1:133713228059:web:ba374113561be0873863be"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  // Helper function to show the success message
+  function showSuccess(msg) {
+    const toast = document.getElementById('toast');
+    toast.innerText = msg;
+    toast.style.opacity = '1';
+    setTimeout(() => { toast.style.opacity = '0'; }, 2000);
+  }
+
+  window.pushData = function() {
+    const user = document.getElementById('username').value;
+    if (!user) return alert("ENTER USERNAME");
+
+    const allData = JSON.stringify(localStorage);
+
+    set(ref(db, 'sync/' + user), {
+      fullBackup: allData,
+      lastUpdated: new Date().toLocaleTimeString()
+    }).then(() => {
+      showSuccess("UPLOAD_SUCCESSFUL");
+      document.getElementById('status').innerText = "> CLOUD_MIRROR_SYNCED";
+    });
+  };
+
+  window.pullData = function() {
+    const user = document.getElementById('username').value;
+    if (!user) return alert("ENTER USERNAME");
+
+    get(child(ref(db), `sync/${user}`)).then((snapshot) => {
+      if (snapshot.exists()) {
+        const dataObj = JSON.parse(snapshot.val().fullBackup);
+        localStorage.clear();
+        Object.keys(dataObj).forEach(key => localStorage.setItem(key, dataObj[key]));
+
+        showSuccess("RESTORATION_COMPLETE");
+        document.getElementById('status').innerText = "> LOCAL_MIRROR_SYNCED";
+        window.location.reload();
+      } else {
+        alert("NO DATA FOUND FOR THIS USER");
+      }
+    });
+  };
+</script>
     <script>
       window.onload = () => {
           document.getElementById('accent').value = localStorage.getItem('w_accent') || '#26ff9a';
