@@ -1298,14 +1298,6 @@ async function switchRoom(newId, newName) {
       if (m) m.textContent = `${count} online`;
     });
 
-    messagesRef.once('value').then(snap => {
-      messagesContainer.innerHTML = '';
-      if (snap.exists()) {
-        snap.forEach(c => messagesContainer.appendChild(createMessageElement(c.key, c.val())));
-        messagesContainer.scrollTop = messagesContainer.scrollHeight;
-      }
-    });
-
     messagesRef.on('child_added', snap => {
       const data = snap.val();
       if (!document.querySelector(`[data-id="${snap.key}"]`)) {
