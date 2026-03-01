@@ -21,6 +21,7 @@ setTimeout(() => {
                 :root { --accent: ${theme.accent}; --bg: ${theme.bg}; }
                 .js-widget {
                     position: fixed; background: var(--bg); color: #fff;
+                    z-index: 9999;
                     padding: 10px; border-radius: 26px; box-shadow: 0 10px 40px rgba(0,0,0,0.5);
                     backdrop-filter: blur(14px); font-family: 'Inter', 'Roboto', sans-serif;
                     transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); width: 200px;

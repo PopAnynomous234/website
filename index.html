@@ -3,307 +3,1078 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
   <title>Codelistener | Home</title>
 
-  <!-- Fontsas -->
-  <link rel="preconnect" href="https://fonts.googleapis.com"> 
+  <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
   <link href="https://fonts.cdnfonts.com/css/minecraft-3" rel="stylesheet">
-  <link href="https://fonts.cdnfonts.com/css/minecrafter-alt" rel="stylesheet">
-
-  <!-- Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
-  <!-- Your External CSSs -->
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="st.css">
 
-  <!-- ===================== -->
-  <!-- Startup Animations -->
-  <!-- ===================== -->
   <style>
-    /* Global Page Fade */
-    body {
-      opacity: 0;
-      animation: pageFadeIn 0.7s ease forwards;
-    }
+  /* ════════════════════════════════════════════════
+     VARIABLES
+  ════════════════════════════════════════════════ */
+  :root {
+    --mint:       #26ff9a;
+    --mint-b:     #1de085;
+    --mint-glow:  rgba(38,255,154,0.22);
+    --mint-dim:   rgba(38,255,154,0.06);
+    --black:      #000000;
+    --surface:    #080808;
+    --text:       #e5e5e5;
+    --text-dim:   #666;
+    --text-muted: #333;
+    --ff-display: 'Bebas Neue', sans-serif;
+    --ff-sub:     'Orbitron', sans-serif;
+    --ff-body:    'DM Sans', sans-serif;
+  }
 
-    @keyframes pageFadeIn {
-      from { opacity: 0; }
-      to   { opacity: 1; }
-    }
+  /* ════════════════════════════════════════════════
+     RESET
+  ════════════════════════════════════════════════ */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    /* Hero Text Overlay Animation */
-    .text-overlay {
-      animation: heroIn 0.9s cubic-bezier(0.22, 1, 0.37, 1) forwards;
-      animation-delay: 0.3s;
-    }
+  html { scroll-behavior: smooth; }
 
-    /* Soft Glow Pulse on Main Title */
-    .text-overlay h1 {
-      text-shadow: 0 0 15px #26ff9a;
-      animation: titleGlow 2.5s ease-in-out infinite alternate;
-    }
+  body {
+    background: var(--black);
+    color: var(--text);
+    font-family: var(--ff-body);
+    overflow-x: hidden;
+    opacity: 0;
+    animation: bodyReveal 0.5s ease 0.1s forwards;
+  }
 
-    @keyframes titleGlow {
-      from { text-shadow: 0 0 10px #26ff9a55; }
-      to   { text-shadow: 0 0 30px #26ff9abb; }
-    }
+  /* ════════════════════════════════════════════════
+     KEYFRAMES — CORE
+  ════════════════════════════════════════════════ */
+  @keyframes bodyReveal  { to { opacity: 1; } }
 
-    /* Timeline Staggered Reveal */
-    .timeline-event {
-      opacity: 0;
-      transform: translateY(30px) scale(0.97);
-      animation: timelineIn 0.8s ease forwards;
-    }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(40px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-30px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeLeft {
+    from { opacity: 0; transform: translateX(60px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+  @keyframes fadeRight {
+    from { opacity: 0; transform: translateX(-60px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+  @keyframes scaleIn {
+    from { opacity: 0; transform: scale(0.88); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(100%); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
 
-    .timeline-event:nth-child(1) { animation-delay: 0.6s; }
-    .timeline-event:nth-child(2) { animation-delay: 0.8s; }
-    .timeline-event:nth-child(3) { animation-delay: 1s; }
-    .timeline-event:nth-child(4) { animation-delay: 1.2s; }
+  /* Glitch title effect */
+  @keyframes glitch1 {
+    0%,100% { clip-path: inset(0 0 100% 0); transform: translate(0); }
+    10%      { clip-path: inset(10% 0 70% 0); transform: translate(-4px, 2px); }
+    20%      { clip-path: inset(60% 0 20% 0); transform: translate(4px, -2px); }
+    30%      { clip-path: inset(30% 0 50% 0); transform: translate(-2px); }
+    40%      { clip-path: inset(80% 0 10% 0); transform: translate(2px, 1px); }
+    50%      { clip-path: inset(0 0 100% 0); transform: translate(0); }
+  }
+  @keyframes glitch2 {
+    0%,100% { clip-path: inset(0 0 100% 0); transform: translate(0); }
+    15%      { clip-path: inset(50% 0 30% 0); transform: translate(4px); }
+    25%      { clip-path: inset(20% 0 65% 0); transform: translate(-4px, -1px); }
+    35%      { clip-path: inset(70% 0 15% 0); transform: translate(2px, 2px); }
+    45%      { clip-path: inset(0 0 100% 0); transform: translate(0); }
+  }
+  @keyframes titleGlow {
+    0%,100% { text-shadow: 0 0 20px rgba(38,255,154,0.3), 0 0 60px rgba(38,255,154,0.1); }
+    50%     { text-shadow: 0 0 40px rgba(38,255,154,0.6), 0 0 100px rgba(38,255,154,0.25), 0 0 200px rgba(38,255,154,0.1); }
+  }
 
-    @keyframes timelineIn {
-      to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-      }
-    }
+  /* Horizontal scan lines */
+  @keyframes scanH {
+    0%   { transform: translateY(-100vh); opacity: 0.5; }
+    100% { transform: translateY(100vh);  opacity: 0; }
+  }
 
-    /* Buttons (your original styles kept) */
-    button {
-      border-radius: 3px;
-      width: 145px;
-      height: 50px;
-      font-weight: bold;
-      font-size: 25px;
-      color: white;
-      transition: background-color 0.3s ease-in-out;
-    }
+  /* Spinning halo */
+  @keyframes rotateSlow {
+    from { transform: translate(-50%,-50%) rotate(0deg); }
+    to   { transform: translate(-50%,-50%) rotate(360deg); }
+  }
 
-    button:hover {
-      background-color: #78FFBD;
-    }
+  @keyframes pulseGlow {
+    0%,100% { opacity: 0.3; transform: scale(1); }
+    50%      { opacity: 0.7; transform: scale(1.05); }
+  }
 
-    /* Timeline Base (unchanged from you) */
-    .timeline {
-      position: relative;
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 20px 0;
-    }
+  @keyframes floatY {
+    0%,100% { transform: translateY(0); }
+    50%     { transform: translateY(-12px); }
+  }
 
-    .timeline-event {
-      position: relative;
-      padding: 15px 40px;
-      margin: 20px 0;
-      background: #001A0E;
-      border-radius: 10px;
-      box-shadow: 0 0 10px #26ff9a44;
-      border: 1px solid #26ff9a66;
-      width: 45%;
-      left: 0;
-      transition: box-shadow 0.3s ease;
-    }
+  @keyframes markerPulse {
+    0%,100% { box-shadow: 0 0 8px var(--mint), 0 0 20px var(--mint-glow); }
+    50%     { box-shadow: 0 0 20px var(--mint), 0 0 50px var(--mint-glow), 0 0 80px rgba(38,255,154,0.1); }
+  }
 
-    .timeline-event.right {
-      left: 55%;
-    }
+  @keyframes lineGrow {
+    from { height: 0; }
+    to   { height: 100%; }
+  }
 
-    .timeline-event:hover {
-      box-shadow: 0 0 25px #26ff9a;
-      border-color: #26ff9a;
-    }
+  @keyframes counterUp {
+    from { opacity: 0; transform: scale(0.7) translateY(10px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+  }
 
-    .timeline-marker {
-      position: absolute;
-      top: 21px;
-      left: -12px;
-      width: 20px;
-      height: 20px;
-      background-color: #26ff9a;
-      border-radius: 50%;
-      box-shadow:
-        0 0 10px #26ff9a,
-        0 0 20px #26ff9a;
-      border: 2px solid #111f35;
-      transition: background-color 0.3s ease, box-shadow 0.3s ease;
-    }
+  @keyframes borderSpin {
+    from { background-position: 0% 50%; }
+    to   { background-position: 200% 50%; }
+  }
 
-    .timeline-event.right .timeline-marker {
-      left: -30px;
-    }
+  @keyframes shimmer {
+    0%   { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
 
-    .timeline-event:hover .timeline-marker {
-      background-color: #00ff99;
-      box-shadow:
-        0 0 15px #00ff99,
-        0 0 30px #00ff99;
-    }
+  @keyframes badgePop {
+    0%   { opacity: 0; transform: scale(0.5) rotate(-8deg); }
+    70%  { transform: scale(1.08) rotate(2deg); }
+    100% { opacity: 1; transform: scale(1) rotate(0deg); }
+  }
 
-    .timeline-content h3 {
-      color: #26ff9a;
-      margin: 0 0 5px 0;
-    }
+  @keyframes particleDrift {
+    0%   { transform: translateY(0) translateX(0) scale(1); opacity: 0.6; }
+    50%  { transform: translateY(-60px) translateX(20px) scale(1.2); opacity: 0.9; }
+    100% { transform: translateY(-120px) translateX(-10px) scale(0.8); opacity: 0; }
+  }
 
-    .timeline-content p {
-      margin: 0;
-      color: #a0a0a0;
-      font-size: 0.9em;
-    }
+  /* ════════════════════════════════════════════════
+     ATMOSPHERIC BACKGROUNDS
+  ════════════════════════════════════════════════ */
 
-    .timeline-content .date {
-      color: #26ff9a;
-      font-weight: bold;
-      text-shadow: 0 0 5px #26ff9a;
-    }
+  /* Noise texture overlay */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 0; opacity: 0.4;
+  }
 
-    /* Trustpilot Button (unchanged) */
-    .trustpilot-btn {
-      display: inline-block;
-      padding: 10px 20px;
-      text-align: center;
-      text-decoration: none;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 16px;
-      font-weight: bold;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      transition: background-color 0.3s ease;
-      background-color: #00b67a;
-      color: #ffffff;
-      border: 1px solid #00895c;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
+  /* Radial ambient glows */
+  body::after {
+    content: '';
+    position: fixed; inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 60% -10%, rgba(38,255,154,0.055) 0%, transparent 55%),
+      radial-gradient(ellipse 50% 40% at 10% 90%, rgba(38,255,154,0.03) 0%, transparent 50%),
+      radial-gradient(ellipse 30% 30% at 90% 80%, rgba(38,200,100,0.025) 0%, transparent 50%);
+    pointer-events: none; z-index: 0;
+  }
 
-    .trustpilot-btn:hover,
-    .trustpilot-btn:focus {
-      background-color: #00895c;
-      color: #ffffff;
-      text-decoration: none;
-    }
+  /* Scanline effect */
+  .scanline {
+    position: fixed; inset: 0; pointer-events: none; z-index: 999; overflow: hidden;
+  }
+  .scanline::after {
+    content: '';
+    position: absolute;
+    left: 0; right: 0; height: 3px;
+    background: linear-gradient(transparent, rgba(38,255,154,0.06), transparent);
+    animation: scanH 8s linear infinite;
+  }
+
+  /* Dot grid */
+  .dot-grid {
+    position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    background-image: radial-gradient(circle, rgba(38,255,154,0.07) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  /* ════════════════════════════════════════════════
+     LAYOUT SHELL
+  ════════════════════════════════════════════════ */
+  .page-shell {
+    position: relative; z-index: 1;
+    padding-left: 80px; /* sidebar */
+    min-height: 100vh;
+  }
+
+  /* ════════════════════════════════════════════════
+     HERO SECTION
+  ════════════════════════════════════════════════ */
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 0 8% 0 7%;
+    overflow: hidden;
+  }
+
+  /* Giant background wordmark */
+  .hero-bg-word {
+    position: absolute;
+    bottom: -5%;
+    right: -3%;
+    font-family: var(--ff-display);
+    font-size: clamp(160px, 22vw, 340px);
+    color: transparent;
+    -webkit-text-stroke: 1px rgba(38,255,154,0.05);
+    letter-spacing: -0.05em;
+    user-select: none;
+    pointer-events: none;
+    white-space: nowrap;
+    line-height: 1;
+    z-index: 0;
+  }
+
+  /* Spinning orbital ring */
+  .orbital {
+    position: absolute;
+    top: 50%; left: 75%;
+    width: 500px; height: 500px;
+    pointer-events: none; z-index: 0;
+  }
+  .orbital-ring {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    border: 1px solid transparent;
+  }
+  .orbital-ring:nth-child(1) {
+    width: 300px; height: 300px;
+    border-color: rgba(38,255,154,0.12);
+    animation: rotateSlow 20s linear infinite;
+  }
+  .orbital-ring:nth-child(2) {
+    width: 420px; height: 420px;
+    border-color: rgba(38,255,154,0.06);
+    animation: rotateSlow 32s linear infinite reverse;
+  }
+  .orbital-ring:nth-child(3) {
+    width: 180px; height: 180px;
+    border-color: rgba(38,255,154,0.18);
+    animation: rotateSlow 12s linear infinite;
+  }
+  /* Dot on the ring */
+  .orbital-ring::after {
+    content: '';
+    position: absolute;
+    top: -4px; left: 50%;
+    width: 8px; height: 8px;
+    background: var(--mint);
+    border-radius: 50%;
+    box-shadow: 0 0 12px var(--mint), 0 0 24px var(--mint-glow);
+  }
+  .orbital-ring:nth-child(2)::after { top: 50%; left: -4px; }
+  .orbital-ring:nth-child(3)::after { display: none; }
+
+  /* Center orb */
+  .orbital-core {
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(38,255,154,0.3), transparent 70%);
+    animation: pulseGlow 3s ease-in-out infinite;
+  }
+
+  /* Hero content */
+  .hero-content {
+    position: relative; z-index: 2;
+    max-width: 700px;
+  }
+
+  .hero-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 10px;
+    font-weight: 400;
+    letter-spacing: 0.3em;
+    color: var(--mint);
+    text-transform: uppercase;
+    margin-bottom: 24px;
+    opacity: 0;
+    animation: fadeRight 0.7s ease 0.4s forwards;
+  }
+  .hero-eyebrow::before {
+    content: '';
+    display: inline-block;
+    width: 32px; height: 1px;
+    background: var(--mint);
+    box-shadow: 0 0 8px var(--mint);
+  }
+  .hero-eyebrow .ver-badge {
+    background: rgba(38,255,154,0.1);
+    border: 1px solid rgba(38,255,154,0.3);
+    padding: 2px 10px;
+    border-radius: 4px;
+    font-size: 9px;
+    animation: badgePop 0.6s cubic-bezier(0.34,1.56,0.64,1) 0.8s both;
+  }
+
+  /* Main title — glitch */
+  .hero-title {
+    font-family: var(--ff-display);
+    font-size: clamp(72px, 10vw, 148px);
+    line-height: 0.92;
+    letter-spacing: -0.02em;
+    color: #fff;
+    position: relative;
+    margin-bottom: 28px;
+    overflow: hidden;
+    animation: titleGlow 4s ease-in-out 2s infinite;
+  }
+  .hero-title .line {
+    display: block;
+    overflow: hidden;
+  }
+  .hero-title .line span {
+    display: inline-block;
+    opacity: 0;
+    animation: slideUp 0.9s cubic-bezier(0.22,1,0.36,1) forwards;
+  }
+  .hero-title .line:nth-child(1) span { animation-delay: 0.5s; }
+  .hero-title .line:nth-child(2) span { animation-delay: 0.7s; color: var(--mint); }
+
+  /* Glitch pseudo-layers */
+  .hero-title::before,
+  .hero-title::after {
+    content: attr(data-text);
+    position: absolute; top: 0; left: 0;
+    font-family: var(--ff-display);
+    font-size: clamp(72px, 10vw, 148px);
+    line-height: 0.92;
+    letter-spacing: -0.02em;
+    width: 100%;
+    pointer-events: none;
+  }
+  .hero-title::before {
+    color: rgba(255,50,50,0.45);
+    animation: glitch1 8s ease-in-out 3s infinite;
+  }
+  .hero-title::after {
+    color: rgba(0,200,255,0.35);
+    animation: glitch2 8s ease-in-out 3.1s infinite;
+  }
+
+  .hero-sub {
+    font-family: 'minecraft', monospace;
+    font-size: 14px;
+    color: rgba(255,255,255,0.55);
+    letter-spacing: 0.06em;
+    margin-bottom: 40px;
+    max-width: 480px;
+    line-height: 1.8;
+    opacity: 0;
+    animation: fadeUp 0.8s ease 1.1s forwards;
+  }
+
+  .hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    align-items: center;
+    opacity: 0;
+    animation: fadeUp 0.8s ease 1.3s forwards;
+  }
+
+  /* CTA Buttons */
+  .btn-primary {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--ff-sub);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 16px 36px;
+    border-radius: 6px;
+    text-decoration: none;
+    color: #000;
+    background: var(--mint);
+    border: none;
+    cursor: pointer;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  .btn-primary::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.35), transparent 70%);
+    background-size: 200% 100%;
+    animation: shimmer 3s ease-in-out 2s infinite;
+  }
+  .btn-primary:hover {
+    transform: translateY(-3px) scale(1.04);
+    box-shadow: 0 0 30px rgba(38,255,154,0.5), 0 14px 40px rgba(0,0,0,0.3);
+    background: #4dffa8;
+  }
+  .btn-primary:active { transform: scale(0.97); }
+
+  .btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--ff-sub);
+    font-size: 11px;
+    font-weight: 400;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 15px 32px;
+    border-radius: 6px;
+    text-decoration: none;
+    color: var(--mint);
+    background: transparent;
+    border: 1px solid rgba(38,255,154,0.35);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .btn-ghost::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: rgba(38,255,154,0.05);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s ease;
+  }
+  .btn-ghost:hover { border-color: var(--mint); color: #fff; box-shadow: 0 0 20px rgba(38,255,154,0.2); }
+  .btn-ghost:hover::before { transform: scaleX(1); }
+
+  .discord-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--ff-sub);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    padding: 15px 24px;
+    border-radius: 6px;
+    text-decoration: none;
+    color: #fff;
+    background: rgba(88,101,242,0.2);
+    border: 1px solid rgba(88,101,242,0.4);
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  .discord-btn:hover {
+    background: rgba(88,101,242,0.35);
+    border-color: rgba(88,101,242,0.8);
+    transform: translateY(-2px);
+    box-shadow: 0 0 20px rgba(88,101,242,0.3);
+  }
+  .discord-btn i { font-size: 16px; color: #7289da; }
+
+  /* Hotkey hint */
+  .hotkey-hint {
+    margin-top: 56px;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    opacity: 0;
+    animation: fadeIn 0.7s ease 1.7s forwards;
+  }
+  @keyframes fadeIn { to { opacity: 1; } }
+  .hotkey-hint p {
+    font-family: var(--ff-sub);
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
+  }
+  .kbd {
+    display: inline-block;
+    padding: 4px 10px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 5px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 10px;
+    color: var(--mint);
+    letter-spacing: 0.05em;
+    box-shadow: 0 2px 0 rgba(38,255,154,0.15);
+    transition: all 0.2s;
+  }
+  .kbd:hover {
+    background: rgba(38,255,154,0.1);
+    border-color: rgba(38,255,154,0.4);
+    transform: translateY(-1px);
+  }
+
+  /* Scroll indicator */
+  .scroll-cue {
+    position: absolute;
+    bottom: 40px; left: 7%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    opacity: 0;
+    animation: fadeIn 0.7s ease 2s forwards;
+    z-index: 2;
+  }
+  .scroll-cue span {
+    font-family: var(--ff-sub);
+    font-size: 9px;
+    color: var(--text-dim);
+    letter-spacing: 0.2em;
+    writing-mode: vertical-rl;
+  }
+  .scroll-line {
+    width: 1px;
+    height: 60px;
+    background: linear-gradient(to bottom, var(--mint), transparent);
+    animation: floatY 2s ease-in-out infinite;
+  }
+
+  /* ════════════════════════════════════════════════
+     STATS STRIP
+  ════════════════════════════════════════════════ */
+  .stats-strip {
+    position: relative; z-index: 1;
+    padding: 0 8%;
+    margin-bottom: 80px;
+  }
+  .stats-inner {
+    display: flex;
+    gap: 1px;
+    border: 1px solid rgba(38,255,154,0.1);
+    border-radius: 12px;
+    overflow: hidden;
+    background: rgba(38,255,154,0.04);
+  }
+  .stat {
+    flex: 1;
+    padding: 28px 32px;
+    text-align: center;
+    border-right: 1px solid rgba(38,255,154,0.08);
+    transition: background 0.3s ease;
+    opacity: 0;
+    animation: counterUp 0.7s ease both;
+  }
+  .stat:last-child { border-right: none; }
+  .stat:hover { background: rgba(38,255,154,0.05); }
+  .stat:nth-child(1) { animation-delay: 0.2s; }
+  .stat:nth-child(2) { animation-delay: 0.35s; }
+  .stat:nth-child(3) { animation-delay: 0.5s; }
+  .stat:nth-child(4) { animation-delay: 0.65s; }
+  .stat-value {
+    font-family: var(--ff-display);
+    font-size: 40px;
+    color: var(--mint);
+    line-height: 1;
+    margin-bottom: 6px;
+    text-shadow: 0 0 20px rgba(38,255,154,0.3);
+  }
+  .stat-label {
+    font-family: var(--ff-sub);
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+  }
+
+  /* ════════════════════════════════════════════════
+     SECTION HEADER
+  ════════════════════════════════════════════════ */
+  .section-header {
+    padding: 0 8%;
+    margin-bottom: 48px;
+    display: flex;
+    align-items: baseline;
+    gap: 20px;
+  }
+  .section-label {
+    font-family: var(--ff-sub);
+    font-size: 9px;
+    letter-spacing: 0.25em;
+    color: var(--mint);
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-label::before {
+    content: '';
+    display: inline-block;
+    width: 20px; height: 1px;
+    background: var(--mint);
+  }
+  .section-title-lg {
+    font-family: var(--ff-display);
+    font-size: clamp(36px, 5vw, 64px);
+    color: #fff;
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+  .section-title-lg span { color: var(--mint); }
+
+  /* ════════════════════════════════════════════════
+     TIMELINE
+  ════════════════════════════════════════════════ */
+  .timeline-section {
+    padding: 80px 0 120px;
+    position: relative; z-index: 1;
+  }
+
+  .timeline {
+    position: relative;
+    padding: 20px 8%;
+    max-width: none;
+    margin: 0;
+  }
+
+  /* The center line */
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 0; bottom: 0;
+    width: 1px;
+    background: linear-gradient(to bottom, transparent, rgba(38,255,154,0.3) 10%, rgba(38,255,154,0.3) 90%, transparent);
+    transform: translateX(-50%);
+    animation: lineGrow 1.5s ease 0.5s both;
+    transform-origin: top;
+  }
+
+  .timeline-event {
+    position: relative;
+    width: 44%;
+    background: transparent;
+    border: 1px solid rgba(38,255,154,0.12);
+    border-radius: 12px;
+    padding: 28px 32px;
+    margin: 0 0 36px 0;
+    left: 0;
+    box-shadow: none;
+    overflow: hidden;
+    opacity: 0;
+    transition: transform 0.4s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  /* Shimmer top border */
+  .timeline-event::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--mint), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .timeline-event:hover::before { opacity: 0.7; }
+
+  /* Interior glow */
+  .timeline-event::after {
+    content: '';
+    position: absolute;
+    top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background: radial-gradient(ellipse at center, rgba(38,255,154,0.04) 0%, transparent 60%);
+    opacity: 0;
+    transition: opacity 0.4s;
+    pointer-events: none;
+  }
+  .timeline-event:hover::after { opacity: 1; }
+  .timeline-event:hover {
+    border-color: rgba(38,255,154,0.4);
+    box-shadow: 0 0 40px rgba(38,255,154,0.08), 0 20px 60px rgba(0,0,0,0.3);
+    transform: translateY(-4px);
+  }
+
+  /* Staggered reveal */
+  .timeline-event:nth-child(1) { animation: fadeRight 0.7s ease 0.3s forwards; }
+  .timeline-event:nth-child(2) { animation: fadeLeft 0.7s ease 0.5s forwards; }
+  .timeline-event:nth-child(3) { animation: fadeRight 0.7s ease 0.7s forwards; }
+  .timeline-event:nth-child(4) { animation: fadeLeft 0.7s ease 0.9s forwards; }
+  .timeline-event:nth-child(5) { animation: fadeRight 0.7s ease 1.1s forwards; }
+
+  .timeline-event.right {
+    left: 56%;
+  }
+
+  .timeline-marker {
+    position: absolute;
+    top: 28px;
+    width: 14px; height: 14px;
+    background: var(--mint);
+    border-radius: 50%;
+    border: 2px solid #000;
+    animation: markerPulse 2.5s ease-in-out infinite;
+    z-index: 2;
+  }
+  .timeline-event:not(.right) .timeline-marker { right: -27px; }
+  .timeline-event.right .timeline-marker { left: -27px; }
+
+  /* Active event styling */
+  .timeline-event.active-now {
+    border-color: rgba(38,255,154,0.5);
+    background: rgba(38,255,154,0.03);
+  }
+  .timeline-event.active-now .timeline-marker {
+    background: #fff;
+    box-shadow: 0 0 0 4px rgba(38,255,154,0.3), 0 0 20px var(--mint);
+  }
+
+  .tl-version {
+    font-family: var(--ff-display);
+    font-size: 28px;
+    color: #fff;
+    letter-spacing: 0.02em;
+    margin-bottom: 8px;
+  }
+  .tl-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    margin-top: 12px;
+  }
+  .tl-date {
+    font-family: var(--ff-sub);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    color: var(--mint);
+  }
+  .tl-dot { width: 3px; height: 3px; background: var(--text-dim); border-radius: 50%; }
+  .tl-tag {
+    font-family: var(--ff-sub);
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    padding: 3px 10px;
+    border-radius: 4px;
+  }
+  .tl-tag.major { background: rgba(38,255,154,0.12); color: var(--mint); border: 1px solid rgba(38,255,154,0.25); }
+  .tl-tag.minor { background: rgba(255,255,255,0.04); color: var(--text-dim); border: 1px solid rgba(255,255,255,0.08); }
+  .tl-tag.current {
+    background: rgba(38,255,154,0.2);
+    color: var(--mint);
+    border: 1px solid rgba(38,255,154,0.5);
+    animation: pulseGlow 2s ease-in-out infinite;
+  }
+  .tl-platform {
+    font-family: var(--ff-sub);
+    font-size: 9px;
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
+  }
+
+  /* ════════════════════════════════════════════════
+     FOOTER STRIP
+  ════════════════════════════════════════════════ */
+  .footer-strip {
+    padding: 32px 8%;
+    border-top: 1px solid rgba(38,255,154,0.07);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative; z-index: 1;
+  }
+  .footer-copy {
+    font-family: var(--ff-sub);
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    color: var(--text-muted);
+  }
+  .footer-copy span { color: rgba(38,255,154,0.5); }
+
+  /* Floating particles decoration */
+  .particles {
+    position: absolute; inset: 0;
+    pointer-events: none; overflow: hidden; z-index: 0;
+  }
+  .particle {
+    position: absolute;
+    width: 3px; height: 3px;
+    background: var(--mint);
+    border-radius: 50%;
+    box-shadow: 0 0 6px var(--mint);
+    animation: particleDrift linear infinite;
+  }
+
+  /* sidebar override */
+  .sidebar { z-index: 10; }
+
+  /* trustpilot */
+  .trustpilot-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--ff-sub);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    padding: 14px 24px;
+    border-radius: 6px;
+    text-decoration: none;
+    color: #fff;
+    background: rgba(0,182,122,0.15);
+    border: 1px solid rgba(0,182,122,0.4);
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  .trustpilot-btn::before { content: '★'; color: #00b67a; font-size: 14px; }
+  .trustpilot-btn:hover {
+    background: rgba(0,182,122,0.25);
+    border-color: rgba(0,182,122,0.8);
+    transform: translateY(-2px);
+    box-shadow: 0 0 20px rgba(0,182,122,0.25);
+    color: #fff;
+    text-decoration: none;
+  }
+
   </style>
 </head>
 
 <body>
 
-  <!-- Sidebar (external CSS controls layout) -->
-  <div class="sidebar">
-    <img src="https://cdn.jsdelivr.net/gh/PopAnynomous234/assets/logo.png" width="70" height="70" alt="logo">
-    <ul>
-      <li><a href="index.html"><i class="fas fa-home icon"></i><span class="text">Home</span></a></li>
-      <li><a href="ai.html"><i class="fas fa-robot icon"></i><span class="text">AI</span></a></li>
-      <li><a href="tools.html"><i class="fa-solid fa-screwdriver-wrench"></i><span class="text">Tools</span></a></li>
-      <li><a href="games.html"><i class="fas fa-gamepad icon"></i><span class="text">Games</span></a></li>
-      <li><a href="music.html"><i class="fas fa-music icon"></i><span class="text">Music</span></a></li>
-      <li><a href="chat.html"><i class="fa-regular fa-comments icon"></i><span class="text">Chat</span></a></li>
-      <li><a href="settings.html"><i class="fas fa-cog icon"></i><span class="text">Settings</span></a></li>
-    </ul>
-  </div>
+<!-- Atmospheric layers -->
+<div class="scanline"></div>
+<div class="dot-grid"></div>
 
-  <!-- Main Content -->
-  <div class="carousel-and-text">
+<!-- ── SIDEBAR ─────────────────────────────────── -->
+<div class="sidebar">
+  <img src="https://cdn.jsdelivr.net/gh/PopAnynomous234/assets/logo.png" width="70" height="70" alt="logo">
+  <ul>
+    <li><a href="index.html"><i class="fas fa-home icon"></i><span class="text">Home</span></a></li>
+    <li><a href="ai.html"><i class="fas fa-robot icon"></i><span class="text">AI</span></a></li>
+    <li><a href="tools.html"><i class="fa-solid fa-screwdriver-wrench"></i><span class="text">Tools</span></a></li>
+    <li><a href="games.html"><i class="fas fa-gamepad icon"></i><span class="text">Games</span></a></li>
+    <li><a href="music.html"><i class="fas fa-music icon"></i><span class="text">Music</span></a></li>
+    <li><a href="chat.html"><i class="fa-regular fa-comments icon"></i><span class="text">Chat</span></a></li>
+    <li><a href="settings.html"><i class="fas fa-cog icon"></i><span class="text">Settings</span></a></li>
+  </ul>
+</div>
 
-    <!-- Made by Coders Section (your external CSS handles it) -->
-    <div class="carousel-container">
-      <div class="carousel">
-        <h1>Made by Coders.</h1>
-        <br>
-        <h1>For Fans, kiddos.</h1> 
+<!-- ── PAGE SHELL ─────────────────────────────── -->
+<div class="page-shell">
+
+  <!-- ──── HERO ──────────────────────────────── -->
+  <section class="hero">
+
+    <!-- Decorative bg word -->
+    <div class="hero-bg-word" aria-hidden="true">CL</div>
+
+    <!-- Orbital rings -->
+    <div class="orbital">
+      <div class="orbital-ring"></div>
+      <div class="orbital-ring"></div>
+      <div class="orbital-ring"></div>
+      <div class="orbital-core"></div>
+    </div>
+
+    <!-- Floating particles -->
+    <div class="particles" aria-hidden="true">
+      <div class="particle" style="left:15%;bottom:20%;animation-duration:6s;animation-delay:0s;"></div>
+      <div class="particle" style="left:30%;bottom:10%;animation-duration:8s;animation-delay:1s;"></div>
+      <div class="particle" style="left:55%;bottom:30%;animation-duration:7s;animation-delay:2s;"></div>
+      <div class="particle" style="left:72%;bottom:15%;animation-duration:9s;animation-delay:0.5s;"></div>
+      <div class="particle" style="left:88%;bottom:40%;animation-duration:5s;animation-delay:3s;"></div>
+      <div class="particle" style="left:8%;bottom:60%;animation-duration:10s;animation-delay:1.5s; width:5px;height:5px;"></div>
+    </div>
+
+    <!-- Main content -->
+    <div class="hero-content">
+      <div class="hero-eyebrow">
+        Made by coders
+        <span class="ver-badge">V6 · 2026</span>
+      </div>
+
+      <h1 class="hero-title" data-text="CODELISTENER">
+        <span class="line"><span>CODE</span></span>
+        <span class="line"><span>LISTENER</span></span>
+      </h1>
+
+      <p class="hero-sub">
+        Do anything you want.<br>
+        Pick Codelistener. Try out.
+      </p>
+
+      <div class="hero-actions">
+        <a href="tools.html" class="btn-primary">
+          <i class="fa-solid fa-bolt"></i>
+          Explore Tools
+        </a>
+        <a href="games.html" class="btn-ghost">
+          <i class="fa-solid fa-gamepad"></i>
+          Play Games
+        </a>
+        <a href="https://www.trustpilot.com/evaluate/codelistener.betteruptime.com"
+           target="_blank" rel="noopener noreferrer"
+           class="trustpilot-btn">
+          Rate us on Trustpilot
+        </a>
+        <a href="https://discord.gg/KRXDTsEbvU" target="_blank" rel="noopener" class="discord-btn">
+          <i class="fa-brands fa-discord"></i>
+          Discord
+        </a>
+      </div>
+
+      <div class="hotkey-hint">
+        <p>Panic key &nbsp;</p>
+        <span class="kbd">Ctrl</span>
+        <span class="kbd">Alt</span>
+        <span class="kbd">J</span>
       </div>
     </div>
 
-    <!-- Hero Overlay -->
-    <div class="text-overlay">
-      <h1>Codelistener</h1>
-      <p style="font-family:minecraft; color: white;">
-        Do anything you want! Pick Codelistener. Try out.
-      </p>
-      <a href="https://www.trustpilot.com/evaluate/codelistener.betteruptime.com"
-         target="_blank"
-         rel="noopener noreferrer"
-         class="trustpilot-btn">
-        Rate us on Trustpilot
-      </a>
-      <a href="https://discord.gg/KRXDTsEbvU" target="_blank" style="
-    display: inline-block;
-    width: 200px;
-    height: 60px;
-    background-image: url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQmstsW_K9GXDjmD15dumAYertYVYpj_RXQLA&s');
-    background-size: cover;
-    background-position: center;
-    border-radius: 12px;
-    transition: transform 0.2s, box-shadow 0.2s;
-    text-decoration: none;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-" onmouseover="this.style.transform='scale(1.05)';" onmouseout="this.style.transform='scale(1)';">
-</a>
+    <!-- Scroll cue -->
+    <div class="scroll-cue" aria-hidden="true">
+      <div class="scroll-line"></div>
+      <span>SCROLL</span>
     </div>
 
-    <br>
+  </section>
 
-    <p style="font-family:orbitron; font-size:17px;">
-      Nervous? Or panicked?
-      <span class="ast">Ctrl</span> + 
-      <span class="ast">Alt</span> + 
-      <span class="ast">J</span>
-    </p>
+  <!-- ──── STATS STRIP ─────────────────────────── -->
+  <div class="stats-strip">
+    <div class="stats-inner">
+      <div class="stat">
+        <div class="stat-value">6+</div>
+        <div class="stat-label">Versions</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">200+</div>
+        <div class="stat-label">Games</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">10+</div>
+        <div class="stat-label">Tools</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">∞</div>
+        <div class="stat-label">Possibilities</div>
+      </div>
+    </div>
+  </div>
 
-    <!-- Timeline -->
+  <!-- ──── TIMELINE ────────────────────────────── -->
+  <section class="timeline-section">
+    <div class="section-header">
+      <div>
+        <div class="section-label">History</div>
+        <h2 class="section-title-lg">Version <span>Log</span></h2>
+      </div>
+    </div>
+
     <div class="timeline">
 
       <div class="timeline-event">
         <div class="timeline-marker"></div>
-        <div class="timeline-content">
-          <h3>Codelistener v1</h3>
-          <p><span class="date">Mid 2025</span> &bull; First Version &bull; CodeHS</p>
+        <div class="tl-version">Codelistener V1</div>
+        <div class="tl-meta">
+          <span class="tl-date">MID 2025</span>
+          <span class="tl-dot"></span>
+          <span class="tl-tag minor">First Release</span>
+          <span class="tl-dot"></span>
+          <span class="tl-platform">CodeHS</span>
         </div>
       </div>
 
       <div class="timeline-event right">
         <div class="timeline-marker"></div>
-        <div class="timeline-content">
-          <h3>Codelistener v2</h3>
-          <p><span class="date">Mid 2025</span> &bull; Minor Release &bull; CodeHS</p>
+        <div class="tl-version">Codelistener V2</div>
+        <div class="tl-meta">
+          <span class="tl-date">MID 2025</span>
+          <span class="tl-dot"></span>
+          <span class="tl-tag minor">Minor Release</span>
+          <span class="tl-dot"></span>
+          <span class="tl-platform">CodeHS</span>
         </div>
       </div>
 
       <div class="timeline-event">
         <div class="timeline-marker"></div>
-        <div class="timeline-content">
-          <h3>Codelistener v3-v4</h3>
-          <p><span class="date">Late 2025</span> &bull; Minor Release &bull; CodeHS</p>
+        <div class="tl-version">Codelistener V3–V4</div>
+        <div class="tl-meta">
+          <span class="tl-date">LATE 2025</span>
+          <span class="tl-dot"></span>
+          <span class="tl-tag minor">Minor Release</span>
+          <span class="tl-dot"></span>
+          <span class="tl-platform">CodeHS</span>
         </div>
       </div>
 
       <div class="timeline-event right">
         <div class="timeline-marker"></div>
-        <div class="timeline-content">
-          <h3>Codelistener V5</h3>
-          <p><span class="date">Start 2026</span> &bull; Major Release &bull; Firebase</p>
+        <div class="tl-version">Codelistener V5</div>
+        <div class="tl-meta">
+          <span class="tl-date">EARLY 2026</span>
+          <span class="tl-dot"></span>
+          <span class="tl-tag major">Major Release</span>
+          <span class="tl-dot"></span>
+          <span class="tl-platform">Firebase</span>
         </div>
       </div>
 
-        <div class="timeline-event">
+      <div class="timeline-event active-now">
         <div class="timeline-marker"></div>
-        <div class="timeline-content">
-          <h3>Codelistener v6</h3>
-          <p><span class="date">NOW</span> &bull; Major Release &bull; Firebase</p>
+        <div class="tl-version">Codelistener V6</div>
+        <div class="tl-meta">
+          <span class="tl-date">NOW · 2026</span>
+          <span class="tl-dot"></span>
+          <span class="tl-tag current">● Live</span>
+          <span class="tl-tag major">Major Release</span>
+          <span class="tl-dot"></span>
+          <span class="tl-platform">Firebase</span>
         </div>
       </div>
-      
-    </div>
-  </div>
 
-  <!-- Your Scripts -->
-  <script src="about.js"></script>
-  <script src="era4.js"></script>
-  <script src="era5.js"></script>
-  <script src="pe.js"></script>
-  <script src="warn.js"></script>
-  <script src="cursor.js"></script>
-  <script src="widget.js"></script>
+    </div>
+  </section>
+
+  <!-- ──── FOOTER ──────────────────────────────── -->
+  <footer class="footer-strip">
+    <div class="footer-copy">© <span>CODELISTENER</span> · ALL RIGHTS RESERVED · 2026</div>
+    <div class="footer-copy">BUILT BY CODERS · FOR EVERYONE</div>
+  </footer>
+
+</div><!-- /page-shell -->
+
+<!-- ── SCRIPTS ────────────────────────────────── -->
+<script src="about.js"></script>
+<script src="era4.js"></script>
+<script src="era5.js"></script>
+<script src="pe.js"></script>
+<script src="warn.js"></script>
+<script src="cursor.js"></script>
+<script src="widget.js"></script>
+
+<script>
+/* Intersection-based reveal for timeline (progressive enhancement) */
+if ('IntersectionObserver' in window) {
+  const items = document.querySelectorAll('.timeline-event');
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.style.animationPlayState = 'running';
+        obs.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.15 });
+
+  items.forEach(el => {
+    el.style.animationPlayState = 'paused';
+    obs.observe(el);
+  });
+}
+</script>
 
 </body>
 </html>

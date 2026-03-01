@@ -15,7 +15,7 @@
                     <html>
                     <head>
                         <title>loading...</title>
-                        <link rel="icon" href="https://instructure-uploads.s3.amazonaws.com/account_96810000000000001/attachments/1049/Canvas_logo_gray2.png">
+                        <link rel="icon"  href="https://instructure-uploads.s3.amazonaws.com/account_96810000000000001/attachments/1049/Canvas_logo_gray2.png">
                         <style>
                             body { margin:0; display:flex; flex-direction:column; justify-content:center; align-items:center; height:100vh; background:#f0f0f0; }
                             iframe { width: 100vw; height: 100vh; border: none; }

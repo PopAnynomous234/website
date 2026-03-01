@@ -1,17 +1,4 @@
-// ===== Tab Switching =====
-const tabButtons = document.querySelectorAll('.tabs button');
-const tabContents = document.querySelectorAll('.tab-content');
 
-tabButtons.forEach(btn => {
-  btn.addEventListener('click', () => {
-    tabButtons.forEach(b => b.classList.remove('active'));
-    tabContents.forEach(c => c.classList.remove('active'));
-
-    btn.classList.add('active');
-    const target = document.getElementById(btn.dataset.tab);
-    if (target) target.classList.add('active');
-  });
-});
 
 // ===== Transform Settings =====
 const presetSelect = document.getElementById('preset');

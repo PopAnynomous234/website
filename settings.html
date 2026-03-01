@@ -1,436 +1,980 @@
-<html>
-  <head>
-    <title>Settings</title>
-    <link rel="stylesheet" href="st.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
-    <style>
-      /* Reset */
-      body {
-        font-family: Arial, sans-serif;
-        height: 100%;
-        background-color: #000;
-        color: #eee;
-      }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Settings — Codelistener</title>
+  <link rel="stylesheet" href="st.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-      /* "Card" area (bigger, no card look) */
-      .settings-area {
-        width: 100%;
-        max-width: 1000px;
-        background: transparent;
-        display: flex;
-        flex-direction: column;
-      }
-      .tabs {
-        display: flex;
-        gap: 10px;
-        margin-bottom: 20px;
-      }
-      .tabs button {
-        flex: 1;
-        padding: 18px;
-        border: none;
-        border-radius: 8px;
-        margin-right:5px;
-        background: #17241e;
-        color: #c1ffe2;
-        box-shadow: 0 0 0 0.67px #676767;
-        font-weight: bold;
-        cursor: pointer;
-        transition: all 0.6s ease-in-out;
-      }
-      .tabs button.active {
-        background: linear-gradient(150deg,#19ac68, #26ff9a, #70fdbb);
-        border-radius:4px;
-        color: #fff;
-      }
-      .tab-content {
-        display: none;
-        background-color:#1a1a1a;
-        padding:15px;
-        border-radius:10px;
-        box-shadow:
-        0 0 3px #fff;
-        animation: slideInFromLeft 0.8s ease-out forwards;
-      }
-      
-      @keyframes slideInFromLeft {
-  0% {
-    /* Start position: 100% of the element's width off the left edge */
-    transform: translateX(-20%);
-    opacity: 0;
-  }
-  100% {
-    /* End position: Default position */
-    transform: translateX(0);
-        opacity:0.80;
-  }
-}
-      .tab-content.active {
-        display: block;
-      }
+  <style>
+    /* ─── VARIABLES ─────────────────────────────────── */
+    :root {
+      --mint:        #26ff9a;
+      --mint-dim:    rgba(38,255,154,0.12);
+      --mint-glow:   rgba(38,255,154,0.35);
+      --black:       #000000;
+      --surface:     #0c0c0c;
+      --surface2:    #141414;
+      --surface3:    #1c1c1c;
+      --border:      rgba(38,255,154,0.15);
+      --border-hot:  rgba(38,255,154,0.45);
+      --text:        #e8e8e8;
+      --text-dim:    #777;
+      --text-muted:  #444;
+      --ff-display:  'Syne', sans-serif;
+      --ff-mono:     'DM Mono', monospace;
+      --radius:      14px;
+      --radius-sm:   8px;
+      --transition:  0.3s cubic-bezier(0.4,0,0.2,1);
+    }
 
-      /* Sections */
-      .section {
-        margin-bottom: 20px;
-      }
-      .section h3 {
-        margin-bottom: 10px;
-        color: #26ff9a;
-      }
-      .menu-item {
-        display: flex;
-        align-items: center;
-        margin-bottom: 12px;
-      }
-      .menu-item label {
-        width: 180px;
-      }
-      .menu-item input[type="checkbox"],
-      .menu-item select,
-      .menu-item input[type="text"],
-      .menu-item button {
-        flex: 1;
-        padding: 8px;
-        border-radius: 4px;
-        border: 1px solid #555;
-        background: #333;
-        color: #eee;
-      }
-      .menu-item button {
-        width: auto;
-        margin-left: 10px;
-        cursor: pointer;
-      }
+    /* ─── RESET ─────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-      /* Responsive */
-      @media (max-width: 600px) {
-        .menu-item {
-          flex-direction: column;
-          align-items: flex-start;
-        }
-        .menu-item label {
-          margin-bottom: 5px;
-          width: 100%;
-        }
-      }
-      .myButton {
-        background-color: black; /* The initial color */
-        color: white; /* Text color */
-        padding: 10px 20px; /* Some spacing */
-        border-radius: 8px;
-        border: 0.5px solid #26ff9a; /* Remove default border */
-        cursor: pointer; /* Change cursor to a hand pointer */
-        transition: box-shadow 0.3s ease; /* Smooth transition effect */
-        font-size: 16px; /* Font size */
-      }
-      .myButton:hover {
-        box-shadow:
-          0 0 4px #26ff9a, /* Inner glow/sharper glow */
-          0 0 8px #26ff9a, /* Medium glow */
-          0 0 11px #26ff9a; /* Wider, softer glow */
-      }
-      /* Changed 'erti' selector to class '.erti' */
-      .erti {
-        color: #26ff9a;
-        font-weight: bold;
-      }
+    html, body {
+      height: 100%;
+      background: var(--black);
+      color: var(--text);
+      font-family: var(--ff-mono);
+      overflow-x: hidden;
+    }
 
-      /* Changed 'savg' id to class .savg */
-      .savg {
-        width: 40px;
-        height: 40px;
-        background-color: #1a1a1a;
-        transition: box-shadow 0.3s ease-in-out;
-        border-radius: 5px;
-        border: 0.5px solid #26ff9a;
-      }
+    /* ─── BACKGROUND GRID ────────────────────────────── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(38,255,154,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(38,255,154,0.03) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none;
+      z-index: 0;
+    }
 
-      .savg:hover {
-        box-shadow:
-          0 0 4px #26ff9a, /* Inner glow/sharper glow */
-          0 0 8px #26ff9a, /* Medium glow */
-          0 0 11px #26ff9a; /* Wider, softer glow */
-      }
+    /* Radial vignette */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(ellipse at 50% 0%, transparent 40%, #000 100%);
+      pointer-events: none;
+      z-index: 0;
+    }
 
-      .main-content {
-        display: flex;
-        justify-content: center; /* Centers horizontally */
-        height: 100vh; /* Example: Centers within the viewport height */
-      }
+    /* ─── STARTUP KEYFRAMES ─────────────────────────── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+    @keyframes slideRight {
+      from { opacity: 0; transform: translateX(-16px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes scanDown {
+      0%   { transform: translateY(-100%); opacity: 0.6; }
+      100% { transform: translateY(400%);  opacity: 0; }
+    }
+    @keyframes pulse-border {
+      0%,100% { border-color: var(--border); }
+      50%      { border-color: var(--border-hot); }
+    }
+    @keyframes glowPulse {
+      0%,100% { box-shadow: 0 0 0 rgba(38,255,154,0); }
+      50%      { box-shadow: 0 0 20px rgba(38,255,154,0.2); }
+    }
+    @keyframes headerLine {
+      from { width: 0; }
+      to   { width: 100%; }
+    }
+    @keyframes countUp {
+      from { opacity: 0; transform: scale(0.85); }
+      to   { opacity: 1; transform: scale(1); }
+    }
 
-      .ey {
-        display: flex; /* Aligns immediate children (image and text-container) side-by-side */
-        align-items: center; /* Vertically centers items within the container */
-        gap: 15px; /* Adds space between the image and the text-container */
+    /* ─── LAYOUT ─────────────────────────────────────── */
+    .page-shell {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      padding: 0 0 80px 100px; /* sidebar offset */
+      display: flex;
+      flex-direction: column;
+    }
 
-        /* Optional styling for visibility */
-        border: 1px solid #ccc;
-        padding: 10px;
-        max-width: 400px;
-      }
+    /* ─── PAGE HEADER ────────────────────────────────── */
+    .page-header {
+      padding: 52px 60px 36px;
+      opacity: 0;
+      animation: fadeUp 0.7s ease 0.1s forwards;
+    }
 
-      .text-container {
-        display: flex; /* Aligns children (h4 and span) vertically */
-        flex-direction: column;
-        /* Adjust margins on default H4 and span elements if needed */
-        margin: 0;
-        padding: 0;
-      }
+    .page-header__eyebrow {
+      font-family: var(--ff-mono);
+      font-size: 10px;
+      letter-spacing: 0.25em;
+      color: var(--mint);
+      text-transform: uppercase;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .page-header__eyebrow::before {
+      content: '';
+      display: inline-block;
+      width: 24px;
+      height: 1px;
+      background: var(--mint);
+    }
 
-      /* Optional: Remove default browser margins from the h4 for a cleaner look */
-      .text-container h4,
-      .text-container span {
-        margin: 0;
-      }
-      .tyt2 {
-        border: none;
-        border-radius: 5px;
-        background-color: #5481cc;
-        transition: background-color 1s ease;
-        color: white;
-        font-size: 20px;
-        width: 80px;
-        height: 40px;
-      }
+    .page-header__title {
+      font-family: var(--ff-display);
+      font-size: clamp(32px, 4vw, 52px);
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: -0.03em;
+      line-height: 1;
+      position: relative;
+      display: inline-block;
+    }
+    .page-header__title span {
+      color: var(--mint);
+    }
 
-      .tyt2:hover {
-        background-color: #3a82fe;
-      }
+    .page-header__underline {
+      height: 1px;
+      background: linear-gradient(90deg, var(--mint), transparent);
+      margin-top: 20px;
+      animation: headerLine 1s ease 0.6s both;
+      width: 0;
+      max-width: 320px;
+    }
 
-      .se {
-        width: 240px;
-        height: 40px;
-        background-color: #26ff9a;
-        border-radius: 3.5px;
-        color: white;
-        font-weight: bold;
-        border: none;
-        transition: background-color 0.3s ease-in-out;
-      }
+    /* ─── MAIN BODY ──────────────────────────────────── */
+    .settings-body {
+      display: grid;
+      grid-template-columns: 200px 1fr;
+      gap: 0;
+      padding: 0 60px;
+      flex: 1;
+    }
 
-      .se:hover {
-        background-color: #78ffbd;
-      }
+    /* ─── VERTICAL NAV ───────────────────────────────── */
+    .vnav {
+      padding-right: 32px;
+      padding-top: 8px;
+      opacity: 0;
+      animation: slideRight 0.6s ease 0.4s forwards;
+      position: sticky;
+      top: 32px;
+      align-self: start;
+    }
 
-      #cookieFileInput {
-        display: none;
-      }
+    .vnav__label {
+      font-size: 9px;
+      letter-spacing: 0.22em;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-bottom: 16px;
+      padding-left: 4px;
+    }
 
-      #controls {
-          width:400px;
-      }
-      #controls label {
-        display: block;
-        margin: 10px 0 4px 0;
-        font-weight: bold;
-      }
-input[type=range] {
-  /* 1. Base Reset */
-  -webkit-appearance: none;
-  height: 25px; 
-  width: 100%;
-  margin: 10px 0;
-  background: transparent; 
-}
-/* WebKit (Chrome, Safari, Edge) Thumb */
-input[type=range]::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  height: 20px;
-  width: 20px;
-  border-radius: 50%;
-  background: #26FF9A; /* NEON GREEN */
-  cursor: pointer;
-  box-shadow: 0 0 5px rgba(38, 255, 154, 0.7); /* Optional: Adds a neon glow */
-  margin-top: -8px; 
-}
+    .vnav__item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-family: var(--ff-mono);
+      font-size: 12px;
+      color: var(--text-dim);
+      transition: var(--transition);
+      position: relative;
+      margin-bottom: 4px;
+      border: 1px solid transparent;
+      background: transparent;
+      width: 100%;
+      text-align: left;
+    }
+    .vnav__item i {
+      width: 16px;
+      font-size: 13px;
+      flex-shrink: 0;
+    }
+    .vnav__item:hover {
+      color: var(--text);
+      background: var(--mint-dim);
+      border-color: var(--border);
+    }
+    .vnav__item.active {
+      color: var(--mint);
+      background: var(--mint-dim);
+      border-color: var(--border-hot);
+    }
+    .vnav__item.active::before {
+      content: '';
+      position: absolute;
+      left: -1px;
+      top: 50%;
+      transform: translateY(-50%);
+      height: 60%;
+      width: 3px;
+      background: var(--mint);
+      border-radius: 0 2px 2px 0;
+    }
 
-/* Mozilla (Firefox) Thumb */
-input[type=range]::-moz-range-thumb {
-  height: 20px;
-  width: 20px;
-  border: none;
-  border-radius: 50%;
-  background: #26FF9A; /* NEON GREEN */
-  cursor: pointer;
-}
+    .vnav__divider {
+      height: 1px;
+      background: var(--border);
+      margin: 16px 0;
+    }
 
-/* -------------------------------------- */
-/* 3. TRACK (The Bar) Styling             */
-/* -------------------------------------- */
+    /* ─── TAB PANELS ─────────────────────────────────── */
+    .panels {
+      border-left: 1px solid var(--border);
+      padding-left: 48px;
+      min-height: 600px;
+    }
 
-/* WebKit (Chrome, Safari, Edge) Track */
-input[type=range]::-webkit-slider-runnable-track {
-  width: 100%;
-  height: 6px;
-  cursor: pointer;
-  background: #111111; /* DARK/BLACK Track Background */
-  border-radius: 5px;
-}
+    .panel {
+      display: none;
+      opacity: 0;
+      animation: fadeUp 0.5s ease forwards;
+    }
+    .panel.active {
+      display: block;
+    }
 
-/* Mozilla (Firefox) Track */
-input[type=range]::-moz-range-track {
-  width: 100%;
-  height: 6px;
-  cursor: pointer;
-  background: #111111; /* DARK/BLACK Track Background */
-  border-radius: 5px;
-}
+    /* ─── SECTION ────────────────────────────────────── */
+    .section {
+      margin-bottom: 48px;
+    }
 
-/* Microsoft (IE/Legacy Edge) Track and Fill */
-input[type=range]::-ms-track {
-  width: 100%;
-  height: 10px;
-  cursor: pointer;
-  background: transparent; 
-  border-color: transparent;
-  color: transparent;
-}
-input[type=range]::-ms-fill-lower {
-  background: #26FF9A; /* Neon Green for the filled part */
-  border-radius: 5px;
-}
-input[type=range]::-ms-fill-upper {
-  background: #111111; /* Dark/Black for the unfilled part */
-  border-radius: 5px;
-}
-      #controls select {
-        width: 100%;
-        padding: 4px;
-        border-radius: 4px;
-        border: none;
-        background-color: #333;
-        color: #eee;
-      }
-        label { display: block; font-size: 0.85rem; color: #aaa; margin-bottom: 10px; }
-        
-        /* Modern Inputs */
-        select, .color-input { width: 100%; height: 45px; border-radius: 12px; border: 1px solid #333; background: #121212; color: #fff; padding: 0 12px; cursor: pointer; }
-        input[type="color"] { padding: 0; border: none; height: 50px; }
+    .section__header {
+      display: flex;
+      align-items: baseline;
+      gap: 16px;
+      margin-bottom: 28px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .section__title {
+      font-family: var(--ff-display);
+      font-size: 15px;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: -0.01em;
+    }
+    .section__badge {
+      font-family: var(--ff-mono);
+      font-size: 9px;
+      letter-spacing: 0.2em;
+      color: var(--mint);
+      background: var(--mint-dim);
+      border: 1px solid var(--border-hot);
+      padding: 3px 8px;
+      border-radius: 4px;
+      text-transform: uppercase;
+    }
 
-        .toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 12px; background: #252525; border-radius: 12px; margin-bottom: 12px; }
-        .save-btn { width: 100%; padding: 15px; background: #26ff9a; color: #000; border: none; border-radius: 14px; font-weight: 700; cursor: pointer; margin-top: 10px; }
-        .save-btn:hover { filter: brightness(1.1); }
-        .nav-btn { display: block; text-align: center; margin-top: 15px; color: #8ab4f8; text-decoration: none; font-size: 0.85rem; }
-         /* Container Styling */
-  .toggle-container {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    font-family: Arial, sans-serif;
-    color: white;
-    padding: 20px;
-    background: #1a1a2b;
-    border-radius: 8px;
-    width: fit-content;
-  }
+    /* ─── FORM ELEMENTS ──────────────────────────────── */
+    .field {
+      display: grid;
+      grid-template-columns: 180px 1fr;
+      align-items: center;
+      gap: 20px;
+      padding: 14px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+    .field:last-child { border-bottom: none; }
 
-  /* The switch - the box around the slider */
-  .switch {
-    position: relative;
-    display: inline-block;
-  }
+    .field__label {
+      font-family: var(--ff-mono);
+      font-size: 12px;
+      color: var(--text-dim);
+      letter-spacing: 0.04em;
+    }
+    .field__sub {
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-top: 2px;
+      letter-spacing: 0.02em;
+    }
 
-  /* Hide default HTML checkbox */
-  .switch input {
-    opacity: 0;
-    width: 0;
-    height: 0;
-  }
+    .field__control {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
 
-  /* The slider */
-  .slider {
-    position: absolute;
-    content: "";
-    left: 4px;
-    bottom: 4px;
-    background:transparent;
-    transition: .4s;
-  }
-   </style>
-  </head>
-  <body>
-    <div class="sidebar">
-      <img src="https://cdn.jsdelivr.net/gh/PopAnynomous234/assets/logo.png" width=70px height=70px alt="logo">
-      <ul>
-        <li>
-          <a href="index.html">
-            <i class="fas fa-home icon"></i><span class="text">Home</span>
-          </a>
-        </li>
-        <li>
-          <a href="ai.html">
-            <i class="fas fa-robot icon"></i><span class="text">AI</span>
-          </a>
-        </li>
-        <li>
-          <a href="tools.html">
-<i class="fa-solid fa-screwdriver-wrench"></i>
-            <span class="text">Tools</span>
-          </a>
-        </li>
-        <li>
-          <a href="games.html">
-            <i class="fas fa-gamepad icon"></i><span class="text">Games</span>
-          </a>
-        </li>
-        <li>
-          <a href="music.html">
-            <i class="fas fa-music icon"></i><span class="text">Music</span>
-          </a>
-        </li>
-        <li>
-          <a href="chat.html">
-            <i class="fa-regular fa-comment icon"></i><span class="text">Chat</span>
-          </a>
-        </li>
-        <li>
-          <a href="settings.html">
-            <i class="fas fa-cog icon"></i><span class="text">Settings</span>
-          </a>
-        </li>
-      </ul>
-    </div>
+    /* Inputs */
+    .input {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: var(--ff-mono);
+      font-size: 12px;
+      padding: 11px 16px;
+      border-radius: var(--radius-sm);
+      outline: none;
+      transition: var(--transition);
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    .input:focus {
+      border-color: var(--mint);
+      background: var(--surface3);
+      box-shadow: 0 0 0 3px rgba(38,255,154,0.08);
+    }
+    .input::placeholder { color: var(--text-muted); }
 
-    <div class="main-content">
-      <div class="settings-area">
-        <!-- Tabs -->
-        <div class="tabs">
-          <button class="active" data-tab="appearance">Theme</button>
-          <button data-tab="transform">Transform</button>
-          <button data-tab="about">Policy</button>
-          <button data-tab="misc">About</button>
-          <button data-tab="help">Help-Desk</button>
-        </div>
+    select.input {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2326ff9a' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      padding-right: 36px;
+      cursor: pointer;
+    }
 
-        <!-- Tab Contents -->
-        <div id="appearance" class="tab-content active">
-          <div class="section">
-            <div class="menu-item">
-              <div id="controls">
-                  <h3>Particle Settings</h3>
-                <label for="particlesAmount"
-                  >Particles Amount: <span id="amountValue"></span></label
-                >
-                <input
-                  type="range"
-                  id="particlesAmount"
-                  min="0"
-                  max="300"
-                  step="1"
-                />
+    select.input option { background: #1a1a1a; }
 
-                <label for="moveSpeed"
-                  >Move Speed: <span id="speedValue"></span></label
-                >
-                <input type="range" id="moveSpeed" min="0" max="10" step="0.1" />
+    /* Toggle */
+    .toggle-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .toggle {
+      position: relative;
+      width: 44px;
+      height: 24px;
+      flex-shrink: 0;
+    }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .toggle-track {
+      position: absolute;
+      inset: 0;
+      background: var(--surface3);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .toggle-track::after {
+      content: '';
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 16px;
+      height: 16px;
+      background: var(--text-dim);
+      border-radius: 50%;
+      transition: var(--transition);
+    }
+    .toggle input:checked + .toggle-track {
+      background: var(--mint-dim);
+      border-color: var(--mint);
+    }
+    .toggle input:checked + .toggle-track::after {
+      transform: translateX(20px);
+      background: var(--mint);
+      box-shadow: 0 0 8px var(--mint-glow);
+    }
+    .toggle-label {
+      font-family: var(--ff-mono);
+      font-size: 12px;
+      color: var(--text-dim);
+    }
 
-                <label for="sizeRange"
-                  >Particle Size: <span id="sizeValue"></span></label
-                >
-                <input type="range" id="sizeRange" min="0" max="20" step="0.1" />
+    /* Range slider */
+    .slider-wrap {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      width: 100%;
+    }
+    .slider-wrap input[type=range] {
+      flex: 1;
+      -webkit-appearance: none;
+      appearance: none;
+      height: 4px;
+      background: var(--surface3);
+      border-radius: 999px;
+      outline: none;
+    }
+    .slider-wrap input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--mint);
+      cursor: pointer;
+      box-shadow: 0 0 8px var(--mint-glow);
+      transition: transform 0.2s;
+    }
+    .slider-wrap input[type=range]::-webkit-slider-thumb:hover {
+      transform: scale(1.3);
+    }
+    .slider-wrap input[type=range]::-moz-range-thumb {
+      width: 16px;
+      height: 16px;
+      border: none;
+      border-radius: 50%;
+      background: var(--mint);
+      cursor: pointer;
+    }
+    .slider-value {
+      font-family: var(--ff-mono);
+      font-size: 11px;
+      color: var(--mint);
+      width: 36px;
+      text-align: right;
+      flex-shrink: 0;
+    }
 
-                <label for="shapeSelect">Shape:</label>
-                <select id="shapeSelect">
+    /* Color pickers */
+    .color-pair {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .color-swatch {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .color-swatch__label {
+      font-size: 10px;
+      color: var(--text-muted);
+      letter-spacing: 0.08em;
+    }
+    .color-swatch input[type=color] {
+      width: 100%;
+      height: 44px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--surface2);
+      cursor: pointer;
+      padding: 4px;
+      transition: var(--transition);
+    }
+    .color-swatch input[type=color]:hover {
+      border-color: var(--mint);
+    }
+
+    /* ─── BUTTONS ────────────────────────────────────── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--ff-mono);
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      padding: 11px 24px;
+      border-radius: var(--radius-sm);
+      border: none;
+      cursor: pointer;
+      transition: var(--transition);
+      text-decoration: none;
+    }
+    .btn-primary {
+      background: var(--mint);
+      color: #000;
+    }
+    .btn-primary:hover {
+      background: #4dffa8;
+      box-shadow: 0 0 24px rgba(38,255,154,0.35);
+      transform: translateY(-1px);
+    }
+    .btn-primary:active { transform: translateY(0); }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--mint);
+      border: 1px solid var(--border-hot);
+    }
+    .btn-ghost:hover {
+      background: var(--mint-dim);
+      box-shadow: 0 0 16px rgba(38,255,154,0.15);
+      transform: translateY(-1px);
+    }
+
+    .btn-danger {
+      background: transparent;
+      color: #ff6b6b;
+      border: 1px solid rgba(255,107,107,0.3);
+    }
+    .btn-danger:hover {
+      background: rgba(255,107,107,0.08);
+      border-color: rgba(255,107,107,0.6);
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      margin-top: 32px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+    }
+
+    /* ─── STAT CARDS ─────────────────────────────────── */
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 14px;
+      margin-bottom: 32px;
+    }
+    .stat-card {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 18px;
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--mint), transparent);
+      opacity: 0;
+      transition: var(--transition);
+    }
+    .stat-card:hover { border-color: var(--border-hot); }
+    .stat-card:hover::before { opacity: 1; }
+    .stat-card__value {
+      font-family: var(--ff-display);
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--mint);
+      display: block;
+      margin-bottom: 4px;
+      animation: countUp 0.6s ease both;
+    }
+    .stat-card__label {
+      font-size: 10px;
+      color: var(--text-muted);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    /* ─── INFO CARD ──────────────────────────────────── */
+    .info-card {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+      margin-bottom: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+    .info-card::after {
+      content: '';
+      position: absolute;
+      top: -40%;
+      right: -20%;
+      width: 200px;
+      height: 200px;
+      background: radial-gradient(circle, rgba(38,255,154,0.05) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    /* ─── POLICY LIST ────────────────────────────────── */
+    .policy-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .policy-list li {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      font-size: 12px;
+      color: var(--text-dim);
+      line-height: 1.7;
+      padding: 14px 18px;
+      background: var(--surface2);
+      border-radius: var(--radius-sm);
+      border: 1px solid transparent;
+      transition: var(--transition);
+    }
+    .policy-list li:hover {
+      border-color: var(--border);
+      color: var(--text);
+    }
+    .policy-list li::before {
+      content: '//';
+      color: var(--mint);
+      font-weight: 700;
+      flex-shrink: 0;
+      margin-top: 1px;
+      font-size: 11px;
+    }
+
+    /* ─── PARTNER CARD ───────────────────────────────── */
+    .partner-card {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      transition: var(--transition);
+    }
+    .partner-card:hover {
+      border-color: var(--border-hot);
+      background: var(--surface3);
+    }
+    .partner-card img {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+    }
+    .partner-card__info h4 {
+      font-family: var(--ff-display);
+      font-size: 14px;
+      font-weight: 700;
+      color: #8ab4f8;
+      margin-bottom: 3px;
+    }
+    .partner-card__info p {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+    .partner-card .btn { margin-left: auto; }
+
+    /* ─── SYNC CARD ──────────────────────────────────── */
+    .sync-panel {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 32px;
+      max-width: 440px;
+      position: relative;
+      overflow: hidden;
+    }
+    .sync-panel::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--mint) 50%, transparent);
+    }
+    /* Scanline effect */
+    .sync-panel::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 60px;
+      background: linear-gradient(to bottom, rgba(38,255,154,0.04), transparent);
+      animation: scanDown 4s linear infinite;
+      pointer-events: none;
+    }
+    .sync-panel__title {
+      font-family: var(--ff-display);
+      font-size: 18px;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 6px;
+    }
+    .sync-panel__sub {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-bottom: 28px;
+      letter-spacing: 0.04em;
+    }
+    .sync-status {
+      font-family: var(--ff-mono);
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-top: 20px;
+      padding: 10px 14px;
+      background: var(--surface);
+      border-radius: 6px;
+      border-left: 2px solid var(--mint);
+      letter-spacing: 0.1em;
+    }
+
+    /* ─── HELP ITEMS ─────────────────────────────────── */
+    .help-item {
+      padding: 22px 24px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 12px;
+      transition: var(--transition);
+      cursor: default;
+    }
+    .help-item:hover { border-color: var(--border-hot); }
+    .help-item__head {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+    .help-item__icon {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--mint-dim);
+      border: 1px solid var(--border-hot);
+      border-radius: 8px;
+      color: var(--mint);
+      font-size: 13px;
+      flex-shrink: 0;
+    }
+    .help-item__title {
+      font-family: var(--ff-display);
+      font-size: 13px;
+      font-weight: 700;
+      color: #fff;
+    }
+    .help-item p {
+      font-size: 12px;
+      color: var(--text-dim);
+      line-height: 1.7;
+    }
+
+    /* ─── TRANSFORM ──────────────────────────────────── */
+    .transform-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+    .transform-opt {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      cursor: pointer;
+      transition: var(--transition);
+      position: relative;
+    }
+    .transform-opt:hover {
+      border-color: var(--border-hot);
+      background: var(--surface3);
+    }
+    .transform-opt__label {
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      color: var(--mint);
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .transform-opt__title {
+      font-family: var(--ff-display);
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+    }
+    .transform-opt__desc {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 8px;
+      line-height: 1.6;
+    }
+
+    /* Blob mask toggle */
+    .blob-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      margin-bottom: 16px;
+      transition: var(--transition);
+    }
+    .blob-toggle:hover { border-color: var(--border-hot); }
+    .blob-toggle__info h4 {
+      font-family: var(--ff-display);
+      font-size: 13px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 4px;
+    }
+    .blob-toggle__info p {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    /* ─── TOAST ──────────────────────────────────────── */
+    #toast {
+      position: fixed;
+      top: 32px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--surface);
+      color: var(--mint);
+      border: 1px solid var(--mint);
+      padding: 12px 28px;
+      border-radius: var(--radius-sm);
+      font-family: var(--ff-mono);
+      font-size: 12px;
+      letter-spacing: 0.1em;
+      box-shadow: 0 0 40px rgba(38,255,154,0.2);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 9999;
+      transition: opacity 0.4s ease;
+    }
+
+    /* ─── STAGGER HELPERS ────────────────────────────── */
+    .stagger > * { opacity: 0; animation: fadeUp 0.5s ease both; }
+    .stagger > *:nth-child(1) { animation-delay: 0.05s; }
+    .stagger > *:nth-child(2) { animation-delay: 0.1s; }
+    .stagger > *:nth-child(3) { animation-delay: 0.15s; }
+    .stagger > *:nth-child(4) { animation-delay: 0.2s; }
+    .stagger > *:nth-child(5) { animation-delay: 0.25s; }
+    .stagger > *:nth-child(6) { animation-delay: 0.3s; }
+    .stagger > *:nth-child(7) { animation-delay: 0.35s; }
+    .stagger > *:nth-child(8) { animation-delay: 0.4s; }
+    .stagger > *:nth-child(9) { animation-delay: 0.45s; }
+    .stagger > *:nth-child(10){ animation-delay: 0.5s; }
+    .stagger > *:nth-child(11){ animation-delay: 0.55s; }
+
+    /* ─── SCROLLBAR ──────────────────────────────────── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #222; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #333; }
+
+    /* ─── SIDEBAR OFFSET ─────────────────────────────── */
+    .sidebar { z-index: 10; }
+  </style>
+</head>
+<body>
+
+<!-- Toast notification -->
+<div id="toast">COMMAND_SUCCESSFUL</div>
+
+<!-- ── SIDEBAR (untouched) ─────────────────────────── -->
+<div class="sidebar">
+  <img src="https://cdn.jsdelivr.net/gh/PopAnynomous234/assets/logo.png" width="70" height="70" alt="logo">
+  <ul>
+    <li><a href="index.html"><i class="fas fa-home icon"></i><span class="text">Home</span></a></li>
+    <li><a href="ai.html"><i class="fas fa-robot icon"></i><span class="text">AI</span></a></li>
+    <li><a href="tools.html"><i class="fa-solid fa-screwdriver-wrench"></i><span class="text">Tools</span></a></li>
+    <li><a href="games.html"><i class="fas fa-gamepad icon"></i><span class="text">Games</span></a></li>
+    <li><a href="music.html"><i class="fas fa-music icon"></i><span class="text">Music</span></a></li>
+    <li><a href="chat.html"><i class="fa-regular fa-comment icon"></i><span class="text">Chat</span></a></li>
+    <li><a href="settings.html"><i class="fas fa-cog icon"></i><span class="text">Settings</span></a></li>
+  </ul>
+</div>
+
+<!-- ── PAGE SHELL ─────────────────────────────────────── -->
+<div class="page-shell">
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="page-header__eyebrow">codelistener </div>
+    <h1 class="page-header__title">Settings<span>.</span></h1>
+    <div class="page-header__underline"></div>
+  </div>
+
+  <!-- Body -->
+  <div class="settings-body">
+
+    <!-- Vertical Nav -->
+    <nav class="vnav">
+      <div class="vnav__label">Navigation</div>
+
+      <button class="vnav__item active" data-panel="theme">
+        <i class="fa-solid fa-palette"></i> Theme
+      </button>
+      <button class="vnav__item" data-panel="transform">
+        <i class="fa-solid fa-mask"></i> Transform
+      </button>
+      <button class="vnav__item" data-panel="sync">
+        <i class="fa-solid fa-cloud-arrow-up"></i> Sync
+      </button>
+
+      <div class="vnav__divider"></div>
+      <div class="vnav__label">Info</div>
+
+      <button class="vnav__item" data-panel="policy">
+        <i class="fa-solid fa-file-shield"></i> Policy
+      </button>
+      <button class="vnav__item" data-panel="about">
+        <i class="fa-solid fa-circle-info"></i> About
+      </button>
+      <button class="vnav__item" data-panel="help">
+        <i class="fa-solid fa-life-ring"></i> Help-Desk
+      </button>
+    </nav>
+
+    <!-- Panels -->
+    <div class="panels">
+
+      <!-- ── THEME ──────────────────────────────────── -->
+      <div id="panel-theme" class="panel active">
+        <div class="section">
+          <div class="section__header">
+            <span class="section__title">Particle Settings</span>
+            <span class="section__badge">Visual</span>
+          </div>
+
+          <div class="stagger">
+            <div class="field">
+              <div class="field__label">
+                Particles Amount
+                <div class="field__sub">Number of floating particles</div>
+              </div>
+              <div class="field__control">
+                <div class="slider-wrap">
+                  <input type="range" id="particlesAmount" min="0" max="300" step="1" oninput="document.getElementById('amountValue').textContent = this.value">
+                  <span class="slider-value" id="amountValue">80</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="field">
+              <div class="field__label">
+                Move Speed
+                <div class="field__sub">Particle drift velocity</div>
+              </div>
+              <div class="field__control">
+                <div class="slider-wrap">
+                  <input type="range" id="moveSpeed" min="0" max="10" step="0.1" oninput="document.getElementById('speedValue').textContent = this.value">
+                  <span class="slider-value" id="speedValue">3.0</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="field">
+              <div class="field__label">
+                Particle Size
+                <div class="field__sub">Radius of each particle</div>
+              </div>
+              <div class="field__control">
+                <div class="slider-wrap">
+                  <input type="range" id="sizeRange" min="0" max="20" step="0.1" oninput="document.getElementById('sizeValue').textContent = this.value">
+                  <span class="slider-value" id="sizeValue">4.0</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="field">
+              <div class="field__label">Shape</div>
+              <div class="field__control">
+                <select id="shapeSelect" class="input">
                   <option value="circle">Circle</option>
                   <option value="edge">Square</option>
                   <option value="triangle">Triangle</option>
@@ -441,66 +985,164 @@ input[type=range]::-ms-fill-upper {
               </div>
             </div>
           </div>
-            <h3>Widget Settings</h3>
-            
-                <label>Theme Colors</label>
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-                    <div><label style="font-size:0.7rem;">Accent</label><input type="color" id="accent" class="color-input"></div>
-                    <div><label style="font-size:0.7rem;">Background</label><input type="color" id="bg" class="color-input"></div>
-                </div>
-        
-          
-                <label>Animation Style</label>
-                <select id="style">
-                    <option value="style-chromeos">ChromeOS (Smooth Wide)</option>
-                    <option value="style-float">Floating (Minimal Rise)</option>
-                    <option value="style-glass">Glassmorphism (Full Reveal)</option>
-                </select>
-        
-        
-        
-                <label>Placement</label>
-                <select id="align">
-                    <option value="bottom-right">Bottom Right</option>
-                    <option value="bottom-left">Bottom Left</option>
-                    <option value="top-right">Top Right</option>
-                    <option value="top-left">Top Left</option>
-                </select>
-        
-            <div class="toggle-row">
-                <span>24-Hour Clock</span>
-                <input type="checkbox" id="h24" style="width:20px; height:20px;">
-            </div>
-        <div class="opt toggle-row" style="border-top: 1px solid #333; padding-top: 15px; margin-top: 20px;">
-            <span>Enable Widget</span>
-            <input type="checkbox" id="w_enabled" style="width:20px; height:20px;">
-        </div>
-            <button class="save-btn" onclick="save()">Apply Design</button>
         </div>
 
-        <div id="transform" class="tab-content">
-          <div class="section">
-            <h3>About:Blank</h3>
-            <p>
-              About:Blank is originally a blank page, but you can fill in some
-              content and use it.
-            </p>
-            <p>Note: Some features might not work as expected.</p>
-            <button class="mybutton" id="toggleBtn">Toggle about:blank</button>
-    <p id="status"></p>
-    <p id="import-status" style="color:red;"></p>
-       <h3>Blob</h3>
-       <p>Blob saves the data of this website in the memory. Can't be seen by most extensions.</p>
-        <label class="switch">
-          <input type="checkbox" id="cloakToggle" onchange="handleToggle(this)">
-          <i class="fa-solid fa-mask" style="color: #63E6BE; width:50px; height:50px;"></i>
-          <span class="slider round"></span>
-        </label>
-       <h3>Transform Tab</h3>
-            <p>Want a Tab disguise? Choose here to change the tab title.</p>
-            <div class="menu-item">
-              <label for="preset">Preset:</label>
-              <select id="preset">
+        <div class="section">
+          <div class="section__header">
+            <span class="section__title">Widget Settings</span>
+            <span class="section__badge">UI</span>
+          </div>
+
+          <div class="stagger">
+            <div class="field">
+              <div class="field__label">
+                Theme Colors
+                <div class="field__sub">Accent and background</div>
+              </div>
+              <div class="field__control">
+                <div class="color-pair" style="width:100%">
+                  <div class="color-swatch">
+                    <span class="color-swatch__label">Accent</span>
+                    <input type="color" id="accent" value="#26ff9a">
+                  </div>
+                  <div class="color-swatch">
+                    <span class="color-swatch__label">Background</span>
+                    <input type="color" id="bg" value="#202124">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="field">
+              <div class="field__label">Animation Style</div>
+              <div class="field__control">
+                <select id="style" class="input">
+                  <option value="style-chromeos">ChromeOS — Smooth Wide</option>
+                  <option value="style-float">Floating — Minimal Rise</option>
+                  <option value="style-glass">Glassmorphism — Full Reveal</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="field">
+              <div class="field__label">Placement</div>
+              <div class="field__control">
+                <select id="align" class="input">
+                  <option value="bottom-right">Bottom Right</option>
+                  <option value="bottom-left">Bottom Left</option>
+                  <option value="top-right">Top Right</option>
+                  <option value="top-left">Top Left</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="field">
+              <div class="field__label">
+                24-Hour Clock
+                <div class="field__sub">Toggle time format</div>
+              </div>
+              <div class="field__control">
+                <label class="toggle">
+                  <input type="checkbox" id="h24">
+                  <div class="toggle-track"></div>
+                </label>
+                <span class="toggle-label">Enable</span>
+              </div>
+            </div>
+
+            <div class="field">
+              <div class="field__label">
+                Widget Enabled
+                <div class="field__sub">Show / hide widget overlay</div>
+              </div>
+              <div class="field__control">
+                <label class="toggle">
+                  <input type="checkbox" id="w_enabled">
+                  <div class="toggle-track"></div>
+                </label>
+                <span class="toggle-label">Active</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="btn-row">
+            <button class="btn btn-primary" onclick="save()">
+              <i class="fa-solid fa-floppy-disk"></i> Apply Design
+            </button>
+            <span style="font-size:11px; color:var(--text-muted);">Changes are persisted locally</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── TRANSFORM ──────────────────────────────── -->
+      <div id="panel-transform" class="panel">
+        <div class="section">
+          <div class="section__header">
+            <span class="section__title">Tab Disguise</span>
+            <span class="section__badge">Stealth</span>
+          </div>
+
+          <div class="blob-toggle">
+            <div class="blob-toggle__info">
+              <h4><i class="fa-solid fa-mask" style="color:var(--mint);margin-right:8px;"></i>Blob Cloak</h4>
+              <p>Hides site data in memory — invisible to most browser extensions.</p>
+            </div>
+            <label class="toggle" style="margin-left:20px;">
+              <input type="checkbox" id="cloakToggle" onchange="handleToggle(this)">
+              <div class="toggle-track"></div>
+            </label>
+          </div>
+
+          <div class="blob-toggle">
+            <div class="blob-toggle__info">
+              <h4><i class="fa-solid fa-door-open" style="color:var(--mint);margin-right:8px;"></i>About:Blank</h4>
+              <p>Open site inside a blank-page wrapper for additional concealment.</p>
+            </div>
+            <button class="btn btn-ghost" id="toggleBtn">Toggle</button>
+                <p id="status" style="margin-top: 24px; font-size: 11px; color: #444444; font-weight: 700; font-family: monospace;"></p>
+          </div>
+
+          <div class="section__header" style="margin-top:36px;">
+            <span class="section__title">Preset Transform</span>
+          </div>
+
+          <div class="transform-grid">
+            <div class="transform-opt" onclick="applyPresetSelect('Canvas')">
+              <div class="transform-opt__label">LMS</div>
+              <div class="transform-opt__title">Canvas</div>
+              <div class="transform-opt__desc">Mimics an educational LMS dashboard tab.</div>
+            </div>
+            <div class="transform-opt" onclick="applyPresetSelect('Chrome New-Tab')">
+              <div class="transform-opt__label">Browser</div>
+              <div class="transform-opt__title">New Tab</div>
+              <div class="transform-opt__desc">Looks exactly like a Chrome new tab page.</div>
+            </div>
+            <div class="transform-opt" onclick="applyPresetSelect('Google Drive')">
+              <div class="transform-opt__label">Productivity</div>
+              <div class="transform-opt__title">Google Drive</div>
+              <div class="transform-opt__desc">Appears as a Google Drive home page.</div>
+            </div>
+            <div class="transform-opt" onclick="applyPresetSelect('Kahoot')">
+              <div class="transform-opt__label">Games</div>
+              <div class="transform-opt__title">Kahoot</div>
+              <div class="transform-opt__desc">Disguise as the Kahoot game-pin entry.</div>
+            </div>
+            <div class="transform-opt" onclick="applyPresetSelect('Clever')">
+              <div class="transform-opt__label">Portal</div>
+              <div class="transform-opt__title">Clever</div>
+              <div class="transform-opt__desc">Mimics the Clever student portal tab.</div>
+            </div>
+            <div class="transform-opt" onclick="applyPresetSelect('Wayground')">
+              <div class="transform-opt__label">Quizzes</div>
+              <div class="transform-opt__title">Wayground</div>
+              <div class="transform-opt__desc">Formerly Quizizz student entry page.</div>
+            </div>
+          </div>
+
+          <div class="field">
+            <div class="field__label">Preset Select</div>
+            <div class="field__control">
+              <select id="preset" class="input" onchange="applyPresetSelect(this.value)">
                 <option value="default">Default</option>
                 <option value="Canvas">Canvas</option>
                 <option value="Chrome New-Tab">Chrome New-Tab</option>
@@ -510,196 +1152,210 @@ input[type=range]::-ms-fill-upper {
                 <option value="Wayground">Wayground</option>
                 <option value="Custom">Custom</option>
               </select>
-              <br />
             </div>
-            <div id="custom-transform" style="display: none">
-              <div class="menu-item">
-                <label for="custom-title">Custom Title:</label>
-                <input type="text" id="custom-title" placeholder="Enter title" />
-                <button id="custom-title-btn">Update</button>
+          </div>
+
+          <div id="custom-transform" style="display:none;">
+            <div class="field">
+              <div class="field__label">Custom Title</div>
+              <div class="field__control">
+                <input type="text" id="custom-title" class="input" placeholder="Enter page title…">
+                <button class="btn btn-ghost" id="custom-title-btn" style="white-space:nowrap; margin-left:12px;">
+                  Update
+                </button>
               </div>
             </div>
           </div>
         </div>
+      </div>
 
-        <div id="about" class="tab-content">
-          <div class="section">
-            <h3>Terms and Conditions</h3>
-            <ul>
-              <li>
-                This webpage is only intended for fun and entertaniment purposes.
-              </li>
-              <li>
-                All the credits go to Pop_Playz and Attribution for this work must
-                exclusively be given to him.
-              </li>
-              <li>
-                Any violation of this policy may result in the temporary or
-                permanent suspension of the associated website or services, at our
-                sole discretion.
-              </li>
-              <li>
-                The content provided on this site has been independently developed
-                and does not infringe upon the intellectual property of any third
-                party.
-              </li>
-              <li>
-                The chat functionality of this website is powered by Firebase©.
-                Unauthorized use of the server's API key is strictly prohibited.
-              </li>
-              <li>
-                We disclose that the website recommendations on the About page are
-                unsponsored.
-              </li>
-              <li>
-                The signature brand color, #26FF9A, is proprietary to Codelistener
-                Page. Use of this specific color is restricted to official branding
-                materials only.
-              </li>
-              <li>
-                We utilize AI site monitoring tools to analyze time and usage
-                patterns. Detection of unusual traffic or activity will
-                automatically trigger a security investigation.
-              </li>
-              <li>
-                The particle effects featured on this webpage are generated using
-                the open-source particles.js library. As this is a widely available
-                public resource, claims of plagiarism or content replication
-                directed at the site owner regarding this specific feature are
-                unfounded and prohibited.
-              </li>
-              <li>
-                Accusations of unauthorized code inspection, use of Artificial
-                Intelligence (AI), or content plagiarism against the site owner
-                without evidence are strictly prohibited. Repeated unfounded claims
-                of this nature may result in the suspension of user access.
-              </li>
-              <li>
-                The chat space is monitored for prohibited language. The use of
-                banned words or offensive content will be documented and may result
-                in the activity being reported to relevant authorities.
-              </li>
-            </ul>
-            <p>&copy; Codelistener. All rights reserved.</p>
+      <!-- ── SYNC ───────────────────────────────────── -->
+      <div id="panel-sync" class="panel">
+        <div class="section">
+          <div class="section__header">
+            <span class="section__title">Cloud Sync</span>
+            <span class="section__badge">Firebase</span>
           </div>
-        </div>
 
-        <div id="misc" class="tab-content">
-          <div class="section">
-            <h3>About</h3>
-            <h4>About the Creator</h4>
-            <p>
-              This webpage was actually created by Thomas and all credits go to Thomas. 
-              </p>
-<div id="toast" style="
-      position: absolute;
-      top: 20px;
-      background: #111111;
-      color: #26ff9a;
-      border: 1px solid #26ff9a;
-      padding: 12px 24px;
-      border-radius: 8px;
-      font-family: monospace;
-      font-weight: bold;
-      box-shadow: 0 0 20px rgba(38, 255, 154, 0.2);
-      opacity: 0;
-      transition: opacity 0.5s ease;
-      pointer-events: none;
-      z-index: 100;
-  ">
-    COMMAND_SUCCESSFUL
-  </div>
+          <div class="stat-grid">
+            <div class="stat-card">
+              <span class="stat-card__value">↑</span>
+              <span class="stat-card__label">Upload</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-card__value">↓</span>
+              <span class="stat-card__label">Download</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-card__value" style="font-size:18px;">AES</span>
+              <span class="stat-card__label">Encryption</span>
+            </div>
+          </div>
 
-  <div id="sync-card" style="font-family: 'Inter', sans-serif; background: #111111; padding: 40px; border-radius: 20px; box-shadow: 0 0 30px rgba(38, 255, 154, 0.05); width: 340px; text-align: center; border: 1px solid #222222;">
-    <h3 style="margin: 0 0 8px 0; color: #26ff9a; font-size: 24px; font-weight: 800; letter-spacing: -0.05em; text-transform: uppercase;">Sync Game Data</h3>
-    
-    <input type="text" id="username" placeholder="Enter Username" style="width: 100%; padding: 16px; margin-bottom: 20px; border: 1px solid #333333; border-radius: 8px; box-sizing: border-box; outline: none; font-family: monospace; font-size: 16px; background: #000000; color: #26ff9a; transition: 0.3s;">
-    
-    <div style="display: flex; flex-direction: column; gap: 14px;">
-      <button onclick="pushData()" style="background: #26ff9a; color: #000000; border: none; padding: 16px; border-radius: 8px; font-weight: 900; cursor: pointer; box-shadow: 0 0 15px rgba(38, 255, 154, 0.4); text-transform: uppercase;">
-        Upload to Cloud
-      </button>
-
-      <button onclick="pullData()" style="background: transparent; color: #26ff9a; border: 2px solid #26ff9a; padding: 14px; border-radius: 8px; font-weight: 900; cursor: pointer; text-transform: uppercase;">
-        Download from Cloud
-      </button>
-    </div>
-    
-    <p id="status" style="margin-top: 24px; font-size: 11px; color: #444444; font-weight: 700; font-family: monospace;">READY</p>
-  </div>
-            <h3>Uptime Status Page</h3>
-            <p>
-              Open the project's uptime status page to view current availability,
-              incidents, and historical uptime metrics.
-            </p>
-            <a href="https://codelistener.betteruptime.com" target="_blank" rel="noopener noreferrer">
-              <svg
-                class="savg"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 640 640"
-                aria-hidden="true"
-                focusable="false"
-              >
-                <!--!Font Awesome Free v7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.-->
-                <path
-                  fill="#26ff9a"
-                  d="M384 64C366.3 64 352 78.3 352 96C352 113.7 366.3 128 384 128L466.7 128L265.3 329.4C252.8 341.9 252.8 362.2 265.3 374.7C277.8 387.2 298.1 387.2 310.6 374.7L512 173.3L512 256C512 273.7 526.3 288 544 288C561.7 288 576 273.7 576 256L576 96C576 78.3 561.7 64 544 64L384 64zM144 160C99.8 160 64 195.8 64 240L64 496C64 540.2 99.8 576 144 576L400 576C444.2 576 480 540.2 480 496L480 416C480 398.3 465.7 384 448 384C430.3 384 416 398.3 416 416L416 496C416 504.8 408.8 512 400 512L144 512C135.2 512 128 504.8 128 496L128 240C128 231.2 135.2 224 144 224L224 224C241.7 224 256 209.7 256 192C256 174.3 241.7 160 224 160L144 160z"
-                />
-              </svg>
-            </a>
-<br>
-            <h3>Partners</h3>
-            <p>People that helped our site grow or collaborated with the owner.</p>
-
-            <div class="ey">
-              <i class="fa-solid fa-star" style="color: #FFD43B;"></i>
-              <img
-                style="width: 30px; height: 30px"
-                src="https://cdn.jsdelivr.net/gh/ethanlb34/delta-icons@main/default.png"
-              />
-
-              <div class="text-container">
-                <h4 style="color: #6366f1">Delta V10</h4>
-                <span style="color: #6e71c7"
-                  >A site with some more games and features.</span
-                >
-              </div>
-              <button
-                class="tyt2"
-                onclick="window.location.href='https://delta-42a39.firebaseapp.com'"
-              >
-                Visit
+          <div class="sync-panel">
+            <div class="sync-panel__title">Game Data Sync</div>
+            <div class="sync-panel__sub">Backup and restore all local data via cloud mirror.</div>
+            <input type="text" id="username" class="input" placeholder="Enter username…" style="margin-bottom:16px;">
+            <div style="display:flex; gap:12px;">
+              <button class="btn btn-primary" onclick="pushData()" style="flex:1; justify-content:center;">
+                <i class="fa-solid fa-cloud-arrow-up"></i> Upload
+              </button>
+              <button class="btn btn-ghost" onclick="pullData()" style="flex:1; justify-content:center;">
+                <i class="fa-solid fa-cloud-arrow-down"></i> Download
               </button>
             </div>
           </div>
         </div>
-        <div id="help" class="tab-content">
-          <div class="section">
-            <h3>Games</h3>
-            <p>If a game doesn't load, please wait for two minutes. If it still does not open after this time, the game may be non-functional.</p>
-            <h3>AI</h3>
-            <p>If the Chatbot says "Error: OpenAI API error (429): You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.", then we need to pay money. This will be done in 5-15 days.</p>
-            <h3>Music</h3>
-            <p>If the Music page is blank, then the Spotify API was blocked.</p>
-            <h3>Chat</h3>
-            <p>If you can't send messages, then you were muted. If you can't log in after entering your username, or when your tab freezes after you switch rooms, refresh the page.</p>
-            <h3>Settings</h3>
-            <p>If any pop-ups or redirects are not appearing, the pop-up option may be blocked or disabled by chrome. Go to the site settings (click the draggers at left of the search bar) and allow the "Pop-ups and redirects" option.</p>
-            <h3>For any more questions, talk to the owner or the website advertiser / reccomender / giver. Or talk to the owner in Chat ( Invite-Code = H3N5LH ).</h3>
+      </div>
+
+      <!-- ── POLICY ─────────────────────────────────── -->
+      <div id="panel-policy" class="panel">
+        <div class="section">
+          <div class="section__header">
+            <span class="section__title">Terms &amp; Conditions</span>
+            <span class="section__badge">Legal</span>
+          </div>
+
+          <ul class="policy-list stagger">
+            <li>This webpage is intended for fun and entertainment purposes only.</li>
+            <li>All credits go to Thomas. Attribution for this work must exclusively be given to him.</li>
+            <li>Violations may result in temporary or permanent suspension of associated services, at our sole discretion.</li>
+            <li>Content provided on this site was independently developed and does not infringe on any third party's intellectual property.</li>
+            <li>Chat functionality is powered by Firebase©. Unauthorized use of the API key is strictly prohibited.</li>
+            <li>Website recommendations on the About page are unsponsored.</li>
+            <li>The brand color <code style="color:var(--mint);">#26FF9A</code> is proprietary to Codelistener. Use is restricted to official branding only.</li>
+            <li>AI monitoring tools analyze usage patterns. Unusual activity triggers automatic security investigation.</li>
+            <li>Particle effects use the open-source particles.js library. Plagiarism claims regarding this feature are unfounded.</li>
+            <li>Accusations of unauthorized code inspection or AI use without evidence are prohibited.</li>
+            <li>The chat space is monitored. Use of banned content will be documented and may be reported.</li>
+          </ul>
+
+          <p style="font-size:11px; color:var(--text-muted); margin-top:24px; padding-top:16px; border-top:1px solid var(--border);">
+            &copy; Codelistener. All rights reserved.
+          </p>
+        </div>
+      </div>
+
+      <!-- ── ABOUT ──────────────────────────────────── -->
+      <div id="panel-about" class="panel">
+        <div class="section">
+          <div class="section__header">
+            <span class="section__title">About</span>
+            <span class="section__badge">v2.5</span>
+          </div>
+
+          <div class="info-card">
+            <p style="font-size:12px; color:var(--text-dim); line-height:1.8;">
+              This webpage was created by <strong style="color:#fff;">Thomas</strong>. All credits go to Thomas.
+            </p>
+          </div>
+
+          <div class="section__header" style="margin-top:32px;">
+            <span class="section__title">Uptime Status</span>
+          </div>
+          <div class="info-card" style="display:flex; align-items:center; gap:20px;">
+            <div style="width:10px; height:10px; border-radius:50%; background:var(--mint); box-shadow:0 0 10px var(--mint-glow); flex-shrink:0; animation:glowPulse 2s infinite;"></div>
+            <div>
+              <p style="font-size:13px; color:#fff; margin-bottom:4px;">All systems operational</p>
+              <p style="font-size:11px; color:var(--text-muted);">View incidents and historical metrics</p>
+            </div>
+            <a href="https://codelistener.betteruptime.com" target="_blank" rel="noopener" class="btn btn-ghost" style="margin-left:auto; white-space:nowrap;">
+              <i class="fa-solid fa-arrow-up-right-from-square"></i> Open
+            </a>
+          </div>
+
+          <div class="section__header" style="margin-top:32px;">
+            <span class="section__title">Partners</span>
+          </div>
+
+          <div class="partner-card">
+            <i class="fa-solid fa-star" style="color:#FFD43B; font-size:18px;"></i>
+            <img src="https://cdn.jsdelivr.net/gh/ethanlb34/delta-icons@main/default.png" alt="Delta">
+            <div class="partner-card__info">
+              <h4>Delta V10</h4>
+              <p>A site with extra games and features.</p>
+            </div>
+            <button class="btn btn-ghost" onclick="window.open('https://delta-42a39.firebaseapp.com','_blank')">
+              Visit <i class="fa-solid fa-arrow-right"></i>
+            </button>
           </div>
         </div>
       </div>
-    </div>
-    <script src="era5.js"></script>
-    <script src="era3.js"></script>
-    <script src="era4.js"></script>
-    <script src="pe.js"></script>
-    <script src="about.js"></script>
-    <script src="warn.js"></script>
-    <script src="era20.js"></script>
-    <script src="era21.js"></script>
-    <script src="cursor.js"></script>
-    <script src="widget.js"></script>
+
+      <!-- ── HELP ───────────────────────────────────── -->
+      <div id="panel-help" class="panel">
+        <div class="section">
+          <div class="section__header">
+            <span class="section__title">Help Desk</span>
+            <span class="section__badge">Support</span>
+          </div>
+
+          <div class="stagger">
+            <div class="help-item">
+              <div class="help-item__head">
+                <div class="help-item__icon"><i class="fa-solid fa-gamepad"></i></div>
+                <span class="help-item__title">Games</span>
+              </div>
+              <p>If a game doesn't load, wait two minutes. If still broken after that, the game may be non-functional.</p>
+            </div>
+
+            <div class="help-item">
+              <div class="help-item__head">
+                <div class="help-item__icon"><i class="fa-solid fa-robot"></i></div>
+                <span class="help-item__title">AI</span>
+              </div>
+              <p>If the chatbot shows a quota error (429), the API key needs to be recharged. Expected resolution: 5–15 days.</p>
+            </div>
+
+            <div class="help-item">
+              <div class="help-item__head">
+                <div class="help-item__icon"><i class="fa-solid fa-music"></i></div>
+                <span class="help-item__title">Music</span>
+              </div>
+              <p>If the Music page is blank, the streaming tunnel may be blocked. Try again later.</p>
+            </div>
+
+            <div class="help-item">
+              <div class="help-item__head">
+                <div class="help-item__icon"><i class="fa-regular fa-comments"></i></div>
+                <span class="help-item__title">Chat</span>
+              </div>
+              <p>Can't send? You may have been muted. If login freezes on room switch — refresh the page.</p>
+            </div>
+
+            <div class="help-item">
+              <div class="help-item__head">
+                <div class="help-item__icon"><i class="fa-solid fa-cog"></i></div>
+                <span class="help-item__title">Settings</span>
+              </div>
+              <p>If pop-ups don't appear, enable "Pop-ups and redirects" in Chrome site settings (the toggles icon left of the URL bar).</p>
+            </div>
+
+            <div class="help-item">
+              <div class="help-item__head">
+                <div class="help-item__icon"><i class="fa-solid fa-headset"></i></div>
+                <span class="help-item__title">Contact</span>
+              </div>
+              <p>For further questions, reach the owner in Chat. Invite Code: <code style="color:var(--mint); letter-spacing:0.1em;">H3N5LH</code></p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /panels -->
+  </div><!-- /settings-body -->
+</div><!-- /page-shell -->
+
+<!-- ── SCRIPTS ──────────────────────────────────────── -->
+<script src="era5.js"></script>
+<script src="era3.js"></script>
+<script src="era4.js"></script>
+<script src="pe.js"></script>
+<script src="about.js"></script>
+<script src="warn.js"></script>
+<script src="cursor.js"></script>
+<script src="widget.js"></script>
+
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
   import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-database.js";
@@ -717,69 +1373,106 @@ input[type=range]::-ms-fill-upper {
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
 
-  // Helper function to show the success message
-  function showSuccess(msg) {
-    const toast = document.getElementById('toast');
-    toast.innerText = msg;
-    toast.style.opacity = '1';
-    setTimeout(() => { toast.style.opacity = '0'; }, 2000);
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.style.opacity = '1';
+    setTimeout(() => t.style.opacity = '0', 2200);
   }
 
   window.pushData = function() {
-    const user = document.getElementById('username').value;
-    if (!user) return alert("ENTER USERNAME");
-
-    const allData = JSON.stringify(localStorage);
-
+    const user = document.getElementById('username').value.trim();
+    if (!user) return alert('ENTER USERNAME');
     set(ref(db, 'sync/' + user), {
-      fullBackup: allData,
+      fullBackup: JSON.stringify(localStorage),
       lastUpdated: new Date().toLocaleTimeString()
     }).then(() => {
-      showSuccess("UPLOAD_SUCCESSFUL");
-      document.getElementById('status').innerText = "> CLOUD_MIRROR_SYNCED";
+      showToast('UPLOAD_SUCCESSFUL');
+      document.getElementById('status').textContent = '> CLOUD_MIRROR_SYNCED';
     });
   };
 
   window.pullData = function() {
-    const user = document.getElementById('username').value;
-    if (!user) return alert("ENTER USERNAME");
-
-    get(child(ref(db), `sync/${user}`)).then((snapshot) => {
-      if (snapshot.exists()) {
-        const dataObj = JSON.parse(snapshot.val().fullBackup);
+    const user = document.getElementById('username').value.trim();
+    if (!user) return alert('ENTER USERNAME');
+    get(child(ref(db), `sync/${user}`)).then(snap => {
+      if (snap.exists()) {
+        const dataObj = JSON.parse(snap.val().fullBackup);
         localStorage.clear();
-        Object.keys(dataObj).forEach(key => localStorage.setItem(key, dataObj[key]));
-
-        showSuccess("RESTORATION_COMPLETE");
-        document.getElementById('status').innerText = "> LOCAL_MIRROR_SYNCED";
+        Object.keys(dataObj).forEach(k => localStorage.setItem(k, dataObj[k]));
+        showToast('RESTORATION_COMPLETE');
+        document.getElementById('status').textContent = '> LOCAL_MIRROR_SYNCED';
         window.location.reload();
       } else {
-        alert("NO DATA FOUND FOR THIS USER");
+        alert('NO DATA FOUND FOR THIS USER');
       }
     });
   };
 </script>
-    <script>
-      window.onload = () => {
-          document.getElementById('accent').value = localStorage.getItem('w_accent') || '#26ff9a';
-          document.getElementById('bg').value = localStorage.getItem('w_bg') || '#202124';
-          document.getElementById('style').value = localStorage.getItem('w_style') || 'style-chromeos';
-          document.getElementById('align').value = localStorage.getItem('w_align') || 'bottom-right';
-          document.getElementById('h24').checked = localStorage.getItem('w_24h') === 'true';
-          const isEnabled = localStorage.getItem('w_enabled') !== 'false'; 
-          document.getElementById('w_enabled').checked = isEnabled;
-      };
-  
-      function save() {
-          localStorage.setItem('w_accent', document.getElementById('accent').value);
-          localStorage.setItem('w_bg', document.getElementById('bg').value);
-          localStorage.setItem('w_style', document.getElementById('style').value);
-          localStorage.setItem('w_align', document.getElementById('align').value);
-          localStorage.setItem('w_24h', document.getElementById('h24').checked);
-          localStorage.setItem('w_enabled', document.getElementById('w_enabled').checked);
-          alert("Settings Saved!");
+
+<script>
+  /* ── TAB SWITCHING ────────────────────────── */
+  const navBtns = document.querySelectorAll('.vnav__item');
+  const panels  = document.querySelectorAll('.panel');
+
+  navBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      navBtns.forEach(b => b.classList.remove('active'));
+      panels.forEach(p => { p.classList.remove('active'); });
+
+      btn.classList.add('active');
+      const target = document.getElementById('panel-' + btn.dataset.panel);
+      if (target) {
+        target.classList.add('active');
+        // Re-trigger animation
+        target.style.animation = 'none';
+        requestAnimationFrame(() => {
+          target.style.animation = '';
+        });
       }
-  </script>
-  <script src="blob.js"></script>
-  </body>
+    });
+  });
+
+  /* ── PRESET SELECT ───────────────────────── */
+  document.getElementById('preset').addEventListener('change', function() {
+    document.getElementById('custom-transform').style.display =
+      this.value === 'Custom' ? 'block' : 'none';
+  });
+
+  function applyPresetSelect(val) {
+    document.getElementById('custom-transform').style.display =
+      val === 'Custom' ? 'block' : 'none';
+    if (typeof applyPreset === 'function') applyPreset(val);
+  }
+  window.applyPresetSelect = applyPresetSelect;
+
+  /* ── SETTINGS LOAD/SAVE ──────────────────── */
+  window.onload = () => {
+    document.getElementById('accent').value    = localStorage.getItem('w_accent') || '#26ff9a';
+    document.getElementById('bg').value        = localStorage.getItem('w_bg')     || '#202124';
+    document.getElementById('style').value     = localStorage.getItem('w_style')  || 'style-chromeos';
+    document.getElementById('align').value     = localStorage.getItem('w_align')  || 'bottom-right';
+    document.getElementById('h24').checked     = localStorage.getItem('w_24h')    === 'true';
+    document.getElementById('w_enabled').checked = localStorage.getItem('w_enabled') !== 'false';
+  };
+
+  function save() {
+    localStorage.setItem('w_accent',   document.getElementById('accent').value);
+    localStorage.setItem('w_bg',       document.getElementById('bg').value);
+    localStorage.setItem('w_style',    document.getElementById('style').value);
+    localStorage.setItem('w_align',    document.getElementById('align').value);
+    localStorage.setItem('w_24h',      document.getElementById('h24').checked);
+    localStorage.setItem('w_enabled',  document.getElementById('w_enabled').checked);
+    // Show toast instead of alert
+    const t = document.getElementById('toast');
+    t.textContent = 'SETTINGS_SAVED';
+    t.style.opacity = '1';
+    setTimeout(() => t.style.opacity = '0', 2200);
+    window.location.reload();
+  }
+  window.save = save;
+</script>
+<script src="blob.js"></script>
+
+</body>
 </html>
