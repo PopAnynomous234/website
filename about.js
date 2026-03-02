@@ -45,11 +45,11 @@
 
         function updateStatusUI() {
             if (isActiveUI) {
-                statusDisplay.textContent = 'about:blank redirect with iframe is active';
-                toggleBtn.textContent = 'Turn OFF about:blank';
+                statusDisplay.textContent = 'Active';
+                toggleBtn.textContent = 'Untoggle';
             } else {
-                statusDisplay.textContent = 'about:blank is inactive';
-                toggleBtn.textContent = 'Turn ON about:blank';
+                statusDisplay.textContent = 'Inactive';
+                toggleBtn.textContent = 'Toggle';
             }
         }
 

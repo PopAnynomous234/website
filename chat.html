@@ -468,6 +468,7 @@ body::after {
 .room-item-actions { display:flex; gap:3px; flex-shrink:0; }
 .room-action-btn {
   width:26px; height:26px; border-radius:7px;
+  z-index: 90;
   background:none; border:none;
   color:var(--text-muted); font-size:10px; cursor:pointer;
   display:flex; align-items:center; justify-content:center;
@@ -922,6 +923,26 @@ body::after {
   #app-container { margin:0; border-radius:0; height:100vh; flex-direction:column; }
   #sidebar { width:80%; max-height:45vh; border-right:none; border-bottom:1px solid var(--border); }
 }
+.room-invite-code {
+  margin-top: 6px;
+  font-family: var(--ff-mono);
+  font-size: 10px;
+  letter-spacing: .15em;
+  color: var(--mint);
+  background: var(--mint-dim);
+  border: 1px solid var(--border-mint);
+  padding: 6px 10px;
+  border-radius: 8px;
+  display: inline-block;
+  cursor: pointer;
+  transition: all .25s ease;
+}
+
+.room-invite-code:hover {
+  background: rgba(38,255,154,0.12);
+  box-shadow: 0 0 12px rgba(38,255,154,0.25);
+  transform: translateY(-1px);
+}
 </style>
 </head>
 <body>
@@ -992,6 +1013,7 @@ body::after {
       <div class="header-info">
         <h2 id="current-room-name">Connecting…</h2>
         <div class="header-meta" id="header-meta">0 online</div>
+        <div id="room-invite-code" class="room-invite-code"></div>        
       </div>
     </div>
 
@@ -1278,6 +1300,19 @@ async function switchRoom(newId, newName) {
 
     currentRoomId = newId;
     currentRoomNameElem.textContent = newName;
+    const inviteElem = document.getElementById('room-invite-code');
+
+database.ref(`rooms/${newId}`).once('value').then(snap => {
+  const room = snap.val();
+
+  if (room?.type === 'private' && room?.joinCode) {
+    inviteElem.textContent = `INVITE: ${room.joinCode}`;
+    inviteElem.onclick = () => copyInviteCode(room.joinCode);
+    inviteElem.style.display = "inline-block";
+  } else {
+    inviteElem.style.display = "none";
+  }
+});
     messagesContainer.innerHTML = '';
     cancelReply();
     roomElements.forEach((el,id) => el.classList.toggle('active', id === newId));
@@ -1610,6 +1645,16 @@ window.onload = async () => {
     checkMuteStatus();
   }, 500);
 };
+function copyInviteCode(code) {
+  navigator.clipboard.writeText(code).then(() => {
+    const el = document.getElementById('room-invite-code');
+    const original = el.textContent;
+    el.textContent = "COPIED!";
+    setTimeout(() => {
+      el.textContent = original;
+    }, 1000);
+  });
+}
 </script>
 
 <script src="about.js"></script>
