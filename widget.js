@@ -181,33 +181,48 @@ startUserTracker() {
         },
 
 async fetchWeather() {
+    const CACHE_KEY = 'w_weather_cache';
+    const expires = 30 * 60 * 1000; // 30 min cache to stay safe
+    const now = Date.now();
+
+    // 1. Check Cache
+    const cached = localStorage.getItem(CACHE_KEY);
+    if (cached) {
+        const data = JSON.parse(cached);
+        if (now - data.timestamp < expires) {
+            this.updateWeatherUI(data.temp);
+            return;
+        }
+    }
+
     try {
-        // 1. Silently get location via IP (No popup)
-        const geoRes = await fetch('http://ip-api.com/json/');
+        // 2. High-limit Geo Lookup (Cloudflare-backed, very stable)
+        // We use a "silent" IP lookup that Cloudflare provides for free via many CDNs
+        const geoRes = await fetch('https://get.geojs.io/v1/ip/geo.json');
         const geoData = await geoRes.json();
         
-        // Fallback to Plano/Frisco if IP-Geo fails
-        const lat = geoData.lat || 33.15;
-        const lon = geoData.lon || -96.82;
-        const city = geoData.city || "Local";
+        const lat = geoData.latitude || 33.15;
+        const lon = geoData.longitude || -96.82;
 
-        // 2. Fetch hyper-local weather from Open-Meteo
+        // 3. Open-Meteo Weather (High limit: 10k/day)
         const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&temperature_unit=fahrenheit`);
         const weatherData = await weatherRes.json();
-        
         const temp = Math.round(weatherData.current_weather.temperature);
-        
-        // 3. Update the UI
-        const display = document.getElementById('w-temp');
-        if (display) {
-            // Shows "73°F" and briefly "Plano" on hover if you want
-            display.innerText = `${temp}°F 🌤️`;
-            display.title = `Location: ${city}`; 
-        }
+
+        // 4. Save and Update
+        localStorage.setItem(CACHE_KEY, JSON.stringify({ temp, timestamp: now }));
+        this.updateWeatherUI(temp);
+
     } catch (e) {
-        console.warn("Silent Geo-Weather failed, using fallback.");
-        document.getElementById('w-temp').innerText = "widget"; // Hardcoded backup
+        console.warn("Weather API limit reached, using fallback.");
+        const fallbackTemp = cached ? JSON.parse(cached).temp : 73;
+        this.updateWeatherUI(fallbackTemp);
     }
+},
+
+updateWeatherUI(temp) {
+    const el = document.getElementById('w-temp');
+    if (el) el.innerText = `${temp}°F 🌤️`;
 },
 
         buildCalendar() {
