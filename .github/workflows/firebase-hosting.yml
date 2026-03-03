@@ -28,4 +28,5 @@ jobs:
       - name: Deploy
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
-        run: firebase deploy --only hosting --site ${{ matrix.site }} --project ${{ matrix.project }}
+        # We combine 'hosting' and the 'site id' into the --only flag
+        run: firebase deploy --only hosting:${{ matrix.site }} --project ${{ matrix.project }}
