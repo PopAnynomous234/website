@@ -8,13 +8,27 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false # Continues deploying other sites even if one fails
+      matrix:
+        include:
+          - project: "chat-67-67"
+            site: "deltasucks"
+          - project: "c0delistener"
+            site: "studyhard"
+          - project: "chat-283f4"
+            site: "nodelta"
+
     steps:
       - uses: actions/checkout@v4
 
       - name: Install Firebase CLI
         run: npm install -g firebase-tools
 
-      - name: Deploy
+      - name: Build Project
+        run: npm ci && npm run build
+
+- name: Deploy to Specific Site
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
-        run: firebase deploy --only hosting --project c0delistener
+        run: firebase deploy --only hosting --site ${{ matrix.site }} --project ${{ matrix.project }}
