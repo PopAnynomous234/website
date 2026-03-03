@@ -28,5 +28,9 @@ jobs:
       - name: Deploy
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
-        # We combine 'hosting' and the 'site id' into the --only flag
-        run: firebase deploy --only hosting:${{ matrix.site }} --project ${{ matrix.project }}
+        run: |
+          # 1. Map the generic target in firebase.json to the specific site for this matrix run
+          firebase target:apply hosting universal-site ${{ matrix.site }} --project ${{ matrix.project }}
+          
+          # 2. Deploy only that target to the specific project
+          firebase deploy --only hosting:universal-site --project ${{ matrix.project }}
