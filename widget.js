@@ -200,9 +200,7 @@ async fetchWeather() {
         // We use a "silent" IP lookup that Cloudflare provides for free via many CDNs
         const geoRes = await fetch('https://get.geojs.io/v1/ip/geo.json');
         const geoData = await geoRes.json();
-        
-        const lat = geoData.latitude || 33.15;
-        const lon = geoData.longitude || -96.82;
+         
 
         // 3. Open-Meteo Weather (High limit: 10k/day)
         const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&temperature_unit=fahrenheit`);

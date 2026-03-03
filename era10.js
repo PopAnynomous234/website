@@ -3,7 +3,9 @@ import {
   getDatabase, 
   ref, 
   runTransaction, 
-  onValue 
+  get, 
+  goOffline, 
+  goOnline 
 } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
 
 const firebaseConfig = {
@@ -1097,8 +1099,66 @@ const games = [
         image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS2ZKP5u_V_SnpO2p43PdxITIWQGvqM0axYWg&s",
         url: "3dashe.html"
     },
-
-
+    {
+        title: "Babel Tower",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQtBEkWVWtJGtXGB-x3-YMLrYdiF9ZZQTBnOA&s",
+        url: "babel.html"
+    },
+    {
+        title: "Crossy Road",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcScoMxZ-x6H_tUl43gB-QKVkSy6wxt-_y3Q1Q&s",
+        url: "crossy.html"
+    },
+    {
+        title: "George and the Printer",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQxkqJ6fjG33NkTjQNMUtBdHZ1g2V5IQ6Tl8Q&s",
+        url: "george.html"
+    },
+    {
+        title: "Ultrakill",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSZuBj6Grz6mdoOjZ2N4T63r5HmmEesmCO-Ow&s",
+        url: "ultrakill.html"
+    },
+    {
+        title: "8 Ball Pool",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRElkh5K6S16c1Br-wnikc7yLsWHwPNnkqnBQ&s",
+        url: "8ball.html"
+    },
+    {
+        title: "Checkers Fun",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSLAbZnpY3zPIm_xS_nTqwGXkbOPEGfeAJINA&s",
+        url: "checkers.html"
+    },
+        {
+        title: "Orange Roulette",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRucmtjUrRakphXI1_PYgO1Vsrh0-EkQOqUCQ&s",
+        url: "oranger.html"
+    },
+        {
+        title: "Papa's Pizzeria",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTObrwfKntIe-D2NwNWuYCTYBYar2HQ9RDy9Q&s",
+        url: "papa.html"
+    },
+        {
+        title: "Penalty Kicks",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQf5Qpkn6-eOttaE0UgLQtylE0QdJlpjfn0Qg&s",
+        url: "penalty.html"
+    },
+        {
+        title: "Portal Flash",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRkorJ3r8rjg2UqzSZ6KI-0y04hOxojO5jfLg&s",
+        url: "portalflash.html"
+    },
+        {
+        title: "Coreball",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRo8cs4Lbkq0Lq4pLSFcJUSIxawhulc_UDenw&s",
+        url: "core.html"
+    },
+    {
+        title: "Pom Gets WiFi",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTAWDgdEr1EEY5H-XF9kTBCiuJDajDS_wJ7zw&s",
+        url: "pomgets.html"
+    }
 
 ];
 // ====================
@@ -1118,59 +1178,53 @@ const fullscreenIframe = document.getElementById('fullscreen-iframe');
  */
 async function generateCards() {
     const container = document.getElementById('card-container');
-    container.innerHTML = '';
+    container.innerHTML = 'Loading games...';
 
-    // 1️⃣ Create all Firebase requests at once
-    const promises = games.map(game => {
-        const gameId = game.url.replace('.html', '');
-        const gameRef = ref(database, "gameViews/" + gameId);
+    // 1️⃣ Briefly connect
+    goOnline(database);
 
-        return new Promise(resolve => {
-            onValue(gameRef, snapshot => {
-                resolve({
-                    game,
-                    count: snapshot.exists() ? snapshot.val() : 0
-                });
-            }, { onlyOnce: true });
-        });
-    });
+    try {
+        // 2️⃣ Fetch the ENTIRE view node at once. 
+        // This is 1 request instead of 1,000.
+        const snapshot = await get(ref(database, "gameViews"));
+        const allViews = snapshot.exists() ? snapshot.val() : {};
 
-    // 2️⃣ Wait for all requests in parallel
-    const results = await Promise.all(promises);
+        // 3️⃣ Disconnect immediately. You are now "offline" but have the data.
+        goOffline(database);
 
-    // 3️⃣ Create cards all at once
-    results.forEach(({ game, count }) => {
-        const gameId = game.url.replace('.html','');
-        const gameRef = ref(database, "gameViews/" + gameId);
+        container.innerHTML = '';
 
-        const card = document.createElement('div');
-        card.className = 'game-card';
-        card.dataset.url = game.url;
+        // 4️⃣ Create cards using the data we already downloaded
+        games.forEach(game => {
+            const gameId = game.url.replace('.html', '');
+            const count = allViews[gameId] || 0; // Find the count in our local object
 
-card.innerHTML = `
-    <img src="${game.image}" alt="${game.title}">
-    <h2>${game.title}</h2>
-    ${game.type ? `<div class="type-tag">${game.type}</div>` : ''}
-    <div class="view-counter">
-        <i class="fas fa-eye"></i>
-        <span class="count">${count}</span>
-    </div>
-`;
+            const card = document.createElement('div');
+            card.className = 'game-card';
+            card.innerHTML = `
+                <img src="${game.image}" alt="${game.title}">
+                <h2>${game.title}</h2>
+                <div class="view-counter"><i class="fas fa-eye"></i><span class="count">${count}</span></div>
+            `;
 
-        card.addEventListener('click', async () => {
-            await runTransaction(gameRef, (current) => (current || 0) + 1);
+            card.addEventListener('click', async () => {
+                // 5️⃣ Reconnect ONLY when a user clicks to update the count
+                goOnline(database);
+                const gameRef = ref(database, "gameViews/" + gameId);
+                
+                await runTransaction(gameRef, (current) => (current || 0) + 1);
+                
+                sessionStorage.setItem('currentGameUrl', JSDELIVR_BASE_URL + game.url);
+                window.location.href = 'loader.html';
+            });
 
-            const counter = card.querySelector('.count');
-            counter.textContent = parseInt(counter.textContent) + 1;
-
-            sessionStorage.setItem('currentGameUrl', JSDELIVR_BASE_URL + game.url);
-            window.location.href = 'loader.html';
+            container.appendChild(card);
         });
 
-        container.appendChild(card);
-    });
-
-    updateDisplay();
+    } catch (error) {
+        console.error("Database error:", error);
+        goOffline(database);
+    }
 }
 /**
  * Constructs the full jsDelivr URL, stores it in sessionStorage, and redirects
