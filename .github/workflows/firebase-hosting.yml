@@ -28,7 +28,7 @@ jobs:
       - name: Build Project
         run: npm ci && npm run build
 
-- name: Deploy to Specific Site
+      - name: Deploy to Specific Site
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
         run: firebase deploy --only hosting --site ${{ matrix.site }} --project ${{ matrix.project }}
