@@ -279,6 +279,81 @@ h1 {
 
 
     </style>
+    <style>
+    :root {
+        --neon-color: #26ff9a;
+        --dark-bg: #1a1a1a;
+    }
+
+    .btn-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+        background: transparent;
+    }
+
+    .request-game-btn {
+        position: relative;
+        padding: 18px 40px;
+        font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        font-size: 1.2rem;
+        font-weight: bold;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        color: var(--dark-bg);
+        background-color: var(--neon-color);
+        border: none;
+        border-radius: 50px;
+        cursor: pointer;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        box-shadow: 0 0 15px rgba(38, 255, 154, 0.4);
+        overflow: hidden;
+        display: inline-block;
+    }
+
+    /* Pulsing Glow Animation */
+    @keyframes pulse-glow {
+        0% { box-shadow: 0 0 15px rgba(38, 255, 154, 0.4); }
+        50% { box-shadow: 0 0 30px rgba(38, 255, 154, 0.7); }
+        100% { box-shadow: 0 0 15px rgba(38, 255, 154, 0.4); }
+    }
+
+    .request-game-btn {
+        animation: pulse-glow 2s infinite;
+    }
+
+    /* The "Gloss" Shine Effect */
+    .request-game-btn::after {
+        content: "";
+        position: absolute;
+        top: -50%;
+        left: -60%;
+        width: 20%;
+        height: 200%;
+        background: rgba(255, 255, 255, 0.5);
+        transform: rotate(30deg);
+        transition: all 0.5s ease;
+    }
+
+    .request-game-btn:hover::after {
+        left: 120%;
+    }
+
+    /* Hover States */
+    .request-game-btn:hover {
+        transform: translateY(-5px);
+        background-color: #fff; /* Shifts to white for high contrast */
+        color: #000;
+        box-shadow: 0 10px 40px rgba(38, 255, 154, 0.8);
+    }
+
+    .request-game-btn:active {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 20px rgba(38, 255, 154, 0.6);
+    }
+</style>
 </head>
 <body>
 <div class="sidebar">
@@ -333,12 +408,17 @@ h1 {
 
     <div class="search-wrapper">
       <h1>Available Games</h1>
-      
       <div class="search-bar-container">
           <i class="fas fa-search"></i>
           <input type="text" id="gameSearch" style="color:#26FF9A" placeholder="Search games A-Z...">
       </div>
-  
+        <div class="btn-container">
+    <a href="https://forms.gle/c6jR5D4XeAwLEA138" 
+       target="_blank" 
+       class="request-game-btn">
+       Request a Game
+    </a>
+</div>
       <div class="filter-controls">
           <div class="game-counter">
               <i class="fas fa-gamepad"></i> Games: <span id="count-number">0</span>
