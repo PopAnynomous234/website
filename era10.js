@@ -1249,11 +1249,52 @@ const games = [
         image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRiXVlKXqfUA4WuMaGCOhEblxFQKoJE0FNPwQ&s",
         url: "colorw.html"
     },
-        {
+    {
         title: "Five Nights at Epstein's",
         image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSnDO7d1SRqjh-Gk1_2XfnXGyntvl1tUinIxQ&s",
         url: "fnae.html"
     },
+    {
+        title: "Cluster Rush",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTO7dQwePnLwJ3BeTx3Pd5x59J-VUkekm1oVw&s",
+        url: "cluster.html"
+    },
+    {
+        title: "Combo Pool",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQKPkrp7eNuJXcAvSntaUxOgDY060m70uLwcA&s",
+        url: "combopool.html"
+    },
+    {
+        title: "Dead Estate",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSyKnC0HGZS7TRY5TTNyJQxZf35Ij2DzNVimw&s",
+        url: "deades.html"
+    },
+    {
+        title: "Death Run",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTn4EqlCoHc5ssGS8oZcRa2T8aCow5bJUSBNw&s",
+        url: "deathrun.html"
+    },
+    {
+        title: "Cover Orange",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRyGhxcPjU_fg9DWUJ0cA0w30tm1R4GoY1p2g&s",
+        url: "coveror.html"
+    },
+    {
+        title: "Cover Orange 2",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTlLf470lC1eC38aan_Ng-WmOtOHyR7J7plZA&s",
+        url: "coveror2.html"
+    },
+    {
+        title: "Cover Orange 3",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRrYqDmq-K6mIBij39JaRYIgElq3EJG5X5l5w&s",
+        url: "coveror3.html"
+    },
+    {
+        title: "Vex X3m",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ8TZvBQcwXqFzv3FEAaN1PXo1JVgKMeoUXSQ&s",
+        url: "vexx3m.html"
+    },
+
 
 ];
 // ====================

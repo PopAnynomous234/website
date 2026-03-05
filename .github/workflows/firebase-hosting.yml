@@ -18,6 +18,8 @@ jobs:
             site: "studyhardd"
           - project: "chat-283f4"
             site: "nodelta"
+          - project: "c0delistener"
+            site: "c0delistener"            
 
     steps:
       - uses: actions/checkout@v4
