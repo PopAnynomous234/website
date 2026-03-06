@@ -1294,6 +1294,31 @@ const games = [
         image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ8TZvBQcwXqFzv3FEAaN1PXo1JVgKMeoUXSQ&s",
         url: "vexx3m.html"
     },
+        {
+        title: "Idle Dice",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSWaYVFZCNq2uI_HAggxegwI7y4BlPNA73Gnw&s",
+        url: "idledice.html"
+    },
+    {
+        title: "Doki Doki Literature Club",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS5uR0fFGLltoMbVqM5dSvQHTGdpvZpkq3YKQ&s",
+        url: "dokidoki.html"
+    },
+    {
+        title: "FNF Vs. Dave and Bambi: Golden Apple",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSpTLfOKIWTlDxeQxt6ABcjxBh_OQygLPvgpg&s",
+        url: "daveand.html"
+    },
+    {
+        title: "Kart Bros",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQBUb_CCRM_ZYYTRRMTOpgRozhHca-wpNy-6w&s",
+        url: "kartbro.html"
+    },
+    {
+        title: "Mario Karts",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSDzLkJUzaESKHj5oTVmJRv4p6dnF4Jwgbt6Q&s",
+        url: "mariokarts.html"
+    },
 
 
 ];
