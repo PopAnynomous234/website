@@ -1,0 +1,300 @@
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;600;800&family=Syne:wght@800&display=swap" rel="stylesheet">
+
+<div class="admin-wrapper">
+    <div class="glass-orb-1"></div>
+    <div class="glass-orb-2"></div>
+    
+    <div class="admin-panel">
+        <div class="panel-inner">
+            <div class="status-header">
+                <div class="sync-indicator">
+                    <div class="pulse-ring" id="pulse"></div>
+                    <span class="dot" id="sync-dot"></span>
+                    <span id="sync-text">READY</span>
+                </div>
+                <div class="timestamp" id="live-clock">00:00:00</div>
+            </div>
+            
+            <h1 class="glitch-title" data-text="SYSTEM BROADCAST">WEBSITE BROADCAST</h1>
+            
+            <div class="input-vault">
+                <div class="field-wrapper">
+                    <label>ENCRYPTION KEY</label>
+                    <input type="password" id="admin-key" placeholder="Password" class="neo-input">
+                </div>
+
+                <div class="field-wrapper">
+                    <label>SUBJECT</label>
+                    <input type="text" id="ann-subject" placeholder="e.g. UPDATE" class="neo-input">
+                </div>
+
+                <div class="field-wrapper">
+                    <label>BODY</label>
+                    <textarea id="ann-text" placeholder="Type your global message..." class="neo-input"></textarea>
+                </div>
+            </div>
+
+            <div class="action-dock">
+                <button onclick="handleBroadcast(true)" class="btn-deploy">
+                    <span>SIGNAL</span>
+                    <div class="btn-glow"></div>
+                </button>
+                <button onclick="handleBroadcast(false)" class="btn-terminate">
+                    TERMINATE
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="module">
+    // 1. Imports
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+    // 2. Configuration
+    const firebaseConfig = {
+        apiKey: "AIzaSyDB2GVl8AdhQF-XMWSU3JvQ05Kb5Gp424s",
+        databaseURL: "https://chat-283f4-default-rtdb.firebaseio.com",
+        projectId: "chat-283f4"
+    };
+
+    // 3. Initialize
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    // 4. THE FIX: Attach to 'window' so the button can see it
+    window.handleBroadcast = function(status) {
+        const keyInput = document.getElementById('admin-key').value;
+        const key = btoa(keyInput);
+        
+        // Security Check
+        if (key !== "YWRtaW4=") {
+            alert("ACCESS DENIED: INVALID ENCRYPTION KEY");
+            return;
+        }
+
+        const dot = document.getElementById('sync-dot');
+        const pulse = document.getElementById('pulse');
+        const text = document.getElementById('sync-text');
+        
+        // UI Feedback: Syncing State
+        dot.style.background = "#ffcc00"; 
+        dot.style.boxShadow = "0 0 15px #ffcc00";
+        pulse.style.borderColor = "#ffcc00";
+        text.textContent = "SYNCHRONIZING...";
+        
+        // Use the 'set' and 'ref' functions we imported
+        set(ref(db, 'system/announcement'), {
+            active: status,
+            subject: document.getElementById('ann-subject').value || "SYSTEM UPDATE",
+            content: document.getElementById('ann-text').value,
+            id: Date.now() 
+        }).then(() => {
+            // UI Feedback: Success State
+            dot.style.background = "#26ff9a";
+            dot.style.boxShadow = "0 0 15px #26ff9a";
+            pulse.style.borderColor = "#26ff9a";
+            text.textContent = status ? "SIGNAL ONLINE" : "SIGNAL TERMINATED";
+            console.log("Broadcast updated successfully.");
+        }).catch((err) => {
+            console.error("Transmission Error:", err);
+            dot.style.background = "#ff5c5c";
+            text.textContent = "UPLINK ERROR";
+        });
+    }
+
+    // Live Clock
+    setInterval(() => {
+        const clock = document.getElementById('live-clock');
+        if(clock) clock.textContent = new Date().toLocaleTimeString();
+    }, 1000);
+</script>
+
+<style>
+:root {
+    --mint: #26ff9a;
+    --mint-glow: rgba(38, 255, 154, 0.4);
+    --bg: #060707;
+    --panel-bg: rgba(15, 18, 17, 0.7);
+}
+
+body {
+    background: var(--bg);
+    margin: 0;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+/* Background Atmosphere */
+.admin-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(circle at 50% 50%, #0c1a14 0%, #060707 100%);
+}
+
+.glass-orb-1, .glass-orb-2 {
+    position: absolute;
+    width: 400px;
+    height: 400px;
+    border-radius: 50%;
+    filter: blur(80px);
+    z-index: 0;
+    animation: float 20s infinite alternate;
+}
+.glass-orb-1 { background: rgba(38, 255, 154, 0.1); top: -10%; left: -10%; }
+.glass-orb-2 { background: rgba(0, 150, 255, 0.05); bottom: -10%; right: -10%; animation-delay: -5s; }
+
+/* The Panel */
+.admin-panel {
+    position: relative;
+    z-index: 10;
+    width: 440px;
+    padding: 2px;
+    background: linear-gradient(135deg, rgba(38, 255, 154, 0.3) 0%, rgba(255, 255, 255, 0.05) 40%, rgba(38, 255, 154, 0.1) 100%);
+    border-radius: 40px;
+    box-shadow: 0 40px 100px rgba(0,0,0,0.8);
+    animation: panelEntry 1s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.panel-inner {
+    background: var(--panel-bg);
+    backdrop-filter: blur(40px);
+    border-radius: 38px;
+    padding: 2.5rem;
+}
+
+/* Typography */
+h1.glitch-title {
+    font-family: 'Syne', sans-serif;
+    color: white;
+    font-size: 2.2rem;
+    margin: 0 0 2rem 0;
+    text-align: center;
+    letter-spacing: -1px;
+    position: relative;
+}
+
+.status-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+    font-family: 'Outfit', sans-serif;
+    font-size: 10px;
+    color: #688074;
+    letter-spacing: 2px;
+}
+
+/* Inputs */
+.field-wrapper {
+    margin-bottom: 1.5rem;
+}
+
+.field-wrapper label {
+    display: block;
+    font-family: 'Outfit', sans-serif;
+    font-size: 9px;
+    font-weight: 800;
+    color: var(--mint);
+    margin-bottom: 8px;
+    letter-spacing: 1px;
+}
+
+.neo-input {
+    width: 100%;
+    box-sizing: border-box;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 16px;
+    padding: 1.1rem;
+    color: white;
+    font-family: 'Outfit', sans-serif;
+    transition: all 0.3s ease;
+}
+
+.neo-input:focus {
+    outline: none;
+    background: rgba(38, 255, 154, 0.05);
+    border-color: var(--mint);
+    box-shadow: 0 0 20px rgba(38, 255, 154, 0.1);
+}
+
+/* Buttons */
+.action-dock {
+    display: grid;
+    grid-template-columns: 1fr 120px;
+    gap: 15px;
+    margin-top: 2rem;
+}
+
+.btn-deploy {
+    position: relative;
+    background: var(--mint);
+    color: #060707;
+    border: none;
+    border-radius: 18px;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 800;
+    font-size: 0.9rem;
+    cursor: pointer;
+    overflow: hidden;
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.btn-deploy:hover { transform: scale(1.03); }
+.btn-deploy:active { transform: scale(0.97); }
+
+.btn-terminate {
+    background: transparent;
+    border: 1px solid rgba(255, 92, 92, 0.3);
+    color: #ff5c5c;
+    border-radius: 18px;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 800;
+    font-size: 0.7rem;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.btn-terminate:hover { background: rgba(255, 92, 92, 0.1); border-color: #ff5c5c; }
+
+/* Status Animations */
+.pulse-ring {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    border: 2px solid var(--mint);
+    border-radius: 50%;
+    opacity: 0;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(0.5); opacity: 0; }
+    50% { opacity: 0.5; }
+    100% { transform: scale(2.5); opacity: 0; }
+}
+
+@keyframes float {
+    from { transform: translate(0,0); }
+    to { transform: translate(10%, 10%); }
+}
+
+@keyframes panelEntry {
+    from { opacity: 0; transform: translateY(30px) scale(0.95); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+</style>
+
+<script>
+    // Live Clock functionality
+    setInterval(() => {
+        document.getElementById('live-clock').textContent = new Date().toLocaleTimeString();
+    }, 1000);
+</script>

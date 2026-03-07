@@ -1,5 +1,85 @@
+(function() {
+    const firebaseConfig = {
+        apiKey: "AIzaSyDB2GVl8AdhQF-XMWSU3JvQ05Kb5Gp424s",
+        databaseURL: "https://chat-283f4-default-rtdb.firebaseio.com",
+        projectId: "chat-283f4"
+    };
 
+    // Device Fingerprint for No-LocalStorage tracking
+    const userFP = (window.screen.width + window.screen.height + navigator.userAgent.length).toString(16);
 
+    function loadScript(src, callback) {
+        const script = document.createElement('script');
+        script.src = src; script.onload = callback;
+        document.head.appendChild(script);
+    }
+
+    if (typeof firebase === 'undefined') {
+        loadScript("https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js", () => {
+            loadScript("https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js", init);
+        });
+    } else { init(); }
+
+    function init() {
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        const style = document.createElement('style');
+        style.textContent = `
+            #ann-toast {
+                position: fixed; top: 1.5rem; left: 1.5rem; z-index: 2147483647;
+                width: 300px; background: rgba(10, 12, 11, 0.95);
+                backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+                border-left: 4px solid #26ff9a; border-radius: 12px; 
+                padding: 1.2rem; color: white; font-family: 'Outfit', sans-serif;
+                transform: translateX(-150%); transition: 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+                box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            }
+            #ann-toast.active { transform: translateX(0); }
+            .ann-header { color: #26ff9a; font-weight: 800; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1.5px; margin-bottom: 5px; display: block; }
+            .ann-subject { font-size: 1.1rem; font-weight: 700; margin: 0 0 8px 0; color: #fff; }
+            .ann-body { font-size: 0.85rem; opacity: 0.8; line-height: 1.4; margin-bottom: 15px; }
+            .ack-link { color: #26ff9a; font-size: 0.75rem; font-weight: 800; cursor: pointer; text-decoration: none; text-transform: uppercase; border: 1px solid rgba(38,255,154,0.3); padding: 5px 10px; border-radius: 6px; transition: 0.2s; }
+            .ack-link:hover { background: #26ff9a; color: #000; }
+        `;
+        document.head.appendChild(style);
+
+        db.ref('system/announcement').on('value', (snap) => {
+            const data = snap.val();
+            if (!data || !data.active) return hide();
+
+            // Check Firebase Ledger instead of LocalStorage
+            db.ref(`users/${userFP}/seen/${data.id}`).once('value', (seen) => {
+                if (seen.exists()) hide(); else show(data);
+            });
+        });
+
+        function show(data) {
+            let t = document.getElementById('ann-toast');
+            if (!t) { t = document.createElement('div'); t.id = 'ann-toast'; document.body.appendChild(t); }
+            
+            t.innerHTML = `
+                <span class="ann-header">System Broadcast</span>
+                <h3 class="ann-subject">${data.subject || 'No Subject'}</h3>
+                <p class="ann-body">${data.content}</p>
+                <div style="text-align: right;">
+                    <span class="ack-link" id="ack-btn">OK</span>
+                </div>
+            `;
+            setTimeout(() => t.classList.add('active'), 100);
+
+            document.getElementById('ack-btn').onclick = () => {
+                db.ref(`users/${userFP}/seen/${data.id}`).set(true);
+                hide();
+            };
+        }
+
+        function hide() {
+            const t = document.getElementById('ann-toast');
+            if (t) { t.classList.remove('active'); setTimeout(() => t.remove(), 500); }
+        }
+    }
+})();
 (function() {
     const isActive = localStorage.getItem('aboutBlankActive') === 'true';
 
