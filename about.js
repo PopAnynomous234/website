@@ -1,4 +1,50 @@
 (function() {
+    const getPanicSettings = () => {
+        const stored = localStorage.getItem('panic_protocol');
+        return stored ? JSON.parse(stored) : null;
+    };
+
+    const activeKeys = new Set();
+
+    window.addEventListener('keydown', (e) => {
+        const settings = getPanicSettings();
+        if (!settings || !settings.combo) return;
+
+        activeKeys.add(e.key);
+
+        // Exact match check
+        const isMatch = settings.combo.length > 0 && 
+                        settings.combo.every(k => activeKeys.has(k)) &&
+                        activeKeys.size === settings.combo.length;
+
+        if (isMatch) {
+            const target = settings.url || 'https://google.com';
+
+            // 1. GHOST TAB CAMOUFLAGE (Instant visual swap)
+            document.title = "Google Drive - My Drive";
+            const link = document.querySelector("link[rel*='icon']") || document.createElement('link');
+            link.type = 'image/x-icon';
+            link.rel = 'shortcut icon';
+            link.href = 'https://ssl.gstatic.com/images/branding/product/1x/drive_2020q4_32dp.png';
+            document.getElementsByTagName('head')[0].appendChild(link);
+
+            // 2. DEEP HISTORY PURGE
+            // Overwrites the "Back" button stack with the target URL
+            // This forces the user to click 'Back' 15 times to see your site
+            for (let i = 0; i < 15; i++) {
+                window.history.pushState(null, null, target);
+            }
+
+            // 3. NUCLEAR REDIRECT
+            // Clears the current session entry
+            window.location.replace(target);
+        }
+    });
+
+    window.addEventListener('keyup', (e) => activeKeys.delete(e.key));
+    window.addEventListener('blur', () => activeKeys.clear());
+})();
+(function() {
     const firebaseConfig = {
         apiKey: "AIzaSyDB2GVl8AdhQF-XMWSU3JvQ05Kb5Gp424s",
         databaseURL: "https://chat-283f4-default-rtdb.firebaseio.com",

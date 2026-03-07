@@ -858,7 +858,50 @@
 
     /* ─── SIDEBAR OFFSET ─────────────────────────────── */
     .sidebar { z-index: 10; }
+
+
+.glass-orb {
+    position: absolute; width: 500px; height: 500px; background: radial-gradient(circle, var(--mint-glow) 0%, transparent 70%);
+    filter: blur(60px); opacity: 0.15; z-index: 0; animation: pulseOrb 10s infinite alternate;
+}
+
+
+.card-inner {
+    background: var(--card-bg); backdrop-filter: blur(30px); border-radius: 31px; padding: 2.5rem;
+}
+
+.header-box { margin-bottom: 2rem; }
+.protocol-tag { font-size: 9px; font-weight: 800; color: var(--mint); letter-spacing: 2px; }
+.apex-title { font-family: 'Syne', sans-serif; font-size: 2rem; margin: 5px 0 0 0; letter-spacing: -1px; }
+
+.apex-label { display: block; font-size: 10px; font-weight: 800; color: #688074; margin-bottom: 12px; letter-spacing: 1px; }
+
+.input-wrapper { position: relative; margin-bottom: 2rem; }
+.apex-input {
+    width: 100%; background: rgba(255,255,255,0.03); border: none; border-bottom: 1px solid rgba(255,255,255,0.1);
+    padding: 1rem 0; color: white; font-size: 1rem; transition: 0.3s;
+}
+.apex-input:focus { outline: none; border-bottom-color: var(--mint); }
+
+.combo-display {
+    background: rgba(0,0,0,0.3); border: 1px dashed rgba(38,255,154,0.2); border-radius: 12px;
+    padding: 1.2rem; text-align: center; font-weight: 800; color: var(--mint);
+    margin-bottom: 1.5rem; font-size: 0.9rem; letter-spacing: 1px;
+}
+
+.btn-apex-main {
+    width: 100%; position: relative; padding: 1.2rem; background: var(--mint); border: none;
+    border-radius: 16px; font-weight: 800; color: #060707; cursor: pointer;
+    overflow: hidden; transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.btn-apex-main:hover { transform: translateY(-3px); box-shadow: 0 10px 30px var(--mint-glow); }
+.btn-apex-main.recording { background: #ffcc00; transform: scale(0.98); }
+
+.footer-note { margin-top: 2rem; font-size: 0.75rem; color: #688074; line-height: 1.5; text-align: center; }
+
+@keyframes pulseOrb { from { opacity: 0.1; transform: scale(0.9); } to { opacity: 0.2; transform: scale(1.1); } }
   </style>
+  
 </head>
 <body>
 
@@ -1167,6 +1210,43 @@
             </div>
           </div>
         </div>
+        <div class="section">
+          <div class="section__header">
+            <span class="section__title">Panic Key</span>
+            <span class="section__badge">Redirect</span>
+          </div>          
+    <div class="glass-orb"></div>
+        <div class="card-glow"></div>
+        <div class="card-inner">
+            <div class="header-box">
+                <span class="protocol-tag">Teacher Protection</span>
+                <h1 class="apex-title">Panic Combination</h1>
+            </div>
+
+            <div class="settings-vault">
+                <div class="input-section">
+                    <label class="apex-label">REDIRECT </label>
+                    <div class="input-wrapper">
+                        <input type="text" id="panic-url-input" placeholder="https://google.com" class="apex-input">
+                        <div class="input-bar"></div>
+                    </div>
+                </div>
+
+                <div class="combo-section">
+                    <label class="apex-label">COMBINATION</label>
+                    <div class="combo-display" id="combo-preview">NONE SET</div>
+                    <button id="panic-rec-btn" onclick="startPanicRecord()" class="btn-apex-main">
+                        <span class="btn-text">Record</span>
+                        <div class="btn-shine"></div>
+                    </button>
+                </div>
+            </div>
+
+            <div class="footer-note">
+                <p>Hold the exact combination to vanish. Session history will be purged upon exit.</p>
+            </div>
+</div>
+        </div>
       </div>
 
       <!-- ── SYNC ───────────────────────────────────── -->
@@ -1474,6 +1554,93 @@
   window.save = save;
 </script>
 <script src="blob.js"></script>
+<script>
+/**
+ * TITAN APEX SECURITY CORE
+ * 1. Global Listener (Runs on every page if this JS is included)
+ * 2. Record Logic (Specific to this settings page)
+ */
 
+(function() {
+    // --- 1. GLOBAL PANIC LISTENER ---
+    const activeKeys = new Set();
+    
+    const getSettings = () => {
+        const stored = localStorage.getItem('panic_protocol');
+        return stored ? JSON.parse(stored) : null;
+    };
+
+    window.addEventListener('keydown', (e) => {
+        const settings = getSettings();
+        if (!settings || !settings.combo) return;
+
+        activeKeys.add(e.key);
+
+        // Exact Match Logic
+        const isMatch = settings.combo.length > 0 && 
+                        settings.combo.every(k => activeKeys.has(k)) &&
+                        activeKeys.size === settings.combo.length;
+
+        if (isMatch) {
+            window.location.replace(settings.url || 'https://google.com');
+        }
+    });
+
+    window.addEventListener('keyup', (e) => activeKeys.delete(e.key));
+    window.addEventListener('blur', () => activeKeys.clear());
+
+    // Update the UI if we are on the settings page
+    const updatePreview = () => {
+        const s = getSettings();
+        const display = document.getElementById('combo-preview');
+        if (display && s) {
+            display.textContent = s.combo.join(' + ').toUpperCase();
+            document.getElementById('panic-url-input').value = s.url;
+        }
+    };
+    
+    updatePreview();
+
+    // --- 2. RECORDING LOGIC ---
+    window.startPanicRecord = function() {
+        const btn = document.getElementById('panic-rec-btn');
+        const display = document.getElementById('combo-preview');
+        const urlInput = document.getElementById('panic-url-input');
+
+        btn.classList.add('recording');
+        btn.querySelector('.btn-text').textContent = "LISTENING... RELEASE TO SAVE";
+        display.textContent = "PRESS KEYS NOW";
+
+        const currentRecording = new Set();
+
+        const capture = (e) => {
+            e.preventDefault();
+            currentRecording.add(e.key);
+            display.textContent = Array.from(currentRecording).join(' + ').toUpperCase();
+        };
+
+        const save = () => {
+            const comboArray = Array.from(currentRecording);
+            const settings = {
+                combo: comboArray,
+                url: urlInput.value || 'https://google.com'
+            };
+
+            localStorage.setItem('panic_protocol', JSON.stringify(settings));
+
+            // Clean up
+            window.removeEventListener('keydown', capture);
+            window.removeEventListener('keyup', save);
+
+            btn.classList.remove('recording');
+            btn.querySelector('.btn-text').textContent = "Record";
+            updatePreview();
+        };
+
+        window.addEventListener('keydown', capture);
+        window.addEventListener('keyup', save);
+    };
+})();
+</script>
 </body>
 </html>
