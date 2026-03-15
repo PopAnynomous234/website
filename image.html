@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Codelistener Image Generator</title>
+    <style>
+        /* --- 1. CORE THEME & VARIABLES --- */
+        :root {
+            --mint: #26ff9a;
+            --mint-glow: rgba(38, 255, 154, 0.3);
+            --bg-dark: #050505;
+            --card-bg: rgba(18, 18, 22, 0.8);
+            --border: rgba(38, 255, 154, 0.15);
+            --text-p: #9ca3af;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Roboto, sans-serif; }
+       
+        body {
+            background-color: var(--bg-dark);
+            background-image:
+                radial-gradient(circle at 50% 50%, #111 0%, #050505 100%),
+                linear-gradient(rgba(38, 255, 154, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(38, 255, 154, 0.05) 1px, transparent 1px);
+            background-size: 100% 100%, 40px 40px, 40px 40px;
+            color: #fff;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        /* --- 2. MAIN CONTAINER --- */
+        #main-shell {
+            width: 95%;
+            max-width: 90vw;
+            height: 95vh;
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            position: relative;
+            z-index: 10;
+        }
+
+        #main-shell::before {
+            content: '';
+            position: absolute;
+            top: -2px; left: -2px; right: -2px; bottom: -2px;
+            background: linear-gradient(45deg, var(--mint), transparent, var(--mint));
+            border-radius: 24px;
+            z-index: -1;
+            opacity: 0.15;
+        }
+
+        /* --- 3. HEADER --- */
+        header {
+            padding: 25px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .brand {
+            font-size: 1.5rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--mint);
+            text-shadow: 0 0 15px var(--mint-glow);
+        }
+
+        .api-badge {
+            font-size: 0.7rem;
+            padding: 5px 12px;
+            border-radius: 20px;
+            background: rgba(38, 255, 154, 0.1);
+            border: 1px solid var(--mint);
+            color: var(--mint);
+        }
+
+        /* --- 4. CHAT DISPLAY --- */
+        #chat-window {
+            flex: 1;
+            overflow-y: auto;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            scroll-behavior: smooth;
+        }
+
+        #chat-window::-webkit-scrollbar { width: 4px; }
+        #chat-window::-webkit-scrollbar-thumb { background: var(--mint); border-radius: 10px; }
+
+        .message { display: flex; flex-direction: column; gap: 10px; max-width: 80%; animation: slideIn 0.3s ease-out; }
+        .user { align-self: flex-end; text-align: right; }
+        .ai { align-self: flex-start; }
+
+        .bubble {
+            padding: 15px 25px;
+            border-radius: 15px;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        .user .bubble {
+            background: var(--mint);
+            color: #000;
+            font-weight: 600;
+            border-bottom-right-radius: 2px;
+        }
+
+        .ai .bubble {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            border-bottom-left-radius: 2px;
+        }
+
+        /* --- 5. IMAGE PREVIEW --- */
+        .img-card {
+            margin-top: 15px;
+            border-radius: 15px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+            background: #000;
+            position: relative;
+            transition: transform 0.3s ease;
+        }
+
+        .img-card img {
+            width: 100%;
+            display: block;
+            opacity: 0;
+            transition: opacity 0.8s ease;
+        }
+
+        .img-card img.loaded { opacity: 1; }
+
+        /* --- 6. ADVANCED LOADER & TIMER --- */
+        .visual-loader {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: var(--mint);
+            box-shadow: 0 0 10px var(--mint);
+            transition: width 0.3s ease;
+        }
+
+        .meta-info {
+            display: flex;
+            justify-content: space-between;
+            font-family: monospace;
+            font-size: 0.75rem;
+            color: var(--mint);
+        }
+
+        .done-pill {
+            background: var(--mint);
+            color: #000;
+            margin-top:15px;
+            height:3vh;
+            font-weight: 900;
+            padding: 2px 8px;
+            border-radius: 4px;
+            box-shadow: 0 0 10px var(--mint);
+        }
+
+        /* --- 7. INPUT AREA --- */
+        .controls {
+            padding: 40px;
+            background: rgba(0, 0, 0, 0.3);
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 20px;
+        }
+
+        .input-group {
+            flex: 1;
+            position: relative;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 5px;
+            display: flex;
+        }
+
+        input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: white;
+            padding: 15px;
+            font-size: 1rem;
+        }
+
+        .gen-btn {
+            background: var(--mint);
+            color: #000;
+            border: none;
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+            border-radius: 100%;
+            font-size: 18px;
+            font-weight: 900;
+            font-weight: 700;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+        }
+
+        .gen-btn:hover {
+            box-shadow: 0 0 20px var(--mint-glow);
+            transform: translateY(-2px);
+        }
+       
+        .download-btn {
+    margin-top: 10px;
+    background: transparent;
+    color: var(--mint);
+    border: 1px solid var(--mint);
+    padding: 8px 15px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    width: fit-content;
+}
+
+.download-btn:hover {
+    background: var(--mint);
+    color: #000;
+    box-shadow: 0 0 15px var(--mint-glow);
+}
+
+        /* --- 8. ANIMATIONS --- */
+        @keyframes slideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+       
+        .skeleton {
+            height: 300px;
+            background: linear-gradient(90deg, #111 25%, #1a1a1a 50%, #111 75%);
+            background-size: 200% 100%;
+            animation: loadingPulse 1.5s infinite;
+        }
+        @keyframes loadingPulse { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+    </style>
+</head>
+<body>
+
+<div id="main-shell">
+    <header>
+        <div class="brand">Codelistener <span style="font-weight: 300; color: #fff;">IMG</span></div>
+        <div class="api-badge" onclick="clearStorage()" style="cursor:pointer">Clear History</div>
+    </header>
+
+    <div id="chat-window">
+        <div class="message ai">
+            <div class="bubble">Hey there! Generate images here. Note: Only image generation permitted, it may be slow due to traffic and it is still in development.</div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <div class="input-group">
+            <input type="text" id="prompt" placeholder="Describe the impossible..." autocomplete="off">
+            <button class="gen-btn" id="btn" onclick="execute()">↑</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const chat = document.getElementById('chat-window');
+    const input = document.getElementById('prompt');
+    const btn = document.getElementById('btn');
+
+    const API_KEY = "0000000000";
+    const HORDE = "https://aihorde.net/api/v2/generate/async";
+
+    // --- ON LOAD: Restore from LocalStorage ---
+    window.onload = () => {
+        const history = JSON.parse(localStorage.getItem('cl_img_history') || "[]");
+        history.forEach(item => {
+            renderStored(item.prompt, item.imgData);
+        });
+    };
+
+    function execute() {
+        const val = input.value.trim();
+        if(!val) return;
+       
+        addMsg(val, 'user');
+        input.value = "";
+        btn.disabled = true;
+
+        const id = 'gen-' + Date.now();
+        const aiMsg = document.createElement('div');
+        aiMsg.className = 'message ai';
+        aiMsg.innerHTML = `
+            <div class="bubble"> Creating: "${val}"</div>
+            <div class="img-card skeleton" id="card-${id}"><img id="img-${id}"></div>
+            <div class="visual-loader">
+                <div class="progress-bar"><div class="progress-fill" id="bar-${id}"></div></div>
+                <div class="meta-info">
+                    <span id="status-${id}">STATUS: QUEUED</span>
+                    <span>Time: <span id="clock-${id}">0.0</span>s</span>
+                </div>
+            </div>
+        `;
+        chat.appendChild(aiMsg);
+        scroll();
+
+        let time = 0;
+        const clockInterval = setInterval(() => {
+            time += 0.1;
+            const clockEl = document.getElementById(`clock-${id}`);
+            if(clockEl) clockEl.innerText = time.toFixed(1);
+        }, 100);
+
+        startHorde(val, id, clockInterval);
+    }
+
+    async function startHorde(prompt, id, interval) {
+        try {
+            const res = await fetch(HORDE, {
+                method: "POST",
+                headers: { "Content-Type": "application/json", "apikey": API_KEY },
+                body: JSON.stringify({
+                    prompt: prompt,
+                    params: { steps: 20, width: 512, height: 512 }
+                })
+            });
+            const data = await res.json();
+            poll(data.id, id, interval, prompt);
+        } catch (e) { handleError(id, interval); }
+    }
+
+    async function poll(hordeId, uiId, interval, originalPrompt) {
+        const res = await fetch(`https://aihorde.net/api/v2/generate/check/${hordeId}`);
+        const status = await res.json();
+
+        if(status.done) {
+            const final = await fetch(`https://aihorde.net/api/v2/generate/status/${hordeId}`);
+            const data = await final.json();
+            const imgUrl = data.generations[0].img;
+           
+            // Convert to Base64 to store in LocalStorage properly
+            const base64 = await getBase64FromUrl(imgUrl);
+            saveToStorage(originalPrompt, base64);
+           
+            render(base64, uiId, interval);
+        } else {
+            document.getElementById(`status-${uiId}`).innerText = `STATUS: PROCESSING (${status.wait_time}s)  `;
+            document.getElementById(`bar-${uiId}`).style.width = "60%";
+            setTimeout(() => poll(hordeId, uiId, interval, originalPrompt), 3000);
+        }
+    }
+
+// 1. Updated Render Function (Handles newly generated images)
+    function render(imgData, uiId, interval, originalPrompt) {
+        clearInterval(interval);
+        const img = document.getElementById(`img-${uiId}`);
+        const statusLabel = document.getElementById(`status-${uiId}`);
+       
+        img.src = imgData;
+        img.onload = () => {
+            img.classList.add('loaded');
+            document.getElementById(`card-${uiId}`).classList.remove('skeleton');
+            document.getElementById(`bar-${uiId}`).style.width = "100%";
+           
+            // FIX: Added the download button here so it shows up immediately
+            statusLabel.parentElement.innerHTML = `
+                <span class="done-pill">DONE</span>
+                <button class="download-btn" onclick="downloadImage('${imgData}', '${originalPrompt}')">Download PNG</button>
+            `;
+           
+            btn.disabled = false;
+            scroll();
+        };
+    }
+
+    // 2. Fixed renderStored (Handles history on page load)
+    function renderStored(prompt, imgData) {
+        const mUser = document.createElement('div');
+        mUser.className = 'message user';
+        mUser.innerHTML = `<div class="bubble">${prompt}</div>`;
+        chat.appendChild(mUser);
+
+        const mAi = document.createElement('div');
+        mAi.className = 'message ai';
+        // FIX: Changed '${img}' to '${imgData}' and '${p}' to '${prompt}'
+        mAi.innerHTML = `
+            <div class="bubble">Recovered from Memory</div>
+            <div class="img-card"><img src="${imgData}" class="loaded"></div>
+            <div class="visual-loader">
+                <div class="meta-info">
+                    <span class="done-pill">DONE</span>
+                    <button class="download-btn" onclick="downloadImage('${imgData}', '${prompt}')">Download</button>
+                </div>
+            </div>
+        `;
+        chat.appendChild(mAi);
+        scroll();
+    }
+    async function getBase64FromUrl(url) {
+        const data = await fetch(url);
+        const blob = await data.blob();
+        return new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(blob);
+            reader.onloadend = () => resolve(reader.result);
+        });
+    }
+
+    function saveToStorage(prompt, imgData) {
+        const history = JSON.parse(localStorage.getItem('cl_img_history') || "[]");
+        history.push({ prompt, imgData });
+        // Keep only last 10 images to avoid LocalStorage 5MB limit
+        if(history.length > 10) history.shift();
+        localStorage.setItem('cl_img_history', JSON.stringify(history));
+    }
+
+    function clearStorage() {
+        localStorage.removeItem('cl_img_history');
+        location.reload();
+    }
+
+    function addMsg(text, type) {
+        const m = document.createElement('div');
+        m.className = `message ${type}`;
+        m.innerHTML = `<div class="bubble">${text}</div>`;
+        chat.appendChild(m);
+        scroll();
+    }
+
+    function scroll() { chat.scrollTop = chat.scrollHeight; }
+    function handleError(id, interval) { clearInterval(interval); btn.disabled = false; }
+   
+    function downloadImage(imgData, prompt) {
+    const link = document.createElement('a');
+    link.href = imgData;
+    // Cleans the prompt to make a safe filename
+    const fileName = prompt.replace(/[^a-z0-9]/gi, '_').toLowerCase().substring(0, 30);
+    link.download = `codelistener_${fileName}.png`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+    input.addEventListener("keypress", (e) => { if(e.key === "Enter") execute(); });
+</script>
+<script src="about.js"></script>
+<script src="era4.js"></script>
+<script src="era5.js"></script>
+<script src="pe.js"></script>
+<script src="warn.js"></script>
+<script src="cursor.js"></script>
+<script src="widget.js"></script>
+</body>
+</html>

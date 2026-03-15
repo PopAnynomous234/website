@@ -1,0 +1,1646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Settings — Codelistener</title>
+  <link rel="stylesheet" href="st.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    /* ─── VARIABLES ─────────────────────────────────── */
+    :root {
+      --mint:        #26ff9a;
+      --mint-dim:    rgba(38,255,154,0.12);
+      --mint-glow:   rgba(38,255,154,0.35);
+      --black:       #000000;
+      --surface:     #0c0c0c;
+      --surface2:    #141414;
+      --surface3:    #1c1c1c;
+      --border:      rgba(38,255,154,0.15);
+      --border-hot:  rgba(38,255,154,0.45);
+      --text:        #e8e8e8;
+      --text-dim:    #777;
+      --text-muted:  #444;
+      --ff-display:  'Syne', sans-serif;
+      --ff-mono:     'DM Mono', monospace;
+      --radius:      14px;
+      --radius-sm:   8px;
+      --transition:  0.3s cubic-bezier(0.4,0,0.2,1);
+    }
+
+    /* ─── RESET ─────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      background: var(--black);
+      color: var(--text);
+      font-family: var(--ff-mono);
+      overflow-x: hidden;
+    }
+
+    /* ─── BACKGROUND GRID ────────────────────────────── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(38,255,154,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(38,255,154,0.03) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Radial vignette */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(ellipse at 50% 0%, transparent 40%, #000 100%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ─── STARTUP KEYFRAMES ─────────────────────────── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+    @keyframes slideRight {
+      from { opacity: 0; transform: translateX(-16px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes scanDown {
+      0%   { transform: translateY(-100%); opacity: 0.6; }
+      100% { transform: translateY(400%);  opacity: 0; }
+    }
+    @keyframes pulse-border {
+      0%,100% { border-color: var(--border); }
+      50%      { border-color: var(--border-hot); }
+    }
+    @keyframes glowPulse {
+      0%,100% { box-shadow: 0 0 0 rgba(38,255,154,0); }
+      50%      { box-shadow: 0 0 20px rgba(38,255,154,0.2); }
+    }
+    @keyframes headerLine {
+      from { width: 0; }
+      to   { width: 100%; }
+    }
+    @keyframes countUp {
+      from { opacity: 0; transform: scale(0.85); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+
+    /* ─── LAYOUT ─────────────────────────────────────── */
+    .page-shell {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      padding: 0 0 80px 100px; /* sidebar offset */
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ─── PAGE HEADER ────────────────────────────────── */
+    .page-header {
+      padding: 52px 60px 36px;
+      opacity: 0;
+      animation: fadeUp 0.7s ease 0.1s forwards;
+    }
+
+    .page-header__eyebrow {
+      font-family: var(--ff-mono);
+      font-size: 10px;
+      letter-spacing: 0.25em;
+      color: var(--mint);
+      text-transform: uppercase;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .page-header__eyebrow::before {
+      content: '';
+      display: inline-block;
+      width: 24px;
+      height: 1px;
+      background: var(--mint);
+    }
+
+    .page-header__title {
+      font-family: var(--ff-display);
+      font-size: clamp(32px, 4vw, 52px);
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: -0.03em;
+      line-height: 1;
+      position: relative;
+      display: inline-block;
+    }
+    .page-header__title span {
+      color: var(--mint);
+    }
+
+    .page-header__underline {
+      height: 1px;
+      background: linear-gradient(90deg, var(--mint), transparent);
+      margin-top: 20px;
+      animation: headerLine 1s ease 0.6s both;
+      width: 0;
+      max-width: 320px;
+    }
+
+    /* ─── MAIN BODY ──────────────────────────────────── */
+    .settings-body {
+      display: grid;
+      grid-template-columns: 200px 1fr;
+      gap: 0;
+      padding: 0 60px;
+      flex: 1;
+    }
+
+    /* ─── VERTICAL NAV ───────────────────────────────── */
+    .vnav {
+      padding-right: 32px;
+      padding-top: 8px;
+      opacity: 0;
+      animation: slideRight 0.6s ease 0.4s forwards;
+      position: sticky;
+      top: 32px;
+      align-self: start;
+    }
+
+    .vnav__label {
+      font-size: 9px;
+      letter-spacing: 0.22em;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-bottom: 16px;
+      padding-left: 4px;
+    }
+
+    .vnav__item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-family: var(--ff-mono);
+      font-size: 12px;
+      color: var(--text-dim);
+      transition: var(--transition);
+      position: relative;
+      margin-bottom: 4px;
+      border: 1px solid transparent;
+      background: transparent;
+      width: 100%;
+      text-align: left;
+    }
+    .vnav__item i {
+      width: 16px;
+      font-size: 13px;
+      flex-shrink: 0;
+    }
+    .vnav__item:hover {
+      color: var(--text);
+      background: var(--mint-dim);
+      border-color: var(--border);
+    }
+    .vnav__item.active {
+      color: var(--mint);
+      background: var(--mint-dim);
+      border-color: var(--border-hot);
+    }
+    .vnav__item.active::before {
+      content: '';
+      position: absolute;
+      left: -1px;
+      top: 50%;
+      transform: translateY(-50%);
+      height: 60%;
+      width: 3px;
+      background: var(--mint);
+      border-radius: 0 2px 2px 0;
+    }
+
+    .vnav__divider {
+      height: 1px;
+      background: var(--border);
+      margin: 16px 0;
+    }
+
+    /* ─── TAB PANELS ─────────────────────────────────── */
+    .panels {
+      border-left: 1px solid var(--border);
+      padding-left: 48px;
+      min-height: 600px;
+    }
+
+    .panel {
+      display: none;
+      opacity: 0;
+      animation: fadeUp 0.5s ease forwards;
+    }
+    .panel.active {
+      display: block;
+    }
+
+    /* ─── SECTION ────────────────────────────────────── */
+    .section {
+      margin-bottom: 48px;
+    }
+
+    .section__header {
+      display: flex;
+      align-items: baseline;
+      gap: 16px;
+      margin-bottom: 28px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .section__title {
+      font-family: var(--ff-display);
+      font-size: 15px;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: -0.01em;
+    }
+    .section__badge {
+      font-family: var(--ff-mono);
+      font-size: 9px;
+      letter-spacing: 0.2em;
+      color: var(--mint);
+      background: var(--mint-dim);
+      border: 1px solid var(--border-hot);
+      padding: 3px 8px;
+      border-radius: 4px;
+      text-transform: uppercase;
+    }
+
+    /* ─── FORM ELEMENTS ──────────────────────────────── */
+    .field {
+      display: grid;
+      grid-template-columns: 180px 1fr;
+      align-items: center;
+      gap: 20px;
+      padding: 14px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+    .field:last-child { border-bottom: none; }
+
+    .field__label {
+      font-family: var(--ff-mono);
+      font-size: 12px;
+      color: var(--text-dim);
+      letter-spacing: 0.04em;
+    }
+    .field__sub {
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-top: 2px;
+      letter-spacing: 0.02em;
+    }
+
+    .field__control {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Inputs */
+    .input {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: var(--ff-mono);
+      font-size: 12px;
+      padding: 11px 16px;
+      border-radius: var(--radius-sm);
+      outline: none;
+      transition: var(--transition);
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    .input:focus {
+      border-color: var(--mint);
+      background: var(--surface3);
+      box-shadow: 0 0 0 3px rgba(38,255,154,0.08);
+    }
+    .input::placeholder { color: var(--text-muted); }
+
+    select.input {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2326ff9a' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      padding-right: 36px;
+      cursor: pointer;
+    }
+
+    select.input option { background: #1a1a1a; }
+
+    /* Toggle */
+    .toggle-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .toggle {
+      position: relative;
+      width: 44px;
+      height: 24px;
+      flex-shrink: 0;
+    }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .toggle-track {
+      position: absolute;
+      inset: 0;
+      background: var(--surface3);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .toggle-track::after {
+      content: '';
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 16px;
+      height: 16px;
+      background: var(--text-dim);
+      border-radius: 50%;
+      transition: var(--transition);
+    }
+    .toggle input:checked + .toggle-track {
+      background: var(--mint-dim);
+      border-color: var(--mint);
+    }
+    .toggle input:checked + .toggle-track::after {
+      transform: translateX(20px);
+      background: var(--mint);
+      box-shadow: 0 0 8px var(--mint-glow);
+    }
+    .toggle-label {
+      font-family: var(--ff-mono);
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+
+    /* Range slider */
+    .slider-wrap {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      width: 100%;
+    }
+    .slider-wrap input[type=range] {
+      flex: 1;
+      -webkit-appearance: none;
+      appearance: none;
+      height: 4px;
+      background: var(--surface3);
+      border-radius: 999px;
+      outline: none;
+    }
+    .slider-wrap input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--mint);
+      cursor: pointer;
+      box-shadow: 0 0 8px var(--mint-glow);
+      transition: transform 0.2s;
+    }
+    .slider-wrap input[type=range]::-webkit-slider-thumb:hover {
+      transform: scale(1.3);
+    }
+    .slider-wrap input[type=range]::-moz-range-thumb {
+      width: 16px;
+      height: 16px;
+      border: none;
+      border-radius: 50%;
+      background: var(--mint);
+      cursor: pointer;
+    }
+    .slider-value {
+      font-family: var(--ff-mono);
+      font-size: 11px;
+      color: var(--mint);
+      width: 36px;
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    /* Color pickers */
+    .color-pair {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .color-swatch {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .color-swatch__label {
+      font-size: 10px;
+      color: var(--text-muted);
+      letter-spacing: 0.08em;
+    }
+    .color-swatch input[type=color] {
+      width: 100%;
+      height: 44px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--surface2);
+      cursor: pointer;
+      padding: 4px;
+      transition: var(--transition);
+    }
+    .color-swatch input[type=color]:hover {
+      border-color: var(--mint);
+    }
+
+    /* ─── BUTTONS ────────────────────────────────────── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--ff-mono);
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      padding: 11px 24px;
+      border-radius: var(--radius-sm);
+      border: none;
+      cursor: pointer;
+      transition: var(--transition);
+      text-decoration: none;
+    }
+    .btn-primary {
+      background: var(--mint);
+      color: #000;
+    }
+    .btn-primary:hover {
+      background: #4dffa8;
+      box-shadow: 0 0 24px rgba(38,255,154,0.35);
+      transform: translateY(-1px);
+    }
+    .btn-primary:active { transform: translateY(0); }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--mint);
+      border: 1px solid var(--border-hot);
+    }
+    .btn-ghost:hover {
+      background: var(--mint-dim);
+      box-shadow: 0 0 16px rgba(38,255,154,0.15);
+      transform: translateY(-1px);
+    }
+
+    .btn-danger {
+      background: transparent;
+      color: #ff6b6b;
+      border: 1px solid rgba(255,107,107,0.3);
+    }
+    .btn-danger:hover {
+      background: rgba(255,107,107,0.08);
+      border-color: rgba(255,107,107,0.6);
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      margin-top: 32px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+    }
+
+    /* ─── STAT CARDS ─────────────────────────────────── */
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 14px;
+      margin-bottom: 32px;
+    }
+    .stat-card {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 18px;
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--mint), transparent);
+      opacity: 0;
+      transition: var(--transition);
+    }
+    .stat-card:hover { border-color: var(--border-hot); }
+    .stat-card:hover::before { opacity: 1; }
+    .stat-card__value {
+      font-family: var(--ff-display);
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--mint);
+      display: block;
+      margin-bottom: 4px;
+      animation: countUp 0.6s ease both;
+    }
+    .stat-card__label {
+      font-size: 10px;
+      color: var(--text-muted);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    /* ─── INFO CARD ──────────────────────────────────── */
+    .info-card {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+      margin-bottom: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+    .info-card::after {
+      content: '';
+      position: absolute;
+      top: -40%;
+      right: -20%;
+      width: 200px;
+      height: 200px;
+      background: radial-gradient(circle, rgba(38,255,154,0.05) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    /* ─── POLICY LIST ────────────────────────────────── */
+    .policy-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .policy-list li {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      font-size: 12px;
+      color: var(--text-dim);
+      line-height: 1.7;
+      padding: 14px 18px;
+      background: var(--surface2);
+      border-radius: var(--radius-sm);
+      border: 1px solid transparent;
+      transition: var(--transition);
+    }
+    .policy-list li:hover {
+      border-color: var(--border);
+      color: var(--text);
+    }
+    .policy-list li::before {
+      content: '//';
+      color: var(--mint);
+      font-weight: 700;
+      flex-shrink: 0;
+      margin-top: 1px;
+      font-size: 11px;
+    }
+
+    /* ─── PARTNER CARD ───────────────────────────────── */
+    .partner-card {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      transition: var(--transition);
+    }
+    .partner-card:hover {
+      border-color: var(--border-hot);
+      background: var(--surface3);
+    }
+    .partner-card img {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+    }
+    .partner-card__info h4 {
+      font-family: var(--ff-display);
+      font-size: 14px;
+      font-weight: 700;
+      color: #8ab4f8;
+      margin-bottom: 3px;
+    }
+    .partner-card__info p {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+    .partner-card .btn { margin-left: auto; }
+
+    /* ─── SYNC CARD ──────────────────────────────────── */
+    .sync-panel {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 32px;
+      max-width: 440px;
+      position: relative;
+      overflow: hidden;
+    }
+    .sync-panel::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--mint) 50%, transparent);
+    }
+    /* Scanline effect */
+    .sync-panel::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 60px;
+      background: linear-gradient(to bottom, rgba(38,255,154,0.04), transparent);
+      animation: scanDown 4s linear infinite;
+      pointer-events: none;
+    }
+    .sync-panel__title {
+      font-family: var(--ff-display);
+      font-size: 18px;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 6px;
+    }
+    .sync-panel__sub {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-bottom: 28px;
+      letter-spacing: 0.04em;
+    }
+    .sync-status {
+      font-family: var(--ff-mono);
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-top: 20px;
+      padding: 10px 14px;
+      background: var(--surface);
+      border-radius: 6px;
+      border-left: 2px solid var(--mint);
+      letter-spacing: 0.1em;
+    }
+
+    /* ─── HELP ITEMS ─────────────────────────────────── */
+    .help-item {
+      padding: 22px 24px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 12px;
+      transition: var(--transition);
+      cursor: default;
+    }
+    .help-item:hover { border-color: var(--border-hot); }
+    .help-item__head {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+    .help-item__icon {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--mint-dim);
+      border: 1px solid var(--border-hot);
+      border-radius: 8px;
+      color: var(--mint);
+      font-size: 13px;
+      flex-shrink: 0;
+    }
+    .help-item__title {
+      font-family: var(--ff-display);
+      font-size: 13px;
+      font-weight: 700;
+      color: #fff;
+    }
+    .help-item p {
+      font-size: 12px;
+      color: var(--text-dim);
+      line-height: 1.7;
+    }
+
+    /* ─── TRANSFORM ──────────────────────────────────── */
+    .transform-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+    .transform-opt {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      cursor: pointer;
+      transition: var(--transition);
+      position: relative;
+    }
+    .transform-opt:hover {
+      border-color: var(--border-hot);
+      background: var(--surface3);
+    }
+    .transform-opt__label {
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      color: var(--mint);
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .transform-opt__title {
+      font-family: var(--ff-display);
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+    }
+    .transform-opt__desc {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 8px;
+      line-height: 1.6;
+    }
+
+    /* Blob mask toggle */
+    .blob-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      margin-bottom: 16px;
+      transition: var(--transition);
+    }
+    .blob-toggle:hover { border-color: var(--border-hot); }
+    .blob-toggle__info h4 {
+      font-family: var(--ff-display);
+      font-size: 13px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 4px;
+    }
+    .blob-toggle__info p {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    /* ─── TOAST ──────────────────────────────────────── */
+    #toast {
+      position: fixed;
+      top: 32px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--surface);
+      color: var(--mint);
+      border: 1px solid var(--mint);
+      padding: 12px 28px;
+      border-radius: var(--radius-sm);
+      font-family: var(--ff-mono);
+      font-size: 12px;
+      letter-spacing: 0.1em;
+      box-shadow: 0 0 40px rgba(38,255,154,0.2);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 9999;
+      transition: opacity 0.4s ease;
+    }
+
+    /* ─── STAGGER HELPERS ────────────────────────────── */
+    .stagger > * { opacity: 0; animation: fadeUp 0.5s ease both; }
+    .stagger > *:nth-child(1) { animation-delay: 0.05s; }
+    .stagger > *:nth-child(2) { animation-delay: 0.1s; }
+    .stagger > *:nth-child(3) { animation-delay: 0.15s; }
+    .stagger > *:nth-child(4) { animation-delay: 0.2s; }
+    .stagger > *:nth-child(5) { animation-delay: 0.25s; }
+    .stagger > *:nth-child(6) { animation-delay: 0.3s; }
+    .stagger > *:nth-child(7) { animation-delay: 0.35s; }
+    .stagger > *:nth-child(8) { animation-delay: 0.4s; }
+    .stagger > *:nth-child(9) { animation-delay: 0.45s; }
+    .stagger > *:nth-child(10){ animation-delay: 0.5s; }
+    .stagger > *:nth-child(11){ animation-delay: 0.55s; }
+
+    /* ─── SCROLLBAR ──────────────────────────────────── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #222; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #333; }
+
+    /* ─── SIDEBAR OFFSET ─────────────────────────────── */
+    .sidebar { z-index: 10; }
+
+
+.glass-orb {
+    position: absolute; width: 500px; height: 500px; background: radial-gradient(circle, var(--mint-glow) 0%, transparent 70%);
+    filter: blur(60px); opacity: 0.15; z-index: 0; animation: pulseOrb 10s infinite alternate;
+}
+
+
+.card-inner {
+    background: var(--card-bg); backdrop-filter: blur(30px); border-radius: 31px; padding: 2.5rem;
+}
+
+.header-box { margin-bottom: 2rem; }
+.protocol-tag { font-size: 9px; font-weight: 800; color: var(--mint); letter-spacing: 2px; }
+.apex-title { font-family: 'Syne', sans-serif; font-size: 2rem; margin: 5px 0 0 0; letter-spacing: -1px; }
+
+.apex-label { display: block; font-size: 10px; font-weight: 800; color: #688074; margin-bottom: 12px; letter-spacing: 1px; }
+
+.input-wrapper { position: relative; margin-bottom: 2rem; }
+.apex-input {
+    width: 100%; background: rgba(255,255,255,0.03); border: none; border-bottom: 1px solid rgba(255,255,255,0.1);
+    padding: 1rem 0; color: white; font-size: 1rem; transition: 0.3s;
+}
+.apex-input:focus { outline: none; border-bottom-color: var(--mint); }
+
+.combo-display {
+    background: rgba(0,0,0,0.3); border: 1px dashed rgba(38,255,154,0.2); border-radius: 12px;
+    padding: 1.2rem; text-align: center; font-weight: 800; color: var(--mint);
+    margin-bottom: 1.5rem; font-size: 0.9rem; letter-spacing: 1px;
+}
+
+.btn-apex-main {
+    width: 100%; position: relative; padding: 1.2rem; background: var(--mint); border: none;
+    border-radius: 16px; font-weight: 800; color: #060707; cursor: pointer;
+    overflow: hidden; transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.btn-apex-main:hover { transform: translateY(-3px); box-shadow: 0 10px 30px var(--mint-glow); }
+.btn-apex-main.recording { background: #ffcc00; transform: scale(0.98); }
+
+.footer-note { margin-top: 2rem; font-size: 0.75rem; color: #688074; line-height: 1.5; text-align: center; }
+
+@keyframes pulseOrb { from { opacity: 0.1; transform: scale(0.9); } to { opacity: 0.2; transform: scale(1.1); } }
+  </style>
+  
+</head>
+<body>
+
+<!-- Toast notification -->
+<div id="toast">COMMAND_SUCCESSFUL</div>
+
+<!-- ── SIDEBAR (untouched) ─────────────────────────── -->
+<div class="sidebar">
+  <img src="https://cdn.jsdelivr.net/gh/PopAnynomous234/assets/logo.png" width="70" height="70" alt="logo">
+  <ul>
+    <li><a href="index.html"><i class="fas fa-home icon"></i><span class="text">Home</span></a></li>
+    <li><a href="ai.html"><i class="fas fa-robot icon"></i><span class="text">AI</span></a></li>
+    <li><a href="tools.html"><i class="fa-solid fa-screwdriver-wrench"></i><span class="text">Tools</span></a></li>
+    <li><a href="games.html"><i class="fas fa-gamepad icon"></i><span class="text">Games</span></a></li>
+    <li><a href="music.html"><i class="fas fa-music icon"></i><span class="text">Music</span></a></li>
+    <li><a href="chat.html"><i class="fa-regular fa-comment icon"></i><span class="text">Chat</span></a></li>
+    <li><a href="settings.html"><i class="fas fa-cog icon"></i><span class="text">Settings</span></a></li>
+  </ul>
+</div>
+
+<!-- ── PAGE SHELL ─────────────────────────────────────── -->
+<div class="page-shell">
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="page-header__eyebrow">codelistener </div>
+    <h1 class="page-header__title">Settings<span>.</span></h1>
+    <div class="page-header__underline"></div>
+  </div>
+
+  <!-- Body -->
+  <div class="settings-body">
+
+    <!-- Vertical Nav -->
+    <nav class="vnav">
+      <div class="vnav__label">Navigation</div>
+
+      <button class="vnav__item active" data-panel="theme">
+        <i class="fa-solid fa-palette"></i> Theme
+      </button>
+      <button class="vnav__item" data-panel="transform">
+        <i class="fa-solid fa-mask"></i> Transform
+      </button>
+      <button class="vnav__item" data-panel="sync">
+        <i class="fa-solid fa-cloud-arrow-up"></i> Sync
+      </button>
+
+      <div class="vnav__divider"></div>
+      <div class="vnav__label">Info</div>
+
+      <button class="vnav__item" data-panel="policy">
+        <i class="fa-solid fa-file-shield"></i> Policy
+      </button>
+      <button class="vnav__item" data-panel="about">
+        <i class="fa-solid fa-circle-info"></i> About
+      </button>
+      <button class="vnav__item" data-panel="help">
+        <i class="fa-solid fa-life-ring"></i> Help-Desk
+      </button>
+    </nav>
+
+    <!-- Panels -->
+    <div class="panels">
+
+      <!-- ── THEME ──────────────────────────────────── -->
+      <div id="panel-theme" class="panel active">
+        <div class="section">
+          <div class="section__header">
+            <span class="section__title">Particle Settings</span>
+            <span class="section__badge">Visual</span>
+          </div>
+
+          <div class="stagger">
+            <div class="field">
+              <div class="field__label">
+                Particles Amount
+                <div class="field__sub">Number of floating particles</div>
+              </div>
+              <div class="field__control">
+                <div class="slider-wrap">
+                  <input type="range" id="particlesAmount" min="0" max="300" step="1" oninput="document.getElementById('amountValue').textContent = this.value">
+                  <span class="slider-value" id="amountValue">80</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="field">
+              <div class="field__label">
+                Move Speed
+                <div class="field__sub">Particle drift velocity</div>
+              </div>
+              <div class="field__control">
+                <div class="slider-wrap">
+                  <input type="range" id="moveSpeed" min="0" max="10" step="0.1" oninput="document.getElementById('speedValue').textContent = this.value">
+                  <span class="slider-value" id="speedValue">3.0</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="field">
+              <div class="field__label">
+                Particle Size
+                <div class="field__sub">Radius of each particle</div>
+              </div>
+              <div class="field__control">
+                <div class="slider-wrap">
+                  <input type="range" id="sizeRange" min="0" max="20" step="0.1" oninput="document.getElementById('sizeValue').textContent = this.value">
+                  <span class="slider-value" id="sizeValue">4.0</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="field">
+              <div class="field__label">Shape</div>
+              <div class="field__control">
+                <select id="shapeSelect" class="input">
+                  <option value="circle">Circle</option>
+                  <option value="edge">Square</option>
+                  <option value="triangle">Triangle</option>
+                  <option value="star" selected>Star</option>
+                  <option value="polygon">Polygon</option>
+                  <option value="image">Image</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section__header">
+            <span class="section__title">Widget Settings</span>
+            <span class="section__badge">UI</span>
+          </div>
+
+          <div class="stagger">
+            <div class="field">
+              <div class="field__label">
+                Theme Colors
+                <div class="field__sub">Accent and background</div>
+              </div>
+              <div class="field__control">
+                <div class="color-pair" style="width:100%">
+                  <div class="color-swatch">
+                    <span class="color-swatch__label">Accent</span>
+                    <input type="color" id="accent" value="#26ff9a">
+                  </div>
+                  <div class="color-swatch">
+                    <span class="color-swatch__label">Background</span>
+                    <input type="color" id="bg" value="#202124">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="field">
+              <div class="field__label">Animation Style</div>
+              <div class="field__control">
+                <select id="style" class="input">
+                  <option value="style-chromeos">ChromeOS — Smooth Wide</option>
+                  <option value="style-float">Floating — Minimal Rise</option>
+                  <option value="style-glass">Glassmorphism — Full Reveal</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="field">
+              <div class="field__label">Placement</div>
+              <div class="field__control">
+                <select id="align" class="input">
+                  <option value="bottom-right">Bottom Right</option>
+                  <option value="bottom-left">Bottom Left</option>
+                  <option value="top-right">Top Right</option>
+                  <option value="top-left">Top Left</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="field">
+              <div class="field__label">
+                24-Hour Clock
+                <div class="field__sub">Toggle time format</div>
+              </div>
+              <div class="field__control">
+                <label class="toggle">
+                  <input type="checkbox" id="h24">
+                  <div class="toggle-track"></div>
+                </label>
+                <span class="toggle-label">Enable</span>
+              </div>
+            </div>
+
+            <div class="field">
+              <div class="field__label">
+                Widget Enabled
+                <div class="field__sub">Show / hide widget overlay</div>
+              </div>
+              <div class="field__control">
+                <label class="toggle">
+                  <input type="checkbox" id="w_enabled">
+                  <div class="toggle-track"></div>
+                </label>
+                <span class="toggle-label">Active</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="btn-row">
+            <button class="btn btn-primary" onclick="save()">
+              <i class="fa-solid fa-floppy-disk"></i> Apply Design
+            </button>
+            <span style="font-size:11px; color:var(--text-muted);">Changes are persisted locally</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── TRANSFORM ──────────────────────────────── -->
+      <div id="panel-transform" class="panel">
+        <div class="section">
+          <div class="section__header">
+            <span class="section__title">Tab Disguise</span>
+            <span class="section__badge">Stealth</span>
+          </div>
+
+          <div class="blob-toggle">
+            <div class="blob-toggle__info">
+              <h4><i class="fa-solid fa-mask" style="color:var(--mint);margin-right:8px;"></i>Blob Cloak</h4>
+              <p>Hides site data in memory — invisible to most browser extensions.</p>
+            </div>
+            <label class="toggle" style="margin-left:20px;">
+              <input type="checkbox" id="cloakToggle" onchange="handleToggle(this)">
+              <div class="toggle-track"></div>
+            </label>
+          </div>
+
+          <div class="blob-toggle">
+            <div class="blob-toggle__info">
+              <h4><i class="fa-solid fa-door-open" style="color:var(--mint);margin-right:8px;"></i>About:Blank</h4>
+              <p>Open site inside a blank-page wrapper for additional concealment.</p>
+            </div>
+            <button class="btn btn-ghost" id="toggleBtn"></button>
+                <p id="status" style="margin-left:20px; font-size: 11px; color: #444444; font-weight: 700; font-family: monospace;"></p>
+          </div>
+
+          <div class="section__header" style="margin-top:36px;">
+            <span class="section__title">Preset Transform</span>
+          </div>
+
+          <div class="transform-grid">
+            <div class="transform-opt" onclick="applyPresetSelect('Canvas')">
+              <div class="transform-opt__label">LMS</div>
+              <div class="transform-opt__title">Canvas</div>
+              <div class="transform-opt__desc">Mimics an educational LMS dashboard tab.</div>
+            </div>
+            <div class="transform-opt" onclick="applyPresetSelect('Chrome New-Tab')">
+              <div class="transform-opt__label">Browser</div>
+              <div class="transform-opt__title">New Tab</div>
+              <div class="transform-opt__desc">Looks exactly like a Chrome new tab page.</div>
+            </div>
+            <div class="transform-opt" onclick="applyPresetSelect('Google Drive')">
+              <div class="transform-opt__label">Productivity</div>
+              <div class="transform-opt__title">Google Drive</div>
+              <div class="transform-opt__desc">Appears as a Google Drive home page.</div>
+            </div>
+            <div class="transform-opt" onclick="applyPresetSelect('Kahoot')">
+              <div class="transform-opt__label">Games</div>
+              <div class="transform-opt__title">Kahoot</div>
+              <div class="transform-opt__desc">Disguise as the Kahoot game-pin entry.</div>
+            </div>
+            <div class="transform-opt" onclick="applyPresetSelect('Clever')">
+              <div class="transform-opt__label">Portal</div>
+              <div class="transform-opt__title">Clever</div>
+              <div class="transform-opt__desc">Mimics the Clever student portal tab.</div>
+            </div>
+            <div class="transform-opt" onclick="applyPresetSelect('Wayground')">
+              <div class="transform-opt__label">Quizzes</div>
+              <div class="transform-opt__title">Wayground</div>
+              <div class="transform-opt__desc">Formerly Quizizz student entry page.</div>
+            </div>
+          </div>
+
+          <div class="field">
+            <div class="field__label">Preset Select</div>
+            <div class="field__control">
+              <select id="preset" class="input" onchange="applyPresetSelect(this.value)">
+                <option value="default">Default</option>
+                <option value="Canvas">Canvas</option>
+                <option value="Chrome New-Tab">Chrome New-Tab</option>
+                <option value="Clever">Clever</option>
+                <option value="Google Drive">Google Drive</option>
+                <option value="Kahoot">Kahoot</option>
+                <option value="Wayground">Wayground</option>
+                <option value="Custom">Custom</option>
+              </select>
+            </div>
+          </div>
+
+          <div id="custom-transform" style="display:none;">
+            <div class="field">
+              <div class="field__label">Custom Title</div>
+              <div class="field__control">
+                <input type="text" id="custom-title" class="input" placeholder="Enter page title…">
+                <button class="btn btn-ghost" id="custom-title-btn" style="white-space:nowrap; margin-left:12px;">
+                  Update
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="section">
+          <div class="section__header">
+            <span class="section__title">Panic Key</span>
+            <span class="section__badge">Redirect</span>
+          </div>          
+    <div class="glass-orb"></div>
+        <div class="card-glow"></div>
+        <div class="card-inner">
+            <div class="header-box">
+                <span class="protocol-tag">Teacher Protection</span>
+                <h1 class="apex-title">Panic Combination</h1>
+            </div>
+
+            <div class="settings-vault">
+                <div class="input-section">
+                    <label class="apex-label">REDIRECT </label>
+                    <div class="input-wrapper">
+                        <input type="text" id="panic-url-input" placeholder="https://google.com" class="apex-input">
+                        <div class="input-bar"></div>
+                    </div>
+                </div>
+
+                <div class="combo-section">
+                    <label class="apex-label">COMBINATION</label>
+                    <div class="combo-display" id="combo-preview">NONE SET</div>
+                    <button id="panic-rec-btn" onclick="startPanicRecord()" class="btn-apex-main">
+                        <span class="btn-text">Record</span>
+                        <div class="btn-shine"></div>
+                    </button>
+                </div>
+            </div>
+
+            <div class="footer-note">
+                <p>Hold the exact combination to vanish. Session history will be purged upon exit.</p>
+            </div>
+</div>
+        </div>
+      </div>
+
+      <!-- ── SYNC ───────────────────────────────────── -->
+      <div id="panel-sync" class="panel">
+        <div class="section">
+          <div class="section__header">
+            <span class="section__title">Cloud Sync</span>
+            <span class="section__badge">Firebase</span>
+          </div>
+
+          <div class="stat-grid">
+            <div class="stat-card">
+              <span class="stat-card__value">↑</span>
+              <span class="stat-card__label">Upload</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-card__value">↓</span>
+              <span class="stat-card__label">Download</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-card__value" style="font-size:18px;">AES</span>
+              <span class="stat-card__label">Encryption</span>
+            </div>
+          </div>
+
+          <div class="sync-panel">
+            <div class="sync-panel__title">Game Data Sync</div>
+            <div class="sync-panel__sub">Backup and restore all local data via cloud mirror.</div>
+            <input type="text" id="username" class="input" placeholder="Enter username…" style="margin-bottom:16px;">
+            <div style="display:flex; gap:12px;">
+              <button class="btn btn-primary" onclick="pushData()" style="flex:1; justify-content:center;">
+                <i class="fa-solid fa-cloud-arrow-up"></i> Upload
+              </button>
+              <button class="btn btn-ghost" onclick="pullData()" style="flex:1; justify-content:center;">
+                <i class="fa-solid fa-cloud-arrow-down"></i> Download
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── POLICY ─────────────────────────────────── -->
+      <div id="panel-policy" class="panel">
+        <div class="section">
+          <div class="section__header">
+            <span class="section__title">Terms &amp; Conditions</span>
+            <span class="section__badge">Legal</span>
+          </div>
+
+          <ul class="policy-list stagger">
+            <li>This webpage is intended for fun and entertainment purposes only.</li>
+            <li>All credits go to Thomas. Attribution for this work must exclusively be given to him.</li>
+            <li>Violations may result in temporary or permanent suspension of associated services, at our sole discretion.</li>
+            <li>Content provided on this site was independently developed and does not infringe on any third party's intellectual property.</li>
+            <li>Chat functionality is powered by Firebase©. Unauthorized use of the API key is strictly prohibited.</li>
+            <li>Website recommendations on the About page are unsponsored.</li>
+            <li>The brand color <code style="color:var(--mint);">#26FF9A</code> is proprietary to Codelistener. Use is restricted to official branding only.</li>
+            <li>AI monitoring tools analyze usage patterns. Unusual activity triggers automatic security investigation.</li>
+            <li>Particle effects use the open-source particles.js library. Plagiarism claims regarding this feature are unfounded.</li>
+            <li>Accusations of unauthorized code inspection or AI use without evidence are prohibited.</li>
+            <li>The chat space is monitored. Use of banned content will be documented and may be reported.</li>
+          </ul>
+
+          <p style="font-size:11px; color:var(--text-muted); margin-top:24px; padding-top:16px; border-top:1px solid var(--border);">
+            &copy; Codelistener. All rights reserved.
+          </p>
+        </div>
+      </div>
+
+      <!-- ── ABOUT ──────────────────────────────────── -->
+      <div id="panel-about" class="panel">
+        <div class="section">
+          <div class="section__header">
+            <span class="section__title">About</span>
+            <span class="section__badge">v2.5</span>
+          </div>
+
+          <div class="info-card">
+            <p style="font-size:12px; color:var(--text-dim); line-height:1.8;">
+              This webpage was created by <strong style="color:#fff;">Thomas</strong>. All credits go to Thomas.
+            </p>
+          </div>
+
+          <div class="section__header" style="margin-top:32px;">
+            <span class="section__title">Uptime Status</span>
+          </div>
+          <div class="info-card" style="display:flex; align-items:center; gap:20px;">
+            <div style="width:10px; height:10px; border-radius:50%; background:var(--mint); box-shadow:0 0 10px var(--mint-glow); flex-shrink:0; animation:glowPulse 2s infinite;"></div>
+            <div>
+              <p style="font-size:13px; color:#fff; margin-bottom:4px;">All systems operational</p>
+              <p style="font-size:11px; color:var(--text-muted);">View incidents and historical metrics</p>
+            </div>
+            <a href="https://codelistener.betteruptime.com" target="_blank" rel="noopener" class="btn btn-ghost" style="margin-left:auto; white-space:nowrap;">
+              <i class="fa-solid fa-arrow-up-right-from-square"></i> Open
+            </a>
+          </div>
+
+          <div class="section__header" style="margin-top:32px;">
+            <span class="section__title">Partners</span>
+          </div>
+
+          <div class="partner-card">
+            <i class="fa-solid fa-star" style="color:#FFD43B; font-size:18px;"></i>
+            <img src="https://cdn.jsdelivr.net/gh/ethanlb34/delta-icons@main/default.png" alt="Delta">
+            <div class="partner-card__info">
+              <h4>Delta V10</h4>
+              <p>A site with extra games and features.</p>
+              <p style="font-size:10px; color:red; margin-top:4px;">EXPIRED (We are no longer Partners)</p>
+            </div>
+            <button class="btn btn-ghost" onclick="window.open('about:blank#expired','_blank')">
+              Visit <i class="fa-solid fa-arrow-right"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── HELP ───────────────────────────────────── -->
+      <div id="panel-help" class="panel">
+        <div class="section">
+          <div class="section__header">
+            <span class="section__title">Help Desk</span>
+            <span class="section__badge">Support</span>
+          </div>
+
+          <div class="stagger">
+            <div class="help-item">
+              <div class="help-item__head">
+                <div class="help-item__icon"><i class="fa-solid fa-gamepad"></i></div>
+                <span class="help-item__title">Games</span>
+              </div>
+              <p>If a game doesn't load, wait two minutes. If still broken after that, the game may be non-functional.</p>
+            </div>
+
+            <div class="help-item">
+              <div class="help-item__head">
+                <div class="help-item__icon"><i class="fa-solid fa-robot"></i></div>
+                <span class="help-item__title">AI</span>
+              </div>
+              <p>If the chatbot shows a quota error (429), the API key needs to be recharged. Expected resolution: 5–15 days.</p>
+            </div>
+
+            <div class="help-item">
+              <div class="help-item__head">
+                <div class="help-item__icon"><i class="fa-solid fa-music"></i></div>
+                <span class="help-item__title">Music</span>
+              </div>
+              <p>If the Music page is blank, the streaming tunnel may be blocked. Try again later.</p>
+            </div>
+
+            <div class="help-item">
+              <div class="help-item__head">
+                <div class="help-item__icon"><i class="fa-regular fa-comments"></i></div>
+                <span class="help-item__title">Chat</span>
+              </div>
+              <p>Can't send? You may have been muted. If login freezes on room switch — refresh the page.</p>
+            </div>
+
+            <div class="help-item">
+              <div class="help-item__head">
+                <div class="help-item__icon"><i class="fa-solid fa-cog"></i></div>
+                <span class="help-item__title">Settings</span>
+              </div>
+              <p>If pop-ups don't appear, enable "Pop-ups and redirects" in Chrome site settings (the toggles icon left of the URL bar).</p>
+            </div>
+
+            <div class="help-item">
+              <div class="help-item__head">
+                <div class="help-item__icon"><i class="fa-solid fa-headset"></i></div>
+                <span class="help-item__title">Contact</span>
+              </div>
+              <p>For further questions, reach the owner in Chat. Room Code: <code style="color:var(--mint); letter-spacing:0.1em;">K6S77A</code></p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /panels -->
+  </div><!-- /settings-body -->
+</div><!-- /page-shell -->
+
+<!-- ── SCRIPTS ──────────────────────────────────────── -->
+<script src="era5.js"></script>
+<script src="era3.js"></script>
+<script src="era4.js"></script>
+<script src="pe.js"></script>
+<script src="about.js"></script>
+<script src="warn.js"></script>
+<script src="cursor.js"></script>
+<script src="widget.js"></script>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
+  import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDs_MC68gPRLluQXLaappyYwlMbROGiODM",
+    authDomain: "chat-67-67.firebaseapp.com",
+    databaseURL: "https://chat-67-67-default-rtdb.firebaseio.com",
+    projectId: "chat-67-67",
+    storageBucket: "chat-67-67.firebasestorage.app",
+    messagingSenderId: "133713228059",
+    appId: "1:133713228059:web:ba374113561be0873863be"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.style.opacity = '1';
+    setTimeout(() => t.style.opacity = '0', 2200);
+  }
+
+  window.pushData = function() {
+    const user = document.getElementById('username').value.trim();
+    if (!user) return alert('ENTER USERNAME');
+    set(ref(db, 'sync/' + user), {
+      fullBackup: JSON.stringify(localStorage),
+      lastUpdated: new Date().toLocaleTimeString()
+    }).then(() => {
+      showToast('UPLOAD_SUCCESSFUL');
+      document.getElementById('status').textContent = '> CLOUD_MIRROR_SYNCED';
+    });
+  };
+
+  window.pullData = function() {
+    const user = document.getElementById('username').value.trim();
+    if (!user) return alert('ENTER USERNAME');
+    get(child(ref(db), `sync/${user}`)).then(snap => {
+      if (snap.exists()) {
+        const dataObj = JSON.parse(snap.val().fullBackup);
+        localStorage.clear();
+        Object.keys(dataObj).forEach(k => localStorage.setItem(k, dataObj[k]));
+        showToast('RESTORATION_COMPLETE');
+        document.getElementById('status').textContent = '> LOCAL_MIRROR_SYNCED';
+        window.location.reload();
+      } else {
+        alert('NO DATA FOUND FOR THIS USER');
+      }
+    });
+  };
+</script>
+
+<script>
+  /* ── TAB SWITCHING ────────────────────────── */
+  const navBtns = document.querySelectorAll('.vnav__item');
+  const panels  = document.querySelectorAll('.panel');
+
+  navBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      navBtns.forEach(b => b.classList.remove('active'));
+      panels.forEach(p => { p.classList.remove('active'); });
+
+      btn.classList.add('active');
+      const target = document.getElementById('panel-' + btn.dataset.panel);
+      if (target) {
+        target.classList.add('active');
+        // Re-trigger animation
+        target.style.animation = 'none';
+        requestAnimationFrame(() => {
+          target.style.animation = '';
+        });
+      }
+    });
+  });
+
+  /* ── PRESET SELECT ───────────────────────── */
+  document.getElementById('preset').addEventListener('change', function() {
+    document.getElementById('custom-transform').style.display =
+      this.value === 'Custom' ? 'block' : 'none';
+  });
+
+  function applyPresetSelect(val) {
+    document.getElementById('custom-transform').style.display =
+      val === 'Custom' ? 'block' : 'none';
+    if (typeof applyPreset === 'function') applyPreset(val);
+  }
+  window.applyPresetSelect = applyPresetSelect;
+
+  /* ── SETTINGS LOAD/SAVE ──────────────────── */
+  window.onload = () => {
+    document.getElementById('accent').value    = localStorage.getItem('w_accent') || '#26ff9a';
+    document.getElementById('bg').value        = localStorage.getItem('w_bg')     || '#202124';
+    document.getElementById('style').value     = localStorage.getItem('w_style')  || 'style-chromeos';
+    document.getElementById('align').value     = localStorage.getItem('w_align')  || 'bottom-right';
+    document.getElementById('h24').checked     = localStorage.getItem('w_24h')    === 'true';
+    document.getElementById('w_enabled').checked = localStorage.getItem('w_enabled') !== 'false';
+  };
+
+  function save() {
+    localStorage.setItem('w_accent',   document.getElementById('accent').value);
+    localStorage.setItem('w_bg',       document.getElementById('bg').value);
+    localStorage.setItem('w_style',    document.getElementById('style').value);
+    localStorage.setItem('w_align',    document.getElementById('align').value);
+    localStorage.setItem('w_24h',      document.getElementById('h24').checked);
+    localStorage.setItem('w_enabled',  document.getElementById('w_enabled').checked);
+    // Show toast instead of alert
+    const t = document.getElementById('toast');
+    t.textContent = 'SETTINGS_SAVED';
+    t.style.opacity = '1';
+    setTimeout(() => t.style.opacity = '0', 2200);
+    window.location.reload();
+  }
+  window.save = save;
+</script>
+<script src="blob.js"></script>
+<script>
+/**
+ * TITAN APEX SECURITY CORE
+ * 1. Global Listener (Runs on every page if this JS is included)
+ * 2. Record Logic (Specific to this settings page)
+ */
+
+(function() {
+    // --- 1. GLOBAL PANIC LISTENER ---
+    const activeKeys = new Set();
+    
+    const getSettings = () => {
+        const stored = localStorage.getItem('panic_protocol');
+        return stored ? JSON.parse(stored) : null;
+    };
+
+    window.addEventListener('keydown', (e) => {
+        const settings = getSettings();
+        if (!settings || !settings.combo) return;
+
+        activeKeys.add(e.key);
+
+        // Exact Match Logic
+        const isMatch = settings.combo.length > 0 && 
+                        settings.combo.every(k => activeKeys.has(k)) &&
+                        activeKeys.size === settings.combo.length;
+
+        if (isMatch) {
+            window.location.replace(settings.url || 'https://google.com');
+        }
+    });
+
+    window.addEventListener('keyup', (e) => activeKeys.delete(e.key));
+    window.addEventListener('blur', () => activeKeys.clear());
+
+    // Update the UI if we are on the settings page
+    const updatePreview = () => {
+        const s = getSettings();
+        const display = document.getElementById('combo-preview');
+        if (display && s) {
+            display.textContent = s.combo.join(' + ').toUpperCase();
+            document.getElementById('panic-url-input').value = s.url;
+        }
+    };
+    
+    updatePreview();
+
+    // --- 2. RECORDING LOGIC ---
+    window.startPanicRecord = function() {
+        const btn = document.getElementById('panic-rec-btn');
+        const display = document.getElementById('combo-preview');
+        const urlInput = document.getElementById('panic-url-input');
+
+        btn.classList.add('recording');
+        btn.querySelector('.btn-text').textContent = "LISTENING... RELEASE TO SAVE";
+        display.textContent = "PRESS KEYS NOW";
+
+        const currentRecording = new Set();
+
+        const capture = (e) => {
+            e.preventDefault();
+            currentRecording.add(e.key);
+            display.textContent = Array.from(currentRecording).join(' + ').toUpperCase();
+        };
+
+        const save = () => {
+            const comboArray = Array.from(currentRecording);
+            const settings = {
+                combo: comboArray,
+                url: urlInput.value || 'https://google.com'
+            };
+
+            localStorage.setItem('panic_protocol', JSON.stringify(settings));
+
+            // Clean up
+            window.removeEventListener('keydown', capture);
+            window.removeEventListener('keyup', save);
+
+            btn.classList.remove('recording');
+            btn.querySelector('.btn-text').textContent = "Record";
+            updatePreview();
+        };
+
+        window.addEventListener('keydown', capture);
+        window.addEventListener('keyup', save);
+    };
+})();
+</script>
+</body>
+</html>

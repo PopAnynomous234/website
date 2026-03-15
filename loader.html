@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Game Loader</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="st.css">
+
+  <style>
+/* ════════════════════════════════════════════════════
+   VARIABLES
+════════════════════════════════════════════════════ */
+:root {
+  --mint:        #26ff9a;
+  --mint-b:      #0dff80;
+  --mint-glow:   rgba(38, 255, 154, 0.55);
+  --mint-glow-m: rgba(38, 255, 154, 0.25);
+  --mint-glow-s: rgba(38, 255, 154, 0.1);
+  --mint-dim:    rgba(38, 255, 154, 0.08);
+  --red:         #ff4d6d;
+  --red-glow:    rgba(255, 77, 109, 0.4);
+  --bg:          #010101;
+  --surf1:       #080808;
+  --surf2:       #0e0e0e;
+  --surf3:       #161616;
+  --border:      rgba(255, 255, 255, 0.05);
+  --border-h:    rgba(38, 255, 154, 0.35);
+  --text:        #f0f0f0;
+  --text-dim:    #777;
+  --ff-display:  'Bebas Neue', sans-serif;
+  --ff-body:     'DM Sans', sans-serif;
+  --ff-mono:     'Fira Code', monospace;
+
+  /* Sidebar width — defined once, used everywhere */
+  --sidebar-w:   80px;
+}
+
+/* ════════════════════════════════════════════════════
+   KEYFRAMES
+════════════════════════════════════════════════════ */
+@keyframes bodyIn {
+  from { opacity: 0 }
+  to   { opacity: 1 }
+}
+@keyframes containerIn {
+  from { opacity: 0; transform: scale(0.97) translateY(12px) }
+  to   { opacity: 1; transform: scale(1) translateY(0) }
+}
+@keyframes scanDown {
+  0%   { transform: translateY(-100%); opacity: .4 }
+  100% { transform: translateY(200vh);  opacity: 0 }
+}
+@keyframes dotPulse { 0% { opacity: .04 } 100% { opacity: .09 } }
+@keyframes rotateCW  { to { transform: rotate(360deg)  } }
+@keyframes rotateCCW { to { transform: rotate(-360deg) } }
+@keyframes breathMint {
+  0%,100% {
+    box-shadow:
+      0 0 0 1px rgba(38,255,154,0.2),
+      0 0 30px rgba(38,255,154,0.15),
+      0 0 70px rgba(38,255,154,0.06);
+  }
+  50% {
+    box-shadow:
+      0 0 0 1px rgba(38,255,154,0.55),
+      0 0 60px rgba(38,255,154,0.45),
+      0 0 120px rgba(38,255,154,0.18),
+      0 0 200px rgba(38,255,154,0.07);
+  }
+}
+@keyframes shimmer {
+  0%   { background-position: -400% 0 }
+  100% { background-position:  400% 0 }
+}
+@keyframes loadBar {
+  0%   { width: 0%;   opacity: 1 }
+  80%  { width: 90%;  opacity: 1 }
+  100% { width: 100%; opacity: 0 }
+}
+@keyframes spinnerRing { to { transform: rotate(360deg) } }
+@keyframes btnGlow {
+  0%,100% { box-shadow: 0 0 8px  rgba(38,255,154,0.2) }
+  50%     { box-shadow: 0 0 20px rgba(38,255,154,0.6), 0 0 40px rgba(38,255,154,0.2) }
+}
+@keyframes badgePop {
+  0%  { opacity: 0; transform: scale(.3) rotate(-10deg) }
+  70% { transform: scale(1.12) rotate(2deg) }
+  100%{ opacity: 1; transform: scale(1) rotate(0) }
+}
+@keyframes cornerSpin { to { transform: rotate(360deg) } }
+
+/* ════════════════════════════════════════════════════
+   RESET / BASE
+════════════════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  width: 100%; height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--ff-body);
+  overflow: hidden; /* no scroll — game fills viewport */
+  opacity: 0;
+  animation: bodyIn .4s ease .05s forwards;
+}
+
+/* Atmospheric dot grid */
+body::before {
+  content: '';
+  position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background-image: radial-gradient(circle, rgba(38,255,154,0.05) 1px, transparent 1px);
+  background-size: 30px 30px;
+  animation: dotPulse 7s ease-in-out infinite alternate;
+}
+
+/* Ambient radial glow */
+body::after {
+  content: '';
+  position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background:
+    radial-gradient(ellipse 70% 40% at 50% -5%, rgba(38,255,154,0.06) 0%, transparent 55%),
+    radial-gradient(ellipse 35% 35% at 95% 80%, rgba(38,255,154,0.03) 0%, transparent 50%);
+}
+
+/* Scanline */
+.scanline { position: fixed; inset: 0; pointer-events: none; z-index: 9999; overflow: hidden; }
+.scanline::after {
+  content: ''; position: absolute; left: 0; right: 0; height: 2px;
+  background: linear-gradient(transparent, rgba(38,255,154,0.045), transparent);
+  animation: scanDown 14s linear infinite;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-thumb { background: rgba(38,255,154,0.2); border-radius: 4px; }
+
+/* Site sidebar */
+.sidebar { z-index: 200; position: fixed; left: 0; top: 0; height: 100%; }
+
+/* ════════════════════════════════════════════════════
+   LAYOUT  — everything pushed right of the sidebar
+════════════════════════════════════════════════════ */
+.page-shell {
+  position: fixed;
+  top: 0; bottom: 0;
+  left: var(--sidebar-w);
+  right: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  padding: 10px 12px 10px 12px;
+  gap: 8px;
+}
+
+/* ════════════════════════════════════════════════════
+   GAME CONTAINER
+════════════════════════════════════════════════════ */
+#game-container {
+  position: relative;
+  flex: 1 1 auto;           /* fills remaining height */
+  min-height: 0;            /* critical for flex children */
+  width: 100%;
+  background: var(--surf1);
+  border-radius: 16px;
+  overflow: hidden;         /* clips iframe + decorations */
+
+  /* The signature: breathing mint border glow */
+  border: 1px solid rgba(38,255,154,0.25);
+  animation: containerIn .6s cubic-bezier(.22,1,.36,1) .15s both,
+             breathMint 5s ease-in-out 1.5s infinite;
+
+  /* Rotating corner-ring decoration */
+  isolation: isolate;
+}
+
+/* Top accent beam */
+#game-container::before {
+  content: '';
+  position: absolute; top: 0; left: 8%; right: 8%; height: 1px; z-index: 10;
+  background: linear-gradient(90deg, transparent, var(--mint) 40%, var(--mint-b) 60%, transparent);
+  opacity: .55;
+  pointer-events: none;
+}
+
+/* Spinning conic corner glow */
+#game-container::after {
+  content: '';
+  position: absolute; top: 50%; left: 50%;
+  width: 140%; height: 140%;
+  transform: translate(-50%, -50%) rotate(0deg);
+  background: conic-gradient(
+    from 0deg,
+    transparent        0%,
+    rgba(38,255,154,0.07) 5%,
+    rgba(38,255,154,0.02) 10%,
+    transparent        16%
+  );
+  pointer-events: none; z-index: 2;
+  animation: cornerSpin 8s linear infinite;
+  border-radius: 50%;
+}
+
+/* ── iframe ── */
+#game-iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+  display: block;
+  z-index: 5;
+  background: url("data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBxMTEhUTExMWFhUVGBgaGBgYGBgdGBoYGBgYGBgaGxsZHiggGholGxsYIjEhJSkrLi4uGB8zODMsNygtLisBCgoKDg0OGxAQGy0mHyUtLS0tLS0tLS0tLS8tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLf/AABEIAKgBKwMBIgACEQEDEQH/xAAbAAACAwEBAQAAAAAAAAAAAAADBAACBQEGB//EADsQAAECBAQEBQMEAgICAAcAAAECEQADITEEEkFRYXGB8AUikaGxEzLBQtHh8QZSFGIVIxYzY3KCksL/xAAZAQADAQEBAAAAAAAAAAAAAAABAgMEAAX/xAArEQACAgICAQMCBgMBAAAAAAAAAQIRAyESMUEEIlEyYRNCcYGR8TOx8CP/2gAMAwEAAhEDEQA/APkhL/x69jhHZaQXqAQ5cmlKtYuTpa8WWXL98PZvSKAQopUnTv2jrWqYunSrsaA23+Y4suSSGfaw/iCgnAh7fPfD1i4B5HbTk2mscQnc9YLisXMUwUokBISNgkWFatDAAzafjv17tX1A5b9fbaOpGlKtXarcYizo9Ht7CnL5hWEqCew9f3jnfGI0WArtHBKCCpTB5MkEd+vCLqlgbnhT5gpoXmkKkCIpI/n5/PdIZUl7sD+IEZfbj4EGzlNMCdG7PrHVG3vxgpwxvbiW9OMV+jr/AF7wLByRUHbv3iLlkct2g8uVW3fSHZmEdLt1Yn4/EK5ISWVJmXko9dYgQRX+++EaP0wilSWqwoXYjlp6wook0pUvHJnKdgxNNnI4RYaV/a2nH+IImQaU99+V4MJL1evH+Y6wOUUTDofT37rb3hqUg1Nh+I5IlEaGNKVhy/Yq8RnKjJlyJHMECAeTDmY3sFiihOULUA4+2heh53+H2hXBYM/inrreGZ4mJOUAm1RsRYHW7RHnbPMyZeTpHosDilEJl5glLsQWA4ks1Ot49D4X4CEAKUvMcw8otmqb1tcho+e4TGFKs1zShqL0eNub4/iMiRmNRVr3JqX2/EbMfqElsklDnyyK/g9rjPDpWUqnLbVnokDQAv2Y+feL+Ly0qKcMhv8A6qqr6E/bzvygfinjU2alKP8AUNfjw49Yzl4RQuXfYgsNT+KcYzTybts25PVQ4pQVf7FFzgCMxL6+js2rloeluJYmIYB6kirhvW4jJnrFk33N+fAQTC49f0/pHzgqcCt6VDHgNNYPJvZJ4+UbK4vGEioPldmoH36FuVIyp89Ve/jrGjiVJJDAUJt0/GsZuIlEENR+/wB4MWacCivAMJJbUwaSrnw2rElB+kaJwv1AlSarVRTOXN3rqR7jjBb8F5NJbESc1WA6bxwyzu0FUkg1vt33SCFb/qbhSAJfwefmSwNQakcaatsfW8CQDO9evH+Y6wOUUTDofT37rb3hqUg1Nh+I5IlEaGNKVhy/Yq8RnKjJlyJHMECAeTDmY3sFiihOULUA4+2heh53+H2hXBYM/inrreGZ4mJOUAm1RsRYHW7RHnbPMyZeTpHosDilEJl5glLsQWA4ks1Ot49D4X4CEAKUvMcw8otmqb1tcho+e4TGFKs1zShqL0eNub4/iMiRmNRVr3JqX2/EbMfqElsklDnyyK/g9rjPDpWUqnLbVnokDQAv2Y+feL+Ly0qKcMhv8A6qqr6E/bzvygfinjU2alKP8AUNfjw49Yzl4RQuXfYgsNT+KcYzTybts25PVQ4pQVf7FFzgCMxL6+js2rloeluJYmIYB6kirhvW4jJnrFk33N+fAQTC49f0/pHzgqcCt6VDHgNNYPJvZJ4+UbK4vGEioPldmoH36FuVIyp89Ve/jrGjiVJJDAUJt0/GsZuIlEENR+/wB4MWacCivAMJJbUwaSrnw2rElB+kaJwv1AlSarVRTOXN3rqR7jjBb8F5NJbESc1WA6bxwyzu0FUkg1vt33SCFb/qbhSAJfwefmSwNQakcaatsfW8CQDO9evH+Y6wOUUTDofT37rb3hqUg1Nh+I5IlEaGNKVhy/Yq8RnKjJlyJHMECAeTDmY3sFiihOULUA4+2heh53+H2hXBYM/inrreGZ4mJOUAm1RsRYHW7RHnbPMyZeTpHosDilEJl5glLsQWA4ks1Ot49D4X4CEAKUvMcw8otmqb1tcho+e4TGFKs1zShqL0eNub4/iMiRmNRVr3JqX2/EbMfqElsklDnyyK/g9rjPDpWUqnLbVnokDQAv2Y+feL+Ly0qKcMhv8A6qqr6E/bzvygfinjU2alKP8AUNfjw49Yzl4RQuXfYgsNT+KcYzTybts25PVQ4pQVf7FFzgCMxL6+js2rloeluJYmIYB6kirhvW4jJnrFk33N+fAQTC49f0/pHzgqcCt6VDHgNNYPJvZJ4+UbK4vGEioPldmoH36FuVIyp89Ve/jrGjiVJJDAUJt0/GsZuIlEENR+/wB4MWacCivAMJJbUwaSrnw2rElB+kaJwv1AlSarVRTOXN3rqR7jjBb8F5NJbESc1WA6bxwyzu0FUkg1vt33SCFb/qbhSAJfwefmSwNQakcaatsfW8CQDO9evH+Y6wOUUTDofT37rb3hqUg1Nh+I5IlEaGNKVhy/Yq8RnKjJlyJHMECAeTDmY3sFiihOULUA4+2heh53+H2hXBYM/inrreGZ4mJOUAm1RsRYHW7RHnbPMyZeTpHosDilEJl5glLsQWA4ks1Ot49D4X4CEAKUvMcw8otmqb1tcho+e4TGFKs1zShqL0eNub4/iMiRmNRVr3JqX2/EbMfqElsklDnyyK/g9rjPDpWUqnLbVnokDQAv2Y+feL+Ly0qKcMhv8A6qqr6E/bzvygfinjU2alKP8AUNfjw49Yzl4RQuXfYgsNT+KcYzTybts25PVQ4pQVf7FFzgCMxL6+js2rloeluJYmIYB6kirhvW4jJnrFk33N+fAQTC49f0/pHzgqcCt6VDHgNNYPJvZJ4+UbK4vGEioPldmoH36FuVIyp89Ve/jrGjiVJJDAUJt0/GsZuIlEENR+/wB4MWacCivAMJJbUwaSrnw2rElB+kaJwv1AlSarVRTOXN3rqR7jjBb8F5NJbESc1WA6bxwyzu0FUkg1vt33SCFb/qbhSAJfwefmSwNQakcaatsfW8CQDO9evH+Y6wOUUTDofT37rb3hqUg1Nh+I5IlEaGNKVhy/Yq8RnKjJlyJHMECAeTDmY3sFiihOULUA4+2heh53+H2hXBYM/inrreGZ4mJOUAm1RsRYHW7RHnbPMyZeTpHosDilEJl5glLsQWA4ks1Ot49D4X4CEAKUvMcw8otmqb1tcho+e4TGFKs1zShqL0eNub4/iMiRmNRVr3JqX2/EbMfqElsklDnyyK/g9rjPDpWUqnLbVnokDQAv2Y+feL+Ly0qKcMhv8A6qqr6E/bzvygfinjU2alKP8AUNfjw49Yzl4RQuXfYgsNT+KcYzTybts25PVQ4pQVf7FFzgCMxL6+js2rloeluJYmIYB6kirhvW4jJnrFk33N+fAQTC49f0/pHzgqcCt6VDHgNNYPJvZJ4+UbK4vGEioPldmoH36FuVIyp89Ve/jrGjiVJJDAUJt0/GsZuIlEENR+/wB4MWacCivAMJJbUwaSrnw2rElB+kaJwv1AlSarVRTOXN3rqR7jjBb8F5NJbESc1WA6bxwyzu0FUkg1vt33SCFb/qbhSAJfwefmSwNQakcaatsfW8CQDO9evH+Y6wOUUTDofT37rb3hqUg1Nh+I5IlEaGNKVhy/Yq8RnKjJlyJHMECAeTDmY3sFiihOULUA4+2heh53+H2hXBYM/inrreGZ4mJOUAm1RsRYHW7RHnbPMyZeTpHosDilEJl5glLsQWA4ks1Ot49D4X4CEAKUvMcw8otmqb1tcho") center/cover no-repeat;
+}
+
+/* ── Loading overlay ── */
+.load-overlay {
+  position: absolute; inset: 0; z-index: 50;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  background: rgba(1,1,1,0.88);
+  backdrop-filter: blur(8px);
+  transition: opacity .5s ease;
+  gap: 20px;
+}
+.load-overlay.hidden { opacity: 0; pointer-events: none; }
+
+.load-spinner {
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  border: 2px solid rgba(38,255,154,0.1);
+  border-top-color: var(--mint);
+  border-right-color: rgba(38,255,154,0.5);
+  animation: spinnerRing .8s linear infinite;
+  box-shadow: 0 0 16px var(--mint-glow);
+}
+.load-label {
+  font-family: var(--ff-mono);
+  font-size: 11px; letter-spacing: .2em;
+  color: var(--mint); text-transform: uppercase;
+  animation: shimmer 2s ease infinite;
+  background: linear-gradient(90deg, var(--mint), #fff, var(--mint));
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.load-bar-track {
+  width: 160px; height: 2px;
+  background: rgba(38,255,154,0.1);
+  border-radius: 2px; overflow: hidden;
+}
+.load-bar-fill {
+  height: 100%; border-radius: 2px;
+  background: linear-gradient(90deg, var(--mint), var(--mint-b));
+  box-shadow: 0 0 8px var(--mint);
+  animation: loadBar 2s cubic-bezier(.4,0,.2,1) forwards;
+}
+
+/* ── Fullscreen button ── */
+#fullscreen-button {
+  position: absolute;
+  top: 12px; right: 12px;
+  width: 36px; height: 36px;
+  background: transparent;
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(38,255,154,0.25);
+  border-radius: 9px;
+  cursor: pointer; z-index: 20;
+  display: flex; align-items: center; justify-content: center;
+  transition: all .25s cubic-bezier(.34,1.56,.64,1);
+}
+#fullscreen-button:hover {
+  background: rgba(38,255,154,0.12);
+  border-color: var(--mint);
+  transform: scale(1.1);
+  box-shadow: 0 0 16px var(--mint-glow), 0 0 32px rgba(38,255,154,0.15);
+}
+#fullscreen-button:active { transform: scale(.95); }
+#fullscreen-button svg {
+  width: 16px; height: 16px;
+  fill: var(--mint);
+  filter: drop-shadow(0 0 4px var(--mint));
+}
+
+/* ── Fullscreen state ── */
+#game-container:fullscreen,
+#game-container:-webkit-full-screen {
+  width: 100vw !important; height: 100vh !important;
+  margin: 0 !important; border: none !important; border-radius: 0 !important;
+  animation: none !important;
+}
+
+/* ════════════════════════════════════════════════════
+   BOTTOM NAV BAR
+════════════════════════════════════════════════════ */
+#iframe-nav {
+  flex: 0 0 auto;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* title left, controls right */
+  gap: 10px;
+  padding: 0 16px;
+  height: 44px;
+  background: var(--surf2);
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+/* Top accent beam */
+#iframe-nav::before {
+  content: '';
+  position: absolute; top: 0; left: 10%; right: 10%; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(38,255,154,0.3), transparent);
+  pointer-events: none;
+}
+
+/* Left side: game label */
+.nav-label {
+  display: flex; align-items: center; gap: 8px;
+  font-family: var(--ff-mono);
+  font-size: 10px; letter-spacing: .18em; text-transform: uppercase;
+  color: var(--text-dim);
+}
+.nav-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--mint);
+  box-shadow: 0 0 6px var(--mint), 0 0 12px rgba(38,255,154,0.4);
+  animation: breathMint 3s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+/* Right side: controls */
+.nav-controls {
+  display: flex; align-items: center; gap: 8px;
+  flex-shrink: 0;
+}
+
+/* Close button — red, premium */
+.btn-close {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 7px 16px;
+  background: rgba(255,77,109,0.1);
+  border: 1px solid rgba(255,77,109,0.3);
+  border-radius: 8px;
+  color: var(--red);
+  font-family: var(--ff-mono);
+  font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+  cursor: pointer;
+  transition: all .25s cubic-bezier(.34,1.56,.64,1);
+  position: relative; overflow: hidden;
+}
+.btn-close::before {
+  content: '';
+  position: absolute; inset: 0; border-radius: 8px;
+  background: linear-gradient(120deg, transparent 30%, rgba(255,77,109,0.07), transparent 70%);
+  background-size: 200% 100%; opacity: 0; transition: opacity .3s;
+}
+.btn-close:hover::before { opacity: 1; animation: shimmer 1.5s ease infinite; }
+.btn-close:hover {
+  background: rgba(255,77,109,0.18);
+  border-color: var(--red);
+  transform: translateY(-1px);
+  box-shadow: 0 0 16px var(--red-glow), 0 4px 16px rgba(0,0,0,0.3);
+}
+.btn-close:active { transform: scale(.96); }
+
+/* Generic icon button (back, refresh etc) */
+.nav-icon-btn {
+  width: 32px; height: 32px; border-radius: 8px;
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-dim); font-size: 12px;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: all .2s ease;
+}
+.nav-icon-btn:hover {
+  color: var(--mint); border-color: var(--border-h);
+  background: var(--mint-dim);
+  box-shadow: 0 0 10px rgba(38,255,154,0.2);
+}
+
+/* Fullscreen btn in nav */
+.btn-fullscreen {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 7px 16px;
+  background: var(--mint-dim);
+  border: 1px solid rgba(38,255,154,0.25);
+  border-radius: 8px;
+  color: var(--mint);
+  font-family: var(--ff-mono);
+  font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+  cursor: pointer;
+  transition: all .25s cubic-bezier(.34,1.56,.64,1);
+}
+.btn-fullscreen:hover {
+  background: rgba(38,255,154,0.15);
+  border-color: var(--mint);
+  transform: translateY(-1px);
+  box-shadow: 0 0 16px var(--mint-glow-m);
+  animation: btnGlow 2s ease-in-out infinite;
+}
+.btn-fullscreen:active { transform: scale(.96); }
+
+
+#fps-dot {
+  width: 6px;
+  height: 6px;
+  background: var(--mint);
+  border-radius: 50%;
+  box-shadow: 0 0 5px var(--mint);
+}
+
+/* ── RATING SYSTEM UI ── */
+.rating-system {
+  display: flex;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 4px 8px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  margin-right: 8px;
+}
+
+.rating-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  color: var(--text-dim);
+  font-family: var(--ff-mono);
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.rating-btn span {
+  font-size: 10px;
+  font-weight: 600;
+}
+
+/* Hover & Active States */
+#like-btn:hover { color: var(--mint); background: var(--mint-dim); }
+#dislike-btn:hover { color: var(--red); background: rgba(255, 77, 109, 0.05); }
+
+/* Toggle Active Styles */
+.rating-btn.active-like {
+  color: var(--mint);
+  border-color: var(--mint);
+  box-shadow: 0 0 12px var(--mint-glow-m);
+  background: var(--mint-dim);
+}
+
+.rating-btn.active-dislike {
+  color: var(--red);
+  border-color: var(--red);
+  box-shadow: 0 0 12px var(--red-glow);
+  background: rgba(255, 77, 109, 0.08);
+}
+
+.rating-btn i { transition: transform 0.2s ease; }
+.rating-btn:active i { transform: scale(1.3); }
+</style>
+</head>
+
+<body>
+<div class="scanline"></div>
+
+<!-- ── SITE SIDEBAR ── -->
+<div class="sidebar">
+  <img src="https://cdn.jsdelivr.net/gh/PopAnynomous234/assets/logo.png" width="70" height="70" alt="logo">
+  <ul>
+    <li><a href="index.html"><i class="fas fa-home icon"></i><span class="text">Home</span></a></li>
+    <li><a href="ai.html"><i class="fas fa-robot icon"></i><span class="text">AI</span></a></li>
+    <li><a href="tools.html"><i class="fa-solid fa-screwdriver-wrench"></i><span class="text">Tools</span></a></li>
+    <li><a href="games.html"><i class="fas fa-gamepad icon"></i><span class="text">Games</span></a></li>
+    <li><a href="music.html"><i class="fas fa-music icon"></i><span class="text">Music</span></a></li>
+    <li><a href="chat.html"><i class="fa-regular fa-comments icon"></i><span class="text">Chat</span></a></li>
+    <li><a href="settings.html"><i class="fas fa-cog icon"></i><span class="text">Settings</span></a></li>
+  </ul>
+</div>
+
+<!-- ── PAGE SHELL (everything right of sidebar) ── -->
+<div class="page-shell">
+
+  <!-- ── GAME CONTAINER ── -->
+  <div id="game-container">
+
+    <!-- Loading overlay -->
+    <div class="load-overlay" id="load-overlay">
+      <div class="load-spinner"></div>
+      <div class="load-bar-track"><div class="load-bar-fill"></div></div>
+      <div class="load-label">LOADING GAME</div>
+    </div>
+
+    <!-- Game iframe -->
+    <iframe
+      id="game-iframe"
+      src=""
+      allow="fullscreen"
+      allowfullscreen
+      sandbox="allow-scripts allow-forms allow-popups allow-same-origin allow-pointer-lock"
+    ></iframe>
+
+    <!-- Fullscreen corner button -->
+<button id="fullscreen-button" title="Toggle Fullscreen" aria-label="Toggle fullscreen">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><!--!Font Awesome Free v7.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.--><path id="fs-icon-path" d="M408 64L552 64C565.3 64 576 74.7 576 88L576 232C576 241.7 570.2 250.5 561.2 254.2C552.2 257.9 541.9 255.9 535 249L496 210L409 297C399.6 306.4 384.4 306.4 375.1 297L343.1 265C333.7 255.6 333.7 240.4 343.1 231.1L430.1 144.1L391.1 105.1C384.2 98.2 382.2 87.9 385.9 78.9C389.6 69.9 398.3 64 408 64zM232 576L88 576C74.7 576 64 565.3 64 552L64 408C64 398.3 69.8 389.5 78.8 385.8C87.8 382.1 98.1 384.2 105 391L144 430L231 343C240.4 333.6 255.6 333.6 264.9 343L296.9 375C306.3 384.4 306.3 399.6 296.9 408.9L209.9 495.9L248.9 534.9C255.8 541.8 257.8 552.1 254.1 561.1C250.4 570.1 241.7 576 232 576z"/></svg>
+</button>
+  </div>
+
+  <!-- ── BOTTOM NAV BAR ── -->
+  <div id="iframe-nav">
+    <!-- Left: status label -->
+    <div class="nav-label">
+      <span class="nav-dot"></span>
+      <span id="game-name-label">Game Running</span>
+    </div>
+
+    <!-- Right: controls -->
+    <div class="nav-controls">
+      <div class="rating-system">
+  <button class="nav-icon-btn rating-btn" id="like-btn" onclick="rateGame('likes')">
+    <i class="fa-solid fa-thumbs-up"></i>
+    <span id="like-count">0</span>
+  </button>
+  <button class="nav-icon-btn rating-btn" id="dislike-btn" onclick="rateGame('dislikes')">
+    <i class="fa-solid fa-thumbs-down"></i>
+    <span id="dislike-count">0</span>
+  </button>
+</div>
+
+  <div id="fps-dot"></div>
+  <span>FPS: <span id="fps-value">--</span></span>
+      <button class="nav-icon-btn" onclick="reloadGame()" title="Reload game">
+        <i class="fa-solid fa-rotate-right"></i>
+      </button>
+      <button class="btn-close" onclick="closeGame()">
+        <i class="fa-solid fa-xmark"></i> Close
+      </button>
+    </div>
+  </div>
+
+</div><!-- /page-shell -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+<!-- ── SCRIPTS ── -->
+<script>
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDB2GVl8AdhQF-XMWSU3JvQ05Kb5Gp424s",
+  authDomain: "chat-283f4.firebaseapp.com",
+  databaseURL: "https://chat-283f4-default-rtdb.firebaseio.com",
+  projectId: "chat-283f4",
+  storageBucket: "chat-283f4.firebasestorage.app",
+  messagingSenderId: "585084707472",
+  appId: "1:585084707472:web:328cc1e40654787e1eee15",
+  measurementId: "G-0EP9CX2LX7"
+};
+
+firebase.initializeApp(firebaseConfig);
+const database = firebase.database();
+  /* ── Helpers ── */
+  function closeGame() {
+    sessionStorage.removeItem('currentGameUrl');
+    window.location.href = 'games.html';
+  }
+
+  function reloadGame() {
+    const iframe = document.getElementById('game-iframe');
+    const url = sessionStorage.getItem('currentGameUrl');
+    if (url) {
+      showLoader();
+      loadIframeUrl(url);
+    } else {
+      iframe.srcdoc = iframe.srcdoc; // force reload if srcdoc
+    }
+  }
+
+  function toggleFullscreen() {
+    const gc = document.getElementById('game-container');
+    if (!document.fullscreenElement) {
+      gc.requestFullscreen && gc.requestFullscreen();
+    } else {
+      document.exitFullscreen && document.exitFullscreen();
+    }
+  }
+
+  /* ── Loader UI ── */
+  function showLoader() {
+    const ol = document.getElementById('load-overlay');
+    ol.classList.remove('hidden');
+  }
+  function hideLoader() {
+    const ol = document.getElementById('load-overlay');
+    ol.classList.add('hidden');
+  }
+
+  /* ── Load game URL into iframe ── */
+  async function loadIframeUrl(gameUrl) {
+    const iframe = document.getElementById('game-iframe');
+    try {
+      const response = await fetch(gameUrl);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const html = await response.text();
+      iframe.srcdoc = html;
+    } catch (err) {
+      console.error('Game load error:', err);
+      iframe.srcdoc = `
+        <html><body style="margin:0;background:#060606;display:flex;align-items:center;justify-content:center;height:100vh;font-family:'Fira Code',monospace;color:#ff4d6d;text-align:center;flex-direction:column;gap:12px;">
+          <div style="font-size:36px;">⚠</div>
+          <div style="font-size:14px;letter-spacing:.1em;color:#888;">FAILED TO LOAD GAME</div>
+          <div style="font-size:11px;color:#444;">${err.message}</div>
+        </body></html>`;
+    }
+    // Hide loader once iframe content is ready
+    iframe.addEventListener('load', hideLoader, { once: true });
+    // Fallback timeout
+    setTimeout(hideLoader, 5000);
+  }
+
+  /* ── Main init ── */
+  document.addEventListener('DOMContentLoaded', async () => {
+    const iframe         = document.getElementById('game-iframe');
+    const gameContainer  = document.getElementById('game-container');
+    const iframeNav      = document.getElementById('iframe-nav');
+    const fsBtn          = document.getElementById('fullscreen-button');
+    const gameUrl        = sessionStorage.getItem('currentGameUrl');
+    const gameDataRaw = sessionStorage.getItem('currentGame');
+    const fsIconPath = document.getElementById('fs-icon-path');
+    const maximizePath = document.getElementById('fs-icon-path').getAttribute('d');
+    const minimizePath = "M503.5 71C512.9 61.6 528.1 61.6 537.4 71L569.4 103C578.8 112.4 578.8 127.6 569.4 136.9L482.4 223.9L521.4 262.9C528.3 269.8 530.3 280.1 526.6 289.1C522.9 298.1 514.2 304 504.5 304L360.5 304C347.2 304 336.5 293.3 336.5 280L336.5 136C336.5 126.3 342.3 117.5 351.3 113.8C360.3 110.1 370.6 112.1 377.5 119L416.5 158L503.5 71zM136.5 336L280.5 336C293.8 336 304.5 346.7 304.5 360L304.5 504C304.5 513.7 298.7 522.5 289.7 526.2C280.7 529.9 270.4 527.9 263.5 521L224.5 482L137.5 569C128.1 578.4 112.9 578.4 103.6 569L71.6 537C62.2 527.6 62.2 512.4 71.6 503.1L158.6 416.1L119.6 377.1C112.7 370.2 110.7 359.9 114.4 350.9C118.1 341.9 126.8 336 136.5 336z";
+
+    /* Redirect if no game selected */
+    if (!gameUrl) {
+      window.location.href = 'games.html';
+      return;
+    }
+
+    /* Show name in nav label */
+    try {
+      const urlObj = new URL(gameUrl);
+      const parts  = urlObj.pathname.split('/').filter(Boolean);
+      document.getElementById('game-name-label').textContent = gameDataRaw;
+    } catch {}
+
+    /* Load game */
+    showLoader();
+    await loadIframeUrl(gameUrl);
+
+    /* ── Fullscreen button (in-frame corner) ── */
+    fsBtn.addEventListener('click', toggleFullscreen);
+
+    /* ── Fullscreen change handler ── */
+    
+
+document.addEventListener('fullscreenchange', () => {
+  const isFS = !!document.fullscreenElement;
+
+  if (isFS) {
+    iframeNav.style.display = 'none';
+    // Change icon to minimize
+    fsIconPath.setAttribute('d', minimizePath);
+  } else {
+    iframeNav.style.display = 'flex';
+    // Change icon back to maximize
+    fsIconPath.setAttribute('d', maximizePath);
+
+    // Force iframe redraw to fix blank content on exit
+    iframe.style.display = 'none';
+    iframe.offsetHeight; // trigger reflow
+    setTimeout(() => {
+      iframe.style.display = 'block';
+      iframe.style.width   = '100%';
+      iframe.style.height  = '100%';
+    }, 10);
+  }
+});
+});
+// ════════════════════════════════════════════════
+// Enhanced FPS Counter for Game Loader
+// Tracks main page FPS and shows dynamic color & tooltip
+// ════════════════════════════════════════════════
+const fpsDisplay = document.getElementById('fps-value');
+const fpsDot = document.getElementById('fps-dot');
+
+let lastFrameTime = performance.now();
+let frameCount = 0;
+let fps = 0;
+let frameTimes = [];
+
+function updateFPS(now) {
+  // Count frames
+  frameCount++;
+
+  // Time difference since last FPS update
+  const delta = now - lastFrameTime;
+
+  // Update every 1 second
+  if (delta >= 350) {
+    fps = Math.round((frameCount * 1000) / delta);
+
+    // Store last 5 frame times for average
+    frameTimes.push(delta / frameCount);
+    if (frameTimes.length > 5) frameTimes.shift();
+    const avgFrameTime = (frameTimes.reduce((a,b)=>a+b,0)/frameTimes.length).toFixed(1);
+
+    // Update display
+    fpsDisplay.textContent = fps;
+    fpsDot.title = `Frame Time: ${avgFrameTime} ms`;
+
+    // Update dot color based on FPS
+    if (fps >= 50) {
+      fpsDot.style.background = 'var(--mint)'; // good
+    } else if (fps >= 30) {
+      fpsDot.style.background = '#ffbf00';     // medium
+    } else {
+      fpsDot.style.background = 'var(--red)';  // low
+    }
+
+    frameCount = 0;
+    lastFrameTime = now;
+  }
+
+  requestAnimationFrame(updateFPS);
+}
+
+// Start the FPS loop
+requestAnimationFrame(updateFPS);
+
+/* ── FIREBASE RATING LOGIC ── */
+
+// 1. Helper to clean game names for Firebase (removes dots like .org)
+const sanitizePath = (path) => path ? path.replace(/[.#$\[\]]/g, '_') : 'unknown_game';
+
+// 2. The Rating Handler (Like/Dislike/Toggle)
+async function rateGame(type) {
+    const gameRaw = sessionStorage.getItem('currentGame');
+    if (!gameRaw) return;
+    
+    const safeName = sanitizePath(gameRaw);
+    const storageKey = `voted_${safeName}`;
+    const previousVote = localStorage.getItem(storageKey); // 'likes', 'dislikes', or null
+
+    // Reference to the ratings object in Firebase
+    const gameRef = firebase.database().ref(`games/${safeName}/ratings`);
+
+    // CASE 1: Re-clicking the same button -> Remove the vote
+    if (previousVote === type) {
+        gameRef.child(type).transaction(current => (current || 0) > 0 ? current - 1 : 0);
+        localStorage.removeItem(storageKey);
+        updateRatingUI(null);
+    } 
+    // CASE 2: Switching vote (e.g. from Like to Dislike)
+    else if (previousVote && previousVote !== type) {
+        // Remove old
+        gameRef.child(previousVote).transaction(current => (current || 0) > 0 ? current - 1 : 0);
+        // Add new
+        gameRef.child(type).transaction(current => (current || 0) + 1);
+        localStorage.setItem(storageKey, type);
+        updateRatingUI(type);
+    } 
+    // CASE 3: Fresh vote
+    else {
+        gameRef.child(type).transaction(current => (current || 0) + 1);
+        localStorage.setItem(storageKey, type);
+        updateRatingUI(type);
+    }
+}
+
+// 3. UI Updater (Switches CSS classes)
+function updateRatingUI(activeType) {
+    const lBtn = document.getElementById('like-btn');
+    const dBtn = document.getElementById('dislike-btn');
+
+    // Remove all active classes
+    lBtn.classList.remove('active-like');
+    dBtn.classList.remove('active-dislike');
+
+    // Apply active class based on vote
+    if (activeType === 'likes') {
+        lBtn.classList.add('active-like');
+    } else if (activeType === 'dislikes') {
+        dBtn.classList.add('active-dislike');
+    }
+}
+
+// 4. Initialization (Put this inside your existing DOMContentLoaded)
+const initRatings = () => {
+    const gameRaw = sessionStorage.getItem('currentGame');
+    if (gameRaw) {
+        const safeName = sanitizePath(gameRaw);
+        
+        // Listen for live database updates
+        firebase.database().ref(`games/${safeName}/ratings`).on('value', (snap) => {
+            const data = snap.val() || { likes: 0, dislikes: 0 };
+            document.getElementById('like-count').textContent = data.likes || 0;
+            document.getElementById('dislike-count').textContent = data.dislikes || 0;
+        });
+
+        // Load existing vote from localStorage
+        const savedVote = localStorage.getItem(`voted_${safeName}`);
+        if (savedVote) updateRatingUI(savedVote);
+    }
+};
+
+// Add to your main init
+document.addEventListener('DOMContentLoaded', initRatings);
+// Start the counter
+updateFPS();
+</script>
+
+<!-- ── Extra site scripts ── -->
+<script src="about.js"></script>
+<script src="era4.js"></script>
+<script src="era5.js"></script>
+<script src="pe.js"></script>
+<script src="warn.js"></script>
+<script src="cursor.js"></script>
+<script src="widget.js"></script>
+</body>
+</html>

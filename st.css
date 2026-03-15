@@ -1,0 +1,200 @@
+:root {
+  --sidebar-expanded: 200px;
+  --sidebar-collapsed: 70px;
+  --speed: 0.3s;
+  --accentt: #26ff9a;
+  --bg-dark: #01190E;
+}
+
+/* ===========================
+   SIDEBAR CONTAINER
+=========================== */
+.sidebar {
+  position: fixed;
+  inset: 7px auto 10px 10px;
+  width: var(--sidebar-collapsed);
+  background: var(--bg-dark);
+  border-radius: 25px;
+  margin-bottom:10px;
+    margin-top:10px;
+  overflow: hidden;
+  opacity: 0.8;
+  z-index: 1000;
+  transition:
+  width var(--speed) ease,
+  border-color var(--speed) ease,
+  box-shadow 0.75s ease;
+}
+
+.sidebar:hover {
+  width: var(--sidebar-expanded);
+  border-color: var(--accentt);
+box-shadow: 0 10px 25px 10px #069D57;
+  
+}
+/* ===========================
+   LIST RESET
+=========================== */
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* ===========================
+   LIST ITEMS (NO GAPS)
+=========================== */
+.sidebar li {
+  margin-bottom:5px;
+  cursor: pointer;
+}
+
+.sidebar li:last-child {
+  border-bottom: none;
+}
+
+/* ===========================
+   LINKS (FULL HIT AREA)
+=========================== */
+.sidebar li a {
+  display: flex;
+  align-items: center;
+  height: 54px;
+  padding: 0 20px;
+  gap: 15px;
+  color: #fff;
+  text-decoration: none;
+  position: relative;
+  overflow: hidden;
+
+  cursor: pointer;
+  transition:
+    background var(--speed) ease,
+    box-shadow var(--speed) ease;
+}
+
+/* ===========================
+   GLOW SWEEP EFFECT
+=========================== */
+.sidebar li a::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(38,255,154,0.6),
+    transparent
+  );
+  transform: translateX(-100%);
+  transition: transform 0.6s ease;
+  pointer-events: none;
+}
+
+.sidebar li a:hover::before {
+  transform: translateX(100%);
+}
+
+/* ===========================
+   HOVER STATE
+=========================== */
+.sidebar li a:hover {
+  box-shadow:
+    inset 0 0 0 1px var(--accentt),
+    0 0 12px rgba(38,255,154,0.6);
+}
+
+/* ===========================
+   ICON
+=========================== */
+.sidebar li a .icon {
+  width: 40px;
+  text-align: center;
+  font-size: 1.5em;
+  transition:
+    rotate var(--speed) ease,  
+    color var(--speed) ease,
+    filter var(--speed) ease;
+}
+
+.sidebar li a:hover .icon {
+  color: var(--accentt);
+  filter: drop-shadow(0 0 8px rgba(38,255,154,0.9));
+  rotate:-15deg;
+}
+
+/* ===========================
+   TEXT (SLIDE IN)
+=========================== */
+.sidebar li a .text {
+  opacity: 0;
+  transform: translateX(-10px);
+  white-space: nowrap;
+  font-weight: bold;
+  transition:
+    opacity var(--speed) ease,
+    transform var(--speed) ease;
+}
+
+.sidebar:hover .text {
+  opacity: 1;
+  transform: translateX(0);
+}
+    .sidebar {
+      transform: translateX(-40px);
+      opacity: 0;
+      animation: sidebarIn 0.7s ease-out forwards;
+      animation-delay: 0.2s;
+    }
+
+    @keyframes sidebarIn {
+      to {
+        transform: translateX(0);
+        opacity: 0.7;
+      }
+    }
+    
+    .sidebar::before {
+  content: "CODELISTENER"; 
+  position: absolute;
+  top: 25px; 
+  left: 65px; 
+  font-family: 'Segoe UI', sans-serif;
+  font-weight: 900;
+  font-size: 1rem;
+  color: var(--accentt);
+  opacity: 0;
+  text-shadow:0px 0px 10px #35F89D;
+  pointer-events: none;
+  white-space: nowrap;
+  transition: opacity var(--speed) ease, transform var(--speed) ease;
+  transform: translateX(-10px);
+}
+
+/* 3. Reveal the text when the sidebar expands */
+.sidebar:hover::before {
+  opacity: 1;
+  transform: translateX(0);
+}
+/* ===========================
+   FONT AWESOME FIX
+=========================== */
+.fa-screwdriver-wrench {
+    font-family: "Font Awesome 6 Free" !important;
+    font-weight: 900 !important;
+    width: 40px;
+    text-align: center;
+    font-size: 1.5em;
+    display: inline-block;
+}
+.sidebar li a:hover .fa-screwdriver-wrench {
+    color: var(--accentt);
+    filter: drop-shadow(0 0 8px rgba(38,255,154,0.9));
+    rotate:-15deg;
+}
+.fa-home::before     { content: "\f015"; }
+.fa-gamepad::before  { content: "\f11b"; }
+.fa-cog::before      { content: "\f013"; }
+.fa-globe::before    { content: "\f0ac"; }
+.fa-comments::before { content: "\f075"; }
+.fa-screwdriver-wrench::before { content: "\f7d9"; }
