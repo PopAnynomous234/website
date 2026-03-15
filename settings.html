@@ -1529,12 +1529,19 @@
 
   /* ── SETTINGS LOAD/SAVE ──────────────────── */
   window.onload = () => {
+    if (localStorage.getItem('w_enabled') === null) localStorage.setItem('w_enabled', 'true');
+  if (localStorage.getItem('w_accent')  === null) localStorage.setItem('w_accent', '#26ff9a');
+  if (localStorage.getItem('w_bg')      === null) localStorage.setItem('w_bg', '#202124');
+  if (localStorage.getItem('w_style')   === null) localStorage.setItem('w_style', 'style-chromeos');
+  if (localStorage.getItem('w_align')   === null) localStorage.setItem('w_align', 'top-left');
+  if (localStorage.getItem('w_24h')     === null) localStorage.setItem('w_24h', 'false');
+
     document.getElementById('accent').value    = localStorage.getItem('w_accent') || '#26ff9a';
     document.getElementById('bg').value        = localStorage.getItem('w_bg')     || '#202124';
     document.getElementById('style').value     = localStorage.getItem('w_style')  || 'style-chromeos';
-    document.getElementById('align').value     = localStorage.getItem('w_align')  || 'bottom-right';
+    document.getElementById('align').value     = localStorage.getItem('w_align')  || 'top-left';
     document.getElementById('h24').checked     = localStorage.getItem('w_24h')    === 'true';
-    document.getElementById('w_enabled').checked = localStorage.getItem('w_enabled') !== 'false';
+    document.getElementById('w_enabled').checked = localStorage.getItem('w_enabled') === 'true';
   };
 
   function save() {

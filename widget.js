@@ -14,7 +14,7 @@ document.head.appendChild(p2pScript);
             const theme = {
                 accent: localStorage.getItem('w_accent') || '#26ff9a',
                 bg: localStorage.getItem('w_bg') || 'rgba(32, 33, 36, 0.96)',
-                align: localStorage.getItem('w_align') || 'bottom-right',
+                align: localStorage.getItem('w_align') || 'top-left',
                 style: localStorage.getItem('w_style') || 'style-chromeos',
                 is24h: localStorage.getItem('w_24h') === 'true'
             };
