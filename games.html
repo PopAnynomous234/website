@@ -8,6 +8,8 @@
     <title>Game Selection</title>
     <link rel="stylesheet" href="st.css">
     <style>
+
+
     body {
         background-color: black;
         overflow-x: hidden; /* Prevents horizontal scrollbar */
@@ -31,7 +33,6 @@
     background-color: #000;
     border-radius: 12px;
     position: relative;
-    /* IMPORTANT: Remove 'overflow: hidden' so the outer box is visible */
     overflow: visible; 
     display: flex;
     align-items: center;
@@ -68,7 +69,34 @@
     transform: scale(1);
     box-shadow: 0 0 15px #26FF9A; /* Outer glow */
 }
+.game-card::after {
+  content: '';
+  position: absolute; inset: 0;
+  border-radius: 12px;
+  background: linear-gradient(
+    120deg,
+    transparent 30%,
+   rgba(38, 255, 154, 0.18) 50%,
+    transparent 70%
+  );
+  background-size: 200% 100%;
+  background-position: -200% 0;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 5;
+  transition: opacity .3s;
+}
 
+.game-card:hover::after {
+  opacity: 1;
+  animation: shimmer 1.5s ease infinite;
+}
+
+@keyframes shimmer {
+  0%   { background-position: -400% 0 }
+  50%  { background-position:  200% 0 }
+  100% { background-position:  400% 0 }
+}
 /* Optional: Slight lift effect on the card itself */
 .game-card:hover {
     transform: scale(1.02);
@@ -86,16 +114,12 @@
         transition:all 0.4s ease-in-out ;
     }
 
-    .game-card img:hover {
-      filter:hue-rotate(180deg);
-    }
-
     /* === Text Styling: Place on top of image === */
     .game-card h2 {
         /* Bring the text above the image */
         position: relative;
         z-index: 10; 
-
+        font-family: 'Bebas Neue', sans-serif;
         /* Align text to the bottom center of the card */
         position: absolute;
         bottom: 0;
@@ -123,7 +147,7 @@
         z-index: 1000;
     }
 h1 {
-  font-family: 'DM Sans', monospace;
+  font-family: 'Fira Code', sans-serif;
   font-size: 3rem;
   color: transparent;
   -webkit-text-fill-color: transparent; /* important */
@@ -356,56 +380,6 @@ h1 {
 </style>
 </head>
 <body>
-<div class="sidebar">
-    <img src="https://cdn.jsdelivr.net/gh/PopAnynomous234/assets/logo.png" width=70px height=70px alt="logo">
-      <ul>
-          <li>
-          <a href="index.html">
-            <i class="fas fa-home icon"></i>
-            <span class="text">Home</span>
-          </a>
-        </li>
-      
-        <li>
-          <a href="ai.html">
-            <i class="fas fa-robot icon"></i>
-            <span class="text">AI</span>
-          </a>
-        </li>
-        <li>
-          <a href="tools.html">
-        <i class="fa-solid fa-screwdriver-wrench"></i>
-            <span class="text">Tools</span>
-          </a>
-        </li>
-        <li>
-          <a href="games.html">
-            <i class="fas fa-gamepad icon"></i>
-            <span class="text">Games</span>
-          </a>
-        </li>
-              <li>
-          <a href="music.html">
-            <i class="fas fa-music icon"></i>
-            <span class="text">Music</span>
-          </a>
-        </li>
-                <li>
-          <a href="chat.html">
-            <i class="fa-regular fa-comments icon"></i>
-            <span class="text">Chat</span>
-          </a>
-        </li>
-        <li>
-          <a href="settings.html">
-            <i class="fas fa-cog icon"></i>
-            <span class="text">Settings</span>
-          </a>
-        </li>
-      </ul>
-    </div>
-
-
     <div class="search-wrapper">
       <h1>Available Games</h1>
       <div class="search-bar-container">

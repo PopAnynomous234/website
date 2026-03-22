@@ -31,9 +31,9 @@
     /* ─── RESET ─────────────────────────────────────── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    html, body {
+     body {
       height: 100%;
-      background: var(--black);
+      background: var(--black)  ;
       color: var(--text);
       font-family: var(--ff-mono);
       overflow-x: hidden;
@@ -44,9 +44,6 @@
       content: '';
       position: fixed;
       inset: 0;
-      background-image:
-        linear-gradient(rgba(38,255,154,0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(38,255,154,0.03) 1px, transparent 1px);
       background-size: 48px 48px;
       pointer-events: none;
       z-index: 0;
@@ -57,7 +54,6 @@
       content: '';
       position: fixed;
       inset: 0;
-      background: radial-gradient(ellipse at 50% 0%, transparent 40%, #000 100%);
       pointer-events: none;
       z-index: 0;
     }
@@ -908,20 +904,6 @@
 <!-- Toast notification -->
 <div id="toast">COMMAND_SUCCESSFUL</div>
 
-<!-- ── SIDEBAR (untouched) ─────────────────────────── -->
-<div class="sidebar">
-  <img src="https://cdn.jsdelivr.net/gh/PopAnynomous234/assets/logo.png" width="70" height="70" alt="logo">
-  <ul>
-    <li><a href="index.html"><i class="fas fa-home icon"></i><span class="text">Home</span></a></li>
-    <li><a href="ai.html"><i class="fas fa-robot icon"></i><span class="text">AI</span></a></li>
-    <li><a href="tools.html"><i class="fa-solid fa-screwdriver-wrench"></i><span class="text">Tools</span></a></li>
-    <li><a href="games.html"><i class="fas fa-gamepad icon"></i><span class="text">Games</span></a></li>
-    <li><a href="music.html"><i class="fas fa-music icon"></i><span class="text">Music</span></a></li>
-    <li><a href="chat.html"><i class="fa-regular fa-comment icon"></i><span class="text">Chat</span></a></li>
-    <li><a href="settings.html"><i class="fas fa-cog icon"></i><span class="text">Settings</span></a></li>
-  </ul>
-</div>
-
 <!-- ── PAGE SHELL ─────────────────────────────────────── -->
 <div class="page-shell">
 
@@ -1142,7 +1124,7 @@
               <p>Open site inside a blank-page wrapper for additional concealment.</p>
             </div>
             <button class="btn btn-ghost" id="toggleBtn"></button>
-                <p id="status" style="margin-left:20px; font-size: 11px; color: #444444; font-weight: 700; font-family: monospace;"></p>
+                <p id="status" style=" font-size: 11px; color: #444444; font-weight: 700; font-family: monospace;"></p>
           </div>
 
           <div class="section__header" style="margin-top:36px;">
@@ -1273,18 +1255,19 @@
           </div>
 
           <div class="sync-panel">
-            <div class="sync-panel__title">Game Data Sync</div>
-            <div class="sync-panel__sub">Backup and restore all local data via cloud mirror.</div>
-            <input type="text" id="username" class="input" placeholder="Enter username…" style="margin-bottom:16px;">
-            <div style="display:flex; gap:12px;">
-              <button class="btn btn-primary" onclick="pushData()" style="flex:1; justify-content:center;">
-                <i class="fa-solid fa-cloud-arrow-up"></i> Upload
-              </button>
-              <button class="btn btn-ghost" onclick="pullData()" style="flex:1; justify-content:center;">
-                <i class="fa-solid fa-cloud-arrow-down"></i> Download
-              </button>
-            </div>
-          </div>
+  <div class="sync-panel__title">Game Data Sync</div>
+  <div class="sync-panel__sub">Backup and restore all local data via cloud mirror.</div>
+  <div class="sync-panel__user">Username: <span id="display-username"></span></div>
+
+  <div style="display:flex; gap:12px; margin-top:16px;">
+    <button class="btn btn-primary" onclick="pushData()" style="flex:1; justify-content:center;">
+      <i class="fa-solid fa-cloud-arrow-up"></i> Upload
+    </button>
+    <button class="btn btn-ghost" onclick="pullData()" style="flex:1; justify-content:center;">
+      <i class="fa-solid fa-cloud-arrow-down"></i> Download
+    </button>
+  </div>
+</div>
         </div>
       </div>
 
@@ -1349,16 +1332,7 @@
           </div>
 
           <div class="partner-card">
-            <i class="fa-solid fa-star" style="color:#FFD43B; font-size:18px;"></i>
-            <img src="https://cdn.jsdelivr.net/gh/ethanlb34/delta-icons@main/default.png" alt="Delta">
-            <div class="partner-card__info">
-              <h4>Delta V10</h4>
-              <p>A site with extra games and features.</p>
-              <p style="font-size:10px; color:red; margin-top:4px;">EXPIRED (We are no longer Partners)</p>
-            </div>
-            <button class="btn btn-ghost" onclick="window.open('about:blank#expired','_blank')">
-              Visit <i class="fa-solid fa-arrow-right"></i>
-            </button>
+        <p style="font-size:10px; color:red; margin-top:4px;">0 Partners</p>
           </div>
         </div>
       </div>
@@ -1377,7 +1351,15 @@
                 <div class="help-item__icon"><i class="fa-solid fa-gamepad"></i></div>
                 <span class="help-item__title">Games</span>
               </div>
-              <p>If a game doesn't load, wait two minutes. If still broken after that, the game may be non-functional.</p>
+              <p>If a game doesn't load, wait two minutes. If still broken after that, the game may be non-functional. If you want more games, Click the "Request a Game" button.</p>
+            </div>
+ 
+              <div class="help-item">
+              <div class="help-item__head">
+                <div class="help-item__icon"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+                <span class="help-item__title">Game Data Sync</span>
+              </div>
+              <p>If you want to Sync Game Data, go to Settings > Sync > Upload.</p>
             </div>
 
             <div class="help-item">
@@ -1386,6 +1368,21 @@
                 <span class="help-item__title">AI</span>
               </div>
               <p>If the chatbot shows a quota error (429), the API key needs to be recharged. Expected resolution: 5–15 days.</p>
+            </div>
+
+            <div class="help-item">
+              <div class="help-item__head">
+                <div class="help-item__icon"><i class="fa-solid fa-globe"></i></div>
+                <span class="help-item__title">Proxy</span>
+              </div>
+              <p>Some Sites are slow to load. Be patient and wait until the site loads. All sites may be slow because of High Traffic (Many people using the Proxy at the same time).</p>
+            </div>
+            <div class="help-item">
+              <div class="help-item__head">
+                <div class="help-item__icon"><i class="fa-solid fa-shapes"></i></div>
+                <span class="help-item__title">Apps</span>
+              </div>
+              <p>If Some Apps don't seem as expected, contact support.</p>
             </div>
 
             <div class="help-item">
@@ -1401,7 +1398,7 @@
                 <div class="help-item__icon"><i class="fa-regular fa-comments"></i></div>
                 <span class="help-item__title">Chat</span>
               </div>
-              <p>Can't send? You may have been muted. If login freezes on room switch — refresh the page.</p>
+              <p>Can't send? You may have been muted. If login freezes on room switch — refresh the page. If the chat doesn't even load, Then someone must have burned through the credits.</p>
             </div>
 
             <div class="help-item">
@@ -1417,7 +1414,7 @@
                 <div class="help-item__icon"><i class="fa-solid fa-headset"></i></div>
                 <span class="help-item__title">Contact</span>
               </div>
-              <p>For further questions, reach the owner in Chat. Room Code: <code style="color:var(--mint); letter-spacing:0.1em;">K6S77A</code></p>
+              <p>For further questions, reach the owner in Chat. Room Code: <code style="color:var(--mint); letter-spacing:0.1em;">K6S77A</code>. Want to Talk in another way, Join the Discord server. Or email at Codelistener@Proton.me</p>
             </div>
           </div>
         </div>
@@ -1456,33 +1453,55 @@
 
   function showToast(msg) {
     const t = document.getElementById('toast');
+    if (!t) return;
     t.textContent = msg;
     t.style.opacity = '1';
     setTimeout(() => t.style.opacity = '0', 2200);
   }
 
+function getUsername() {
+  if (window.onboardingData?.username?.trim()) {
+    return window.onboardingData.username.trim();
+  }
+  const stored = localStorage.getItem('username');
+  if (stored?.trim().length > 0) return stored.trim();
+  return null;
+}
+
+  window.displayUsername = function() {
+    const username = getUsername() || 'Not set';
+    const span = document.getElementById('display-username');
+    if (span) span.textContent = username;
+  };
+
+  window.addEventListener('DOMContentLoaded', () => {
+    setTimeout(window.displayUsername, 150);
+  });
+
   window.pushData = function() {
-    const user = document.getElementById('username').value.trim();
-    if (!user) return alert('ENTER USERNAME');
+    const user = getUsername();
+    if (!user) { alert('USERNAME NOT SET'); return; }
     set(ref(db, 'sync/' + user), {
-      fullBackup: JSON.stringify(localStorage),
+      fullBackup:  JSON.stringify(localStorage),
       lastUpdated: new Date().toLocaleTimeString()
     }).then(() => {
       showToast('UPLOAD_SUCCESSFUL');
-      document.getElementById('status').textContent = '> CLOUD_MIRROR_SYNCED';
+      const s = document.getElementById('status');
+      if (s) s.textContent = '> CLOUD_MIRROR_SYNCED';
     });
   };
 
   window.pullData = function() {
-    const user = document.getElementById('username').value.trim();
-    if (!user) return alert('ENTER USERNAME');
+    const user = getUsername();
+    if (!user) { alert('USERNAME NOT SET'); return; }
     get(child(ref(db), `sync/${user}`)).then(snap => {
       if (snap.exists()) {
         const dataObj = JSON.parse(snap.val().fullBackup);
         localStorage.clear();
         Object.keys(dataObj).forEach(k => localStorage.setItem(k, dataObj[k]));
         showToast('RESTORATION_COMPLETE');
-        document.getElementById('status').textContent = '> LOCAL_MIRROR_SYNCED';
+        const s = document.getElementById('status');
+        if (s) s.textContent = '> LOCAL_MIRROR_SYNCED';
         window.location.reload();
       } else {
         alert('NO DATA FOUND FOR THIS USER');
@@ -1490,7 +1509,6 @@
     });
   };
 </script>
-
 <script>
   /* ── TAB SWITCHING ────────────────────────── */
   const navBtns = document.querySelectorAll('.vnav__item');

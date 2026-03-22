@@ -11,12 +11,9 @@
 =========================== */
 .sidebar {
   position: fixed;
-  inset: 7px auto 10px 10px;
+  inset: 0px auto 0px 0px;
   width: var(--sidebar-collapsed);
   background: var(--bg-dark);
-  border-radius: 25px;
-  margin-bottom:10px;
-    margin-top:10px;
   overflow: hidden;
   opacity: 0.8;
   z-index: 1000;
@@ -29,7 +26,6 @@
 .sidebar:hover {
   width: var(--sidebar-expanded);
   border-color: var(--accentt);
-box-shadow: 0 10px 25px 10px #069D57;
   
 }
 /* ===========================
@@ -179,7 +175,7 @@ box-shadow: 0 10px 25px 10px #069D57;
 /* ===========================
    FONT AWESOME FIX
 =========================== */
-.fa-screwdriver-wrench {
+.fa-shapes {
     font-family: "Font Awesome 6 Free" !important;
     font-weight: 900 !important;
     width: 40px;
@@ -187,7 +183,7 @@ box-shadow: 0 10px 25px 10px #069D57;
     font-size: 1.5em;
     display: inline-block;
 }
-.sidebar li a:hover .fa-screwdriver-wrench {
+.sidebar li a:hover .fa-shapes {
     color: var(--accentt);
     filter: drop-shadow(0 0 8px rgba(38,255,154,0.9));
     rotate:-15deg;
@@ -197,4 +193,4 @@ box-shadow: 0 10px 25px 10px #069D57;
 .fa-cog::before      { content: "\f013"; }
 .fa-globe::before    { content: "\f0ac"; }
 .fa-comments::before { content: "\f075"; }
-.fa-screwdriver-wrench::before { content: "\f7d9"; }
+.fa-shapes::before { content: "\f7d9"; }

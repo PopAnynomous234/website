@@ -78,10 +78,138 @@
     to   { opacity: 1; transform: translateY(0); }
   }
 
-  @keyframes titleGlow {
-    0%,100% { text-shadow: 0 0 20px rgba(38,255,154,0.3), 0 0 60px rgba(38,255,154,0.1); }
-    50%     { text-shadow: 0 0 40px rgba(38,255,154,0.6), 0 0 100px rgba(38,255,154,0.25), 0 0 200px rgba(38,255,154,0.1); }
+@keyframes glitch1 {
+  0%,100% { 
+    transform: translateX(0) skewX(0deg);
+    opacity: 0;
+    text-shadow: none;
   }
+  /* Quick burst — red channel splits left */
+  18% { 
+    transform: translateX(-4px) skewX(-1deg);
+    opacity: 0.85;
+    text-shadow: 3px 0 #ff0040, -1px 0 #00ffff;
+    filter: brightness(1.4);
+  }
+  19% { 
+    transform: translateX(4px) skewX(2deg);
+    opacity: 0.6;
+    text-shadow: -4px 0 #ff0040, 2px 0 #00ffff;
+    filter: brightness(0.8);
+  }
+  20% { 
+    transform: translateX(-2px) skewX(0deg) scaleY(0.98);
+    opacity: 0.9;
+    text-shadow: 5px 0 #ff0040;
+  }
+  21% { 
+    transform: translateX(0);
+    opacity: 0;
+    text-shadow: none;
+    filter: none;
+  }
+
+  /* Slice tear — horizontal displacement */
+  45% {
+    transform: translateX(0);
+    opacity: 0;
+  }
+  46% {
+    transform: translateX(-6px) skewX(-3deg);
+    opacity: 0.7;
+    text-shadow: 6px 0 #ff0040, -2px 0 rgba(0,255,255,0.5);
+    filter: brightness(1.6) saturate(2);
+  }
+  47% {
+    transform: translateX(3px) skewX(1deg) scaleX(1.01);
+    opacity: 0.4;
+    text-shadow: -5px 0 #ff0040;
+  }
+  48% {
+    transform: translateX(0) skewX(0);
+    opacity: 0;
+    filter: none;
+  }
+
+  /* Micro-stutter */
+  72% {
+    transform: translateX(2px);
+    opacity: 0.5;
+    text-shadow: -3px 0 #ff0040, 2px 0 #00ffff;
+  }
+  72.5% {
+    transform: translateX(-2px);
+    opacity: 0.3;
+  }
+  73% {
+    transform: translateX(0);
+    opacity: 0;
+  }
+}
+
+@keyframes glitch2 {
+  0%,100% { 
+    transform: translateX(0);
+    opacity: 0;
+  }
+  /* Delayed cyan channel — always offset from glitch1 */
+  20% {
+    transform: translateX(5px) skewX(2deg);
+    opacity: 0.7;
+    text-shadow: -4px 0 #00ffff, 2px 0 rgba(255,0,64,0.4);
+    filter: brightness(1.3);
+  }
+  21% {
+    transform: translateX(-3px) scaleY(1.02);
+    opacity: 0.5;
+    text-shadow: 4px 0 #00ffff;
+  }
+  22% {
+    transform: translateX(0);
+    opacity: 0;
+    filter: none;
+  }
+
+  /* Long drag glitch */
+  47% {
+    transform: translateX(0);
+    opacity: 0;
+  }
+  48% {
+    transform: translateX(7px) skewX(3deg);
+    opacity: 0.65;
+    text-shadow: -6px 0 #00ffff, 3px 0 rgba(255,0,64,0.3);
+    filter: brightness(1.5) hue-rotate(15deg);
+  }
+  49% {
+    transform: translateX(-4px) skewX(-1deg) scaleX(0.99);
+    opacity: 0.4;
+  }
+  50% {
+    transform: translateX(2px);
+    opacity: 0.2;
+  }
+  51% {
+    transform: translateX(0);
+    opacity: 0;
+    filter: none;
+  }
+
+  /* Flicker */
+  73% {
+    transform: translateX(-3px) skewX(-1deg);
+    opacity: 0.6;
+    text-shadow: 3px 0 #00ffff;
+  }
+  74% {
+    transform: translateX(1px);
+    opacity: 0.2;
+  }
+  74.5% {
+    transform: translateX(0);
+    opacity: 0;
+  }
+}
 
   /* Horizontal scan lines */
   @keyframes scanH {
@@ -311,67 +439,45 @@
     animation: badgePop 0.6s cubic-bezier(0.34,1.56,0.64,1) 0.8s both;
   }
 
-.hero-title {
-  font-family: var(--ff-display);
-  font-size: clamp(72px, 10vw, 148px);
-  line-height: 0.92;
-  color: #fff;
-  position: relative;
-  overflow: hidden;
-  transform: translateZ(0); /* Force GPU */
+  /* Main title — glitch */
+  .hero-title {
+    font-family: var(--ff-display);
+    font-size: clamp(72px, 10vw, 148px);
+    line-height: 0.92;
+    letter-spacing: -0.02em;
+    color: var(--mint);
+    position: relative;
+    margin-bottom: 28px;
+    overflow: hidden;
+  }
+  .hero-title .line {
+    display: block;
+    overflow: hidden;
+  }
+  .hero-title .line span {
+    display: inline-block;
+    opacity: 0;
+    animation: slideUp 0.9s cubic-bezier(0.22,1,0.36,1) forwards;
+  }
+  .hero-title .line:nth-child(1) span { animation-delay: 0.5s; }
+
+  /* Glitch pseudo-layers */
+.hero-title::before {
+  content: attr(data-text);
+  position: absolute; inset: 0;
+  color: #ff0040;
+  will-change: transform, opacity;
+  animation: glitch1 6s cubic-bezier(0.25, 0.46, 0.45, 0.94) infinite;
+  pointer-events: none;
 }
 
-.hero-title::before,
 .hero-title::after {
   content: attr(data-text);
-  position: absolute;
-  inset: 0;
+  position: absolute; inset: 0;
+  color: #00ffff;
+  will-change: transform, opacity;
+  animation: glitch2 6s cubic-bezier(0.25, 0.46, 0.45, 0.94) infinite 0.15s;
   pointer-events: none;
-  will-change: transform, clip-path;
-  /* 'steps(1)' ensures the browser only renders exactly what you see 
-      in the keyframes, cutting CPU work by about 80% */
-  animation-timing-function: steps(1);
-  opacity: 0.7;
-}
-
-.hero-title::before {
-  color: green;
-  animation: balancedGlitch 3.5s infinite;
-}
-
-.hero-title::after {
-  color: #26ff9a;
-  animation: balancedGlitch 3.5s infinite reverse;
-  animation-delay: 0.2s;
-}
-
-/* --- BALANCED TIMING ---
-   The glitch pulses at a steady rhythm. 
-   Visible for enough time to see, but fast enough to feel digital.
-*/
-
-@keyframes balancedGlitch {
-  0%, 10%, 90%, 100% { 
-    clip-path: inset(0 0 100% 0); 
-    transform: translate(0); 
-  }
-  20% { 
-    clip-path: inset(15% 0 65% 0); 
-    transform: translate(-4px, 2px); 
-  }
-  25% { 
-    clip-path: inset(45% 0 35% 0); 
-    transform: translate(4px, -2px); 
-  }
-  30% { 
-    clip-path: inset(75% 0 5% 0); 
-    transform: translate(-2px, 3px); 
-  }
-  35% { 
-    clip-path: inset(0 0 100% 0); 
-    transform: translate(0); 
-  }
-  /* The gap between 35% and 90% is the "Balanced" rest period */
 }
 
   .hero-sub {
@@ -628,156 +734,287 @@
   }
   .section-title-lg span { color: var(--mint); }
 
-  /* ════════════════════════════════════════════════
-     TIMELINE
-  ════════════════════════════════════════════════ */
-  .timeline-section {
-    padding: 80px 0 120px;
-    position: relative; z-index: 1;
-  }
+ /* ═══════════════════════════════════════════════════════
+   TIMELINE REDESIGN — Horizontal Railway Track
+═══════════════════════════════════════════════════════ */
 
-  .timeline {
-    position: relative;
-    padding: 20px 8%;
-    max-width: none;
-    margin: 0;
-  }
+.timeline-section {
+  padding: 80px 0 120px;
+  position: relative; z-index: 1;
+  overflow: hidden;
+}
 
-  /* The center line */
-  .timeline::before {
-    content: '';
-    position: absolute;
-    left: 50%;
-    top: 0; bottom: 0;
-    width: 1px;
-    background: linear-gradient(to bottom, transparent, rgba(38,255,154,0.3) 10%, rgba(38,255,154,0.3) 90%, transparent);
-    transform: translateX(-50%);
-    animation: lineGrow 1.5s ease 0.5s both;
-    transform-origin: top;
-  }
+.timeline {
+  position: relative;
+  padding: 80px 8% 60px;
+  display: flex;
+  gap: 0;
+  overflow-x: auto;
+  overflow-y: visible;
+  scrollbar-width: none;
+  cursor: grab;
+  -webkit-overflow-scrolling: touch;
+}
+.timeline::-webkit-scrollbar { display: none; }
+.timeline:active { cursor: grabbing; }
 
-  .timeline-event {
-    position: relative;
-    width: 44%;
-    background: transparent;
-    border: 1px solid rgba(38,255,154,0.12);
-    border-radius: 12px;
-    padding: 28px 32px;
-    margin: 0 0 36px 0;
-    left: 0;
-    box-shadow: none;
-    overflow: hidden;
-    opacity: 0;
-    transition: transform 0.4s ease, border-color 0.3s ease, box-shadow 0.3s ease;
-  }
+/* ── Railroad track (two rails + ties) ── */
+.timeline::before {
+  content: '';
+  position: absolute;
+  top: 48px;
+  left: 8%;
+  right: 8%;
+  height: 12px;
+  background:
+    linear-gradient(oklch(85% 0.22 155 / 0.6), oklch(85% 0.22 155 / 0.6)) 0 0 / 100% 2px no-repeat,
+    linear-gradient(oklch(85% 0.22 155 / 0.6), oklch(85% 0.22 155 / 0.6)) 0 100% / 100% 2px no-repeat,
+    repeating-linear-gradient(
+      90deg,
+      transparent 0px,
+      transparent 28px,
+      oklch(85% 0.22 155 / 0.18) 28px,
+      oklch(85% 0.22 155 / 0.18) 34px
+    );
+  box-shadow:
+    0 -1px 8px oklch(85% 0.22 155 / 0.2),
+    0  1px 8px oklch(85% 0.22 155 / 0.2);
+  z-index: 0;
+}
+.timeline:hover::before {
+  background:
+    linear-gradient(oklch(85% 0.22 155 / 0.9), oklch(85% 0.22 155 / 0.9)) 0 0 / 100% 2px no-repeat,
+    linear-gradient(oklch(85% 0.22 155 / 0.9), oklch(85% 0.22 155 / 0.9)) 0 100% / 100% 2px no-repeat,
+    repeating-linear-gradient(
+      90deg,
+      transparent 0px,
+      transparent 28px,
+      oklch(85% 0.22 155 / 0.35) 28px,
+      oklch(85% 0.22 155 / 0.35) 34px
+    );
+  box-shadow:
+    0 -1px 16px oklch(85% 0.22 155 / 0.4),
+    0  1px 16px oklch(85% 0.22 155 / 0.4);
+  transition: all 0.4s ease;
+}
 
-  /* Shimmer top border */
-  .timeline-event::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, var(--mint), transparent);
-    opacity: 0;
-    transition: opacity 0.3s;
-  }
-  .timeline-event:hover::before { opacity: 0.7; }
+/* ── Moving train ── */
+.timeline::after {
+  content: '>>>';
+  position: absolute;
+  top: 28px;
+  font-size: 22px;
+  z-index: 4;
+  background: none;
+  border-radius: 0;
+  width: auto; height: auto;
+  box-shadow: none;
+  filter: drop-shadow(0 0 8px oklch(85% 0.22 155 / 0.6));
+  animation: trainRide 8s ease-in-out infinite;
+}
+@keyframes trainRide {
+  0%   { left: 8%;  transform: scaleX(1);  }
+  48%  { left: 82%; transform: scaleX(1);  }
+  50%  { left: 82%; transform: scaleX(-1); }
+  98%  { left: 8%;  transform: scaleX(-1); }
+  100% { left: 8%;  transform: scaleX(1);  }
+}
 
-  /* Interior glow */
-  .timeline-event::after {
-    content: '';
-    position: absolute;
-    top: -50%; left: -50%;
-    width: 200%; height: 200%;
-    background: radial-gradient(ellipse at center, rgba(38,255,154,0.04) 0%, transparent 60%);
-    opacity: 0;
-    transition: opacity 0.4s;
-    pointer-events: none;
-  }
-  .timeline-event:hover::after { opacity: 1; }
-  .timeline-event:hover {
-    border-color: rgba(38,255,154,0.4);
-    box-shadow: 0 0 40px rgba(38,255,154,0.08), 0 20px 60px rgba(0,0,0,0.3);
-    transform: translateY(-4px);
-  }
+/* ── Each event card ── */
+.timeline-event {
+  position: relative;
+  flex: 0 0 260px;
+  padding: 84px 16px 0;
+  left: 0 !important;
+  width: auto;
+  opacity: 0;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  overflow: visible;
+  animation: stationIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+.timeline-event:nth-child(1) { animation-delay: 0.2s; }
+.timeline-event:nth-child(2) { animation-delay: 0.35s; }
+.timeline-event:nth-child(3) { animation-delay: 0.5s; }
+.timeline-event:nth-child(4) { animation-delay: 0.65s; }
+.timeline-event:nth-child(5) { animation-delay: 0.8s; }
 
-  /* Staggered reveal */
-  .timeline-event:nth-child(1) { animation: fadeRight 0.7s ease 0.3s forwards; }
-  .timeline-event:nth-child(2) { animation: fadeLeft 0.7s ease 0.5s forwards; }
-  .timeline-event:nth-child(3) { animation: fadeRight 0.7s ease 0.7s forwards; }
-  .timeline-event:nth-child(4) { animation: fadeLeft 0.7s ease 0.9s forwards; }
-  .timeline-event:nth-child(5) { animation: fadeRight 0.7s ease 1.1s forwards; }
+@keyframes stationIn {
+  from { opacity:0; transform: translateY(24px) scale(0.94); }
+  to   { opacity:1; transform: translateY(0) scale(1); }
+}
 
-  .timeline-event.right {
-    left: 56%;
-  }
+/* Kill old pseudo-elements on cards */
+.timeline-event::before,
+.timeline-event::after {
+  display: none !important;
+}
 
-  .timeline-marker {
-    position: absolute;
-    top: 28px;
-    width: 14px; height: 14px;
-    background: var(--mint);
-    border-radius: 50%;
-    border: 2px solid #000;
-    animation: markerPulse 2.5s ease-in-out infinite;
-    z-index: 2;
-  }
-  .timeline-event:not(.right) .timeline-marker { right: -27px; }
-  .timeline-event.right .timeline-marker { left: -27px; }
+/* ── Station marker ── */
+.timeline-marker {
+  position: absolute;
+  top: 42px;
+  left: 36px;
+  right: auto !important;
+  width: 20px; height: 20px;
+  background: oklch(8% 0.008 155);
+  border: 2px solid oklch(85% 0.22 155);
+  border-radius: 4px;
+  z-index: 3;
+  box-shadow: 0 0 10px oklch(85% 0.22 155 / 0.4), inset 0 0 6px oklch(85% 0.22 155 / 0.1);
+  transition: all 0.3s ease;
+}
+/* Station post up to rail */
+.timeline-marker::before {
+  content: '';
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  height: 10px;
+  background: oklch(85% 0.22 155 / 0.5);
+  display: block !important;
+}
+.timeline-event:hover .timeline-marker {
+  background: oklch(85% 0.22 155);
+  box-shadow: 0 0 20px oklch(85% 0.22 155 / 0.6), 0 0 40px oklch(85% 0.22 155 / 0.2);
+  transform: scale(1.2);
+}
+.timeline-event.active-now .timeline-marker {
+  transform: rotate(45deg) scale(1.15);
+  background: oklch(85% 0.22 155);
+  box-shadow: 0 0 24px oklch(85% 0.22 155 / 0.7), 0 0 0 4px oklch(85% 0.22 155 / 0.15);
+  animation: markerPulse 2s ease-in-out infinite;
+}
 
-  /* Active event styling */
-  .timeline-event.active-now {
-    border-color: rgba(38,255,154,0.5);
-    background: rgba(38,255,154,0.03);
-  }
-  .timeline-event.active-now .timeline-marker {
-    background: #fff;
-    box-shadow: 0 0 0 4px rgba(38,255,154,0.3), 0 0 20px var(--mint);
-  }
+/* ── Station connector line ── */
+.station-connector {
+  position: absolute;
+  top: 62px;
+  left: 45px;
+  width: 1px;
+  height: 22px;
+  background: linear-gradient(to bottom, oklch(85% 0.22 155 / 0.5), transparent);
+}
 
-  .tl-version {
-    font-family: var(--ff-display);
-    font-size: 28px;
-    color: #fff;
-    letter-spacing: 0.02em;
-    margin-bottom: 8px;
-  }
-  .tl-meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    align-items: center;
-    margin-top: 12px;
-  }
-  .tl-date {
-    font-family: var(--ff-sub);
-    font-size: 10px;
-    letter-spacing: 0.15em;
-    color: var(--mint);
-  }
-  .tl-dot { width: 3px; height: 3px; background: var(--text-dim); border-radius: 50%; }
-  .tl-tag {
-    font-family: var(--ff-sub);
-    font-size: 9px;
-    letter-spacing: 0.1em;
-    padding: 3px 10px;
-    border-radius: 4px;
-  }
-  .tl-tag.major { background: rgba(38,255,154,0.12); color: var(--mint); border: 1px solid rgba(38,255,154,0.25); }
-  .tl-tag.minor { background: rgba(255,255,255,0.04); color: var(--text-dim); border: 1px solid rgba(255,255,255,0.08); }
-  .tl-tag.current {
-    background: rgba(38,255,154,0.2);
-    color: var(--mint);
-    border: 1px solid rgba(38,255,154,0.5);
-    animation: pulseGlow 2s ease-in-out infinite;
-  }
-  .tl-platform {
-    font-family: var(--ff-sub);
-    font-size: 9px;
-    color: var(--text-dim);
-    letter-spacing: 0.1em;
-  }
+/* ── Station card ── */
+.station-card {
+  margin-left: 4px;
+  width: 240px;
+  background: oklch(8% 0.008 155 / 0.92);
+  border: 1px solid oklch(100% 0 0 / 0.07);
+  border-radius: 14px;
+  padding: 18px 20px 20px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  backdrop-filter: blur(16px);
+}
+/* Top accent beam */
+.station-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 10%; right: 10%; height: 1px;
+  background: linear-gradient(90deg, transparent, oklch(85% 0.22 155 / 0.35), transparent);
+  display: block !important;
+}
+.timeline-event:hover .station-card {
+  border-color: oklch(85% 0.22 155 / 0.3);
+  transform: translateY(-6px);
+  box-shadow:
+    0 0 30px oklch(85% 0.22 155 / 0.08),
+    0 20px 40px oklch(0% 0 0 / 0.4);
+}
 
+/* ── Active/current card ── */
+.timeline-event.active-now .station-card {
+  border-color: oklch(85% 0.22 155 / 0.45);
+  background: oklch(85% 0.22 155 / 0.05);
+  animation: activePulse 3s ease-in-out infinite;
+}
+@keyframes activePulse {
+  0%,100% { box-shadow: 0 0 20px oklch(85% 0.22 155 / 0.1); }
+  50%     { box-shadow: 0 0 40px oklch(85% 0.22 155 / 0.25), 0 0 80px oklch(85% 0.22 155 / 0.08); }
+}
+
+/* ── Version title ── */
+.tl-version {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px;
+  letter-spacing: 0.06em;
+  color: #fff;
+  line-height: 1;
+  margin-bottom: 10px;
+  padding: 6px 10px;
+  background: oklch(12% 0.01 155 / 0.8);
+  border-left: 2px solid oklch(85% 0.22 155);
+  border-radius: 0 6px 6px 0;
+}
+.timeline-event.active-now .tl-version {
+  color: oklch(85% 0.22 155);
+  border-left-color: oklch(92% 0.24 152);
+  background: oklch(85% 0.22 155 / 0.07);
+  text-shadow: 0 0 14px oklch(85% 0.22 155 / 0.5);
+}
+
+/* ── Meta row ── */
+.tl-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  margin-top: 10px;
+}
+.tl-date {
+  font-family: 'Fira Code', monospace;
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  color: oklch(85% 0.22 155 / 0.7);
+  text-transform: uppercase;
+}
+.tl-dot {
+  width: 3px; height: 3px;
+  background: oklch(45% 0.008 155);
+  border-radius: 50%;
+}
+.tl-tag {
+  font-family: 'Fira Code', monospace;
+  font-size: 8px;
+  letter-spacing: 0.1em;
+  padding: 3px 9px;
+  border-radius: 999px;
+  text-transform: uppercase;
+}
+.tl-tag.major {
+  background: oklch(85% 0.22 155 / 0.1);
+  color: oklch(85% 0.22 155);
+  border: 1px solid oklch(85% 0.22 155 / 0.25);
+}
+.tl-tag.minor {
+  background: oklch(100% 0 0 / 0.04);
+  color: oklch(45% 0.008 155);
+  border: 1px solid oklch(100% 0 0 / 0.08);
+}
+.tl-tag.current {
+  background: oklch(85% 0.22 155 / 0.15);
+  color: oklch(85% 0.22 155);
+  border: 1px solid oklch(85% 0.22 155 / 0.4);
+  box-shadow: 0 0 8px oklch(85% 0.22 155 / 0.2);
+}
+.tl-platform {
+  font-family: 'Fira Code', monospace;
+  font-size: 9px;
+  color: oklch(30% 0.006 155);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-top: 6px;
+  display: block;
+}
+
+/* ── Drag to scroll JS helper ── */
   /* ════════════════════════════════════════════════
      FOOTER STRIP
   ════════════════════════════════════════════════ */
@@ -850,20 +1087,6 @@
 <div class="scanline"></div>
 <div class="dot-grid"></div>
 
-<!-- ── SIDEBAR ─────────────────────────────────── -->
-<div class="sidebar">
-  <img src="https://cdn.jsdelivr.net/gh/PopAnynomous234/assets/logo.png" width="70" height="70" alt="logo">
-  <ul>
-    <li><a href="index.html"><i class="fas fa-home icon"></i><span class="text">Home</span></a></li>
-    <li><a href="ai.html"><i class="fas fa-robot icon"></i><span class="text">AI</span></a></li>
-    <li><a href="tools.html"><i class="fa-solid fa-screwdriver-wrench"></i><span class="text">Tools</span></a></li>
-    <li><a href="games.html"><i class="fas fa-gamepad icon"></i><span class="text">Games</span></a></li>
-    <li><a href="music.html"><i class="fas fa-music icon"></i><span class="text">Music</span></a></li>
-    <li><a href="chat.html"><i class="fa-regular fa-comments icon"></i><span class="text">Chat</span></a></li>
-    <li><a href="settings.html"><i class="fas fa-cog icon"></i><span class="text">Settings</span></a></li>
-  </ul>
-</div>
-
 <!-- ── PAGE SHELL ─────────────────────────────── -->
 <div class="page-shell">
 
@@ -904,7 +1127,7 @@
 
       <p class="hero-sub">
         Do anything you want.<br>
-        Pick Codelistener. Try out.
+        Pick Codelistener.
       </p>
 
       <div class="hero-actions">
@@ -928,10 +1151,7 @@
       </div>
 
       <div class="hotkey-hint">
-        <p>Panic key &nbsp;</p>
-        <span class="kbd">Ctrl</span>
-        <span class="kbd">Alt</span>
-        <span class="kbd">J</span>
+      <i class="fa-solid fa-thumbs-up">  Maintained Well</i>
       </div>
     </div>
 
@@ -951,16 +1171,16 @@
         <div class="stat-label">Versions</div>
       </div>
       <div class="stat">
-        <div class="stat-value">200+</div>
+        <div class="stat-value">500+</div>
         <div class="stat-label">Games</div>
       </div>
       <div class="stat">
         <div class="stat-value">10+</div>
         <div class="stat-label">Tools</div>
       </div>
-       <div class="stat">
+      <div class="stat">
         <div class="stat-value">10+</div>
-        <div class="stat-label">Updates Per Week</div>
+        <div class="stat-label">Updates per Week</div>
       </div>
       <div class="stat">
         <div class="stat-value">∞</div>

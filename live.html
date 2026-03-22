@@ -17,7 +17,7 @@
   --red:#26ff9a; --red-glow:#26ff9a; --red-dim:rgba(255,45,85,0.1);
   --bg:#010101; --surf1:#080808; --surf2:#0e0e0e; --surf3:#141414; --surf4:#1c1c1c;
   --border:rgba(255,255,255,0.05); --border-h:rgba(38,255,154,0.3);
-  --text:#f0f0f0; --text-dim:#555; --text-muted:#252525;
+  --text:#f0f0f0; --text-dim:#888; --text-muted:#454545;
   --ff-display:'Bebas Neue',sans-serif; --ff-body:'DM Sans',sans-serif; --ff-mono:'Fira Code',monospace;
   --sidebar-w:80px;
 }
@@ -99,11 +99,21 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;back
 .e-title{font-family:var(--ff-display);font-size:32px;color:rgba(255,255,255,0.2);letter-spacing:.04em;}
 .e-sub{font-family:var(--ff-mono);font-size:10px;letter-spacing:.12em;color:var(--text-muted);text-transform:uppercase;}
 /* WATCH LAYOUT */
-.wl{display:flex;height:100%;}
-.wl-left{flex:1;min-width:0;display:flex;flex-direction:column;padding:10px 8px 10px 12px;gap:8px;}
-.wl-right{width:300px;flex-shrink:0;border-left:1px solid var(--border);display:flex;flex-direction:column;background:var(--surf1);animation:panelIn .5s ease both;}
+.wl{
+  display:grid;
+  grid-template-columns: 1fr 320px;
+  height:100%;
+  width:100%;
+}
+.wl-left{
+  flex:1 1 auto;
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+}
+.wl-right{width:320px; min-width: 320px;flex-shrink:0;border-left:1px solid var(--border);display:flex;flex-direction:column;background:var(--surf1);animation:panelIn .5s ease both;}
 /* VIDEO STAGE */
-.vstage{position:relative;flex:1;min-height:0;background:#000;border-radius:16px;overflow:hidden;border:1px solid rgba(38,255,154,0.18);animation:breathMint 5s ease-in-out 1s infinite;}
+.vstage{position:relative;width:100%;height:100%; min-height:0;background:#000;border-radius:16px;overflow:hidden;border:1px solid rgba(38,255,154,0.18);animation:breathMint 5s ease-in-out 1s infinite;}
 .vstage.red{animation:breathRed 2.5s ease-in-out infinite;}
 .vstage::before{content:'';position:absolute;top:0;left:8%;right:8%;height:1px;z-index:20;background:linear-gradient(90deg,transparent,var(--mint) 40%,var(--mint-b) 60%,transparent);opacity:.4;pointer-events:none;}
 .vstage::after{content:'';position:absolute;top:50%;left:50%;width:160%;height:160%;transform:translate(-50%,-50%);background:conic-gradient(from 0deg,transparent 0%,rgba(38,255,154,0.05) 5%,transparent 12%);pointer-events:none;z-index:3;border-radius:50%;animation:conicSpin 10s linear infinite;}
@@ -147,7 +157,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;back
 .setup-wrap{display:flex;flex-direction:column;padding:16px 4px 16px 0;gap:14px;overflow-y:auto;flex:1;}
 .su-title{font-family:var(--ff-display);font-size:36px;letter-spacing:.04em;color:#fff;}
 .su-sub{font-family:var(--ff-mono);font-size:10px;letter-spacing:.14em;color:var(--text-dim);text-transform:uppercase;margin-top:3px;}
-.su-prev{width:100%;aspect-ratio:16/9;max-height:240px;background:var(--surf2);border-radius:14px;overflow:hidden;border:1px solid var(--border);position:relative;}
+.su-prev{width:100%;height:100%;background:var(--surf2);border-radius:14px;overflow:hidden;border:1px solid var(--border);position:relative;}
 .su-prev video{width:100%;height:100%;object-fit:cover;display:none;}
 .su-ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:30px;color:rgba(38,255,154,0.1);background:radial-gradient(ellipse at center,rgba(38,255,154,0.04) 0%,transparent 60%);}
 .fl{font-family:var(--ff-mono);font-size:9px;letter-spacing:.2em;color:var(--text-dim);text-transform:uppercase;margin-bottom:5px;}
@@ -189,18 +199,6 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;back
 </head>
 <body>
 <div class="scanline"></div>
-<div class="sidebar">
-  <img src="https://cdn.jsdelivr.net/gh/PopAnynomous234/assets/logo.png" width="70" height="70" alt="logo">
-  <ul>
-    <li><a href="index.html"><i class="fas fa-home icon"></i><span class="text">Home</span></a></li>
-    <li><a href="ai.html"><i class="fas fa-robot icon"></i><span class="text">AI</span></a></li>
-    <li><a href="tools.html"><i class="fa-solid fa-screwdriver-wrench"></i><span class="text">Tools</span></a></li>
-    <li><a href="games.html"><i class="fas fa-gamepad icon"></i><span class="text">Games</span></a></li>
-    <li><a href="music.html"><i class="fas fa-music icon"></i><span class="text">Music</span></a></li>
-    <li><a href="chat.html"><i class="fa-regular fa-comments icon"></i><span class="text">Chat</span></a></li>
-    <li><a href="settings.html"><i class="fas fa-cog icon"></i><span class="text">Settings</span></a></li>
-  </ul>
-</div>
 <div class="page-shell">
   <div class="top-bar">
     <div class="brand">CODE<span>LIVE</span> <span class="brand-badge">BETA</span></div>

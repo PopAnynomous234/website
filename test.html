@@ -1,107 +1,178 @@
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;600;800&family=Syne:wght@800&display=swap" rel="stylesheet">
 
-<div class="apex-settings-container">
-    <div class="glass-orb"></div>
-    
-    <div class="panic-card">
-        <div class="card-glow"></div>
-        <div class="card-inner">
-            <div class="header-box">
-                <span class="protocol-tag">SECURITY PROTOCOL 01</span>
-                <h1 class="apex-title">STEALTH EXIT</h1>
-            </div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Club HTML Editor</title>
+<link rel="icon" href="https://www.dropbox.com/scl/fi/vnz4rs2sjz6g4tal3j714/dhd-removebg-preview.png?rlkey=15d0v2yhflsimksh23ofvzzli&st=q5mgrxlo&raw=1" type="image/svg+xml">
+  <!-- CodeMirror CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/eclipse.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/dracula.min.css"> <!-- Added a dark theme -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/blackboard.min.css"> <!-- Added a high-contrast theme -->
 
-            <div class="settings-vault">
-                <div class="input-section">
-                    <label class="apex-label">REDIRECT DESTINATION</label>
-                    <div class="input-wrapper">
-                        <input type="text" id="panic-url-input" placeholder="https://google.com" class="apex-input">
-                        <div class="input-bar"></div>
-                    </div>
-                </div>
+  <!-- CodeMirror JS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/xml/xml.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/htmlmixed/htmlmixed.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closetag.min.js"></script>
 
-                <div class="combo-section">
-                    <label class="apex-label">ACTIVATION COMBINATION</label>
-                    <div class="combo-display" id="combo-preview">NONE SET</div>
-                    <button id="panic-rec-btn" onclick="startPanicRecord()" class="btn-apex-main">
-                        <span class="btn-text">INITIALIZE RECORDING</span>
-                        <div class="btn-shine"></div>
-                    </button>
-                </div>
-            </div>
+  <style>
+    body { margin: 0; font-family: Arial, sans-serif; background: #f9f9f9; color: #222; height: 100vh; display: flex; flex-direction: column; }
+    .topbar { display: flex; justify-content: space-between; align-items: center; background: #2c3e50; padding: 10px 20px; color: white; }
+    .topbar a, .topbar button { color: white; text-decoration: none; padding: 6px 12px; border: none; background: #34495e; border-radius: 4px; cursor: pointer; margin-right: 5px; }
+    .topbar a:hover, .topbar button:hover { background: #1abc9c; }
 
-            <div class="footer-note">
-                <p>Hold the exact combination to vanish. Session history will be purged upon exit.</p>
-            </div>
-        </div>
+    .container { flex: 1; display: flex; border-top: 2px solid #ccc; min-height: 400px; max-height: calc(100vh - 60px); }
+    .editor { flex: 1; display: flex; flex-direction: column; border-right: 3px solid #ccc; min-width: 200px; resize: horizontal; overflow: auto; position: relative; }
+    .editor label { background: #eee; padding: 6px; font-weight: bold; border-bottom: 1px solid #ccc; display: flex; justify-content: space-between; align-items: center; }
+    .CodeMirror { flex: 1; height: 100%; font-size: 14px; } /* Added initial font-size for CodeMirror */
+    iframe { flex: 1; border: none; background: white; min-width: 200px; }
+
+    .fab { position: fixed; bottom: 20px; right: 20px; width: 55px; height: 55px; background:#5E06C9; color: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 24px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.2); z-index: 1000; }
+    .fab:hover { background: #8C4CE0; }
+
+    .accessibility-menu { display: none; position: fixed; bottom: 85px; right: 20px; background: white; color: black; border: 1px solid #ccc; border-radius: 8px; padding: 12px; min-width: 220px; z-index: 1000; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+    .accessibility-menu label { display: block; margin: 6px 0 3px; font-size: 14px; font-weight: bold; }
+    .accessibility-menu select { width: 100%; padding: 4px; margin-bottom: 8px; }
+
+    body.dark { background: #1e1e1e; color: #eee; }
+    body.dark .topbar { background: #000; }
+    body.dark a, body.dark button { background: #333; color: #eee; }
+    body.high-contrast { background: black !important; color: yellow !important; }
+    body.high-contrast a, body.high-contrast button { background: black !important; color: yellow !important; border: 2px solid yellow; }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="left">
+      <a href="dashboard.html">🏠 Dashboard</a>
+      <a href="#">ℹ️ About</a>
     </div>
-</div>
+    <div class="right">
+      <button id="fullscreenBtn">⛶ Fullscreen</button>
+      <button id="logoutBtn" onclick="logout()">Logout</button>
+    </div>
+  </div>
 
-<style>
-:root {
-    --mint: #26ff9a;
-    --mint-glow: rgba(38, 255, 154, 0.4);
-    --bg: #060707;
-    --card-bg: rgba(13, 15, 14, 0.85);
-}
+  <div class="container" id="editorWrapper">
+    <div class="editor">
+      <label>
+        HTML Editor
+        <button id="downloadBtn">💾 Download</button>
+      </label>
+      <textarea id="htmlCode"></textarea>
+    </div>
+    <iframe id="preview"></iframe>
+  </div>
 
-body {
-    background: var(--bg);
-    margin: 0;
-    font-family: 'Outfit', sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    color: white;
-}
+  <div class="fab" id="accessibilityBtn">♿</div>
 
-.apex-settings-container { position: relative; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
+  <div class="accessibility-menu" id="accessibilityMenu">
+    <label for="fontSize">Font Size</label>
+    <select id="fontSize">
+      <option value="12">Small</option>
+      <option value="14" selected>Medium</option>
+      <option value="18">Large</option>
+      <option value="22">Extra Large</option>
+    </select>
 
-.glass-orb {
-    position: absolute; width: 500px; height: 500px; background: radial-gradient(circle, var(--mint-glow) 0%, transparent 70%);
-    filter: blur(60px); opacity: 0.15; z-index: 0; animation: pulseOrb 10s infinite alternate;
-}
+    <label for="lineSpacing">Line Spacing</label>
+    <select id="lineSpacing">
+      <option value="1">Normal</option>
+      <option value="1.5">1.5x</option>
+      <option value="2">2x</option>
+    </select>
 
-.panic-card {
-    position: relative; width: 380px; z-index: 10; padding: 1px;
-    background: linear-gradient(145deg, rgba(38,255,154,0.4), rgba(255,255,255,0.05));
-    border-radius: 32px; box-shadow: 0 50px 100px rgba(0,0,0,0.9);
-}
+    <label for="theme">Theme</label>
+    <select id="theme">
+      <option value="light" selected>Light</option>
+      <option value="dark">Dark</option>
+      <option value="high-contrast">High Contrast</option>
+    </select>
 
-.card-inner {
-    background: var(--card-bg); backdrop-filter: blur(30px); border-radius: 31px; padding: 2.5rem;
-}
+    <label for="fontType">Font</label>
+    <select id="fontType">
+      <option value="default">Default</option>
+      <option value="monospace">Monospace</option>
+    </select>
+  </div>
 
-.header-box { margin-bottom: 2rem; }
-.protocol-tag { font-size: 9px; font-weight: 800; color: var(--mint); letter-spacing: 2px; }
-.apex-title { font-family: 'Syne', sans-serif; font-size: 2rem; margin: 5px 0 0 0; letter-spacing: -1px; }
+  <script>
+    // ✅ CodeMirror setup
+    const editor = CodeMirror.fromTextArea(document.getElementById("htmlCode"), {
+      mode: "text/html", theme: "eclipse", lineNumbers: true, autoCloseTags: true
+    });
+    const preview = document.getElementById("preview");
+    editor.on("change", () => preview.srcdoc = editor.getValue());
 
-.apex-label { display: block; font-size: 10px; font-weight: 800; color: #688074; margin-bottom: 12px; letter-spacing: 1px; }
+    // ✅ Accessibility
+    const accessibilityBtn = document.getElementById("accessibilityBtn");
+    const accessibilityMenu = document.getElementById("accessibilityMenu");
+    accessibilityBtn.addEventListener("click", () => accessibilityMenu.style.display = accessibilityMenu.style.display === 'block' ? 'none' : 'block');
 
-.input-wrapper { position: relative; margin-bottom: 2rem; }
-.apex-input {
-    width: 100%; background: rgba(255,255,255,0.03); border: none; border-bottom: 1px solid rgba(255,255,255,0.1);
-    padding: 1rem 0; color: white; font-size: 1rem; transition: 0.3s;
-}
-.apex-input:focus { outline: none; border-bottom-color: var(--mint); }
+    document.getElementById("fontSize").addEventListener("change", e => {
+      // Set font size for the CodeMirror editor directly
+      const cmWrapper = document.querySelector('.CodeMirror');
+      if (cmWrapper) {
+        cmWrapper.style.fontSize = e.target.value + 'px';
+      }
+    });
 
-.combo-display {
-    background: rgba(0,0,0,0.3); border: 1px dashed rgba(38,255,154,0.2); border-radius: 12px;
-    padding: 1.2rem; text-align: center; font-weight: 800; color: var(--mint);
-    margin-bottom: 1.5rem; font-size: 0.9rem; letter-spacing: 1px;
-}
+    document.getElementById("lineSpacing").addEventListener("change", e => {
+        const cmWrapper = document.querySelector('.CodeMirror');
+        if (cmWrapper) {
+            cmWrapper.style.lineHeight = e.target.value;
+        }
+    });
 
-.btn-apex-main {
-    width: 100%; position: relative; padding: 1.2rem; background: var(--mint); border: none;
-    border-radius: 16px; font-weight: 800; color: #060707; cursor: pointer;
-    overflow: hidden; transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-.btn-apex-main:hover { transform: translateY(-3px); box-shadow: 0 10px 30px var(--mint-glow); }
-.btn-apex-main.recording { background: #ffcc00; transform: scale(0.98); }
+    document.getElementById("theme").addEventListener("change", e => {
+      document.body.classList.remove('dark', 'high-contrast');
+      if (e.target.value === 'dark') {
+        document.body.classList.add('dark');
+        editor.setOption('theme', 'dracula'); // Example dark theme for CodeMirror
+      } else if (e.target.value === 'high-contrast') {
+        document.body.classList.add('high-contrast');
+        editor.setOption('theme', 'blackboard'); // Example high contrast theme
+      } else {
+        document.body.classList.remove('dark', 'high-contrast');
+        editor.setOption('theme', 'eclipse'); // Default light theme
+      }
+    });
 
-.footer-note { margin-top: 2rem; font-size: 0.75rem; color: #688074; line-height: 1.5; text-align: center; }
+    document.getElementById("fontType").addEventListener("change", e => {
+      // Set font family for the CodeMirror editor
+      const cmWrapper = document.querySelector('.CodeMirror');
+      if (cmWrapper) {
+        cmWrapper.style.fontFamily = e.target.value === 'monospace' ? 'monospace' : 'Arial, sans-serif';
+      }
+      document.body.style.fontFamily = e.target.value === 'monospace' ? 'monospace' : 'Arial, sans-serif';
+    });
 
-@keyframes pulseOrb { from { opacity: 0.1; transform: scale(0.9); } to { opacity: 0.2; transform: scale(1.1); } }
-</style>
+    // ✅ Fullscreen
+    const fullscreenBtn = document.getElementById("fullscreenBtn");
+    let isFullscreen = false;
+    fullscreenBtn.addEventListener("click", () => {
+      const wrapper = document.getElementById("editorWrapper");
+      if (!isFullscreen) {
+        wrapper.requestFullscreen();
+      } else {
+        document.exitFullscreen();
+      }
+    });
+    document.addEventListener("fullscreenchange", () => isFullscreen = !!document.fullscreenElement);
 
+    // ✅ Download functionality
+    const downloadBtn = document.getElementById("downloadBtn");
+    downloadBtn.addEventListener("click", () => {
+        const code = editor.getValue();
+        const blob = new Blob([code], { type: "text/html" });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = "my-code.html";
+        link.click();
+    });
+
+  </script>
+</body>
+</html>
