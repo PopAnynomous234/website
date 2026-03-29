@@ -6,6 +6,10 @@
   --bg-dark: #01190E;
 }
 
+::-webkit-scrollbar { width:4px; height:4px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:rgba(38,255,154,0.2); border-radius:2px; }
+
 /* ===========================
    SIDEBAR CONTAINER
 =========================== */

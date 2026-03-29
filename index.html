@@ -1078,6 +1078,130 @@
     text-decoration: none;
   }
 
+  /* ── Game card collage ── */
+.hero-collage {
+  position: absolute;
+  right: 10%;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 420px;
+  height: 520px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.collage-card {
+  position: absolute;
+  width: 140px;
+  height: 105px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(38,255,154,0.2);
+  box-shadow:
+    0 8px 32px rgba(0,0,0,0.6),
+    0 0 0 1px rgba(255,255,255,0.05);
+  transition: transform .4s ease, box-shadow .4s ease;
+  animation: collageFloat linear infinite;
+}
+
+.collage-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  filter: brightness(0.88) saturate(1.1);
+  transition: filter .3s ease;
+}
+
+.collage-card:hover {
+  box-shadow:
+    0 0 24px var(--mint-glow),
+    0 12px 40px rgba(0,0,0,0.7);
+  z-index: 10;
+  pointer-events: all;
+}
+.collage-card:hover img {
+  filter: brightness(1.1) saturate(1.4);
+}
+
+/* Each card gets unique position, rotation, float speed */
+.collage-card:nth-child(1) {
+  top: 0px; left: 80px;
+  transform: rotate(-8deg);
+  animation-duration: 7s; animation-delay: 0s;
+}
+.collage-card:nth-child(2) {
+  top: 20px; left: 230px;
+  transform: rotate(5deg);
+  animation-duration: 9s; animation-delay: -2s;
+}
+.collage-card:nth-child(3) {
+  top: 110px; left: 10px;
+  transform: rotate(3deg);
+  width: 160px; height: 120px;
+  animation-duration: 8s; animation-delay: -1s;
+}
+.collage-card:nth-child(4) {
+  top: 130px; left: 170px;
+  transform: rotate(-6deg);
+  animation-duration: 6s; animation-delay: -3s;
+}
+.collage-card:nth-child(5) {
+  top: 130px; left: 310px;
+  transform: rotate(9deg);
+  width: 120px; height: 90px;
+  animation-duration: 10s; animation-delay: -1.5s;
+}
+.collage-card:nth-child(6) {
+  top: 260px; left: 60px;
+  transform: rotate(-4deg);
+  animation-duration: 7.5s; animation-delay: -4s;
+}
+.collage-card:nth-child(7) {
+  top: 265px; left: 210px;
+  transform: rotate(7deg);
+  width: 150px; height: 110px;
+  animation-duration: 8.5s; animation-delay: -2.5s;
+}
+.collage-card:nth-child(8) {
+  top: 380px; left: 100px;
+  transform: rotate(-11deg);
+  animation-duration: 6.5s; animation-delay: -0.5s;
+}
+.collage-card:nth-child(9) {
+  top: 390px; left: 260px;
+  transform: rotate(4deg);
+  width: 130px; height: 95px;
+  animation-duration: 9.5s; animation-delay: -3.5s;
+}
+
+@keyframes collageFloat {
+  0%,100% { margin-top: 0px;    }
+  50%     { margin-top: -10px;  }
+}
+
+/* Fade edges of the collage so it bleeds into the bg */
+.hero-collage::before {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 50% 30% at 50% 0%,   var(--black) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 30% at 50% 100%,  var(--black) 0%, transparent 70%),
+    radial-gradient(ellipse 30% 100% at 0%  50%,  var(--black) 0%, transparent 60%);
+  z-index: 5;
+  pointer-events: none;
+}
+
+/* Dot particles on collage */
+.hero-collage::after {
+  content: '';
+  position: absolute; inset: 0;
+  background-image: radial-gradient(circle, rgba(38,255,154,0.12) 1px, transparent 1px);
+  background-size: 24px 24px;
+  z-index: 0;
+  pointer-events: none;
+}
+
   </style>
 </head>
 
@@ -1103,7 +1227,17 @@
       <div class="orbital-ring"></div>
       <div class="orbital-core"></div>
     </div>
-
+    <div class="hero-collage" aria-hidden="true">
+  <div class="collage-card"><img src="data:image/jpeg;base64,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" alt=""></div>
+  <div class="collage-card"><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQE_T77uAtv5RGA4uiiZOsREwnMxkz8h3cSeA&s" alt=""></div>
+  <div class="collage-card"><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSAPyMPI1Ly2HyOtlhqcWcFX-2mZNFp06ctsw&s" alt=""></div>
+  <div class="collage-card"><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSeviFrkRhnX9ucY1Q-rrcWW0W5ccOOG8r-Tg&s" alt=""></div>
+  <div class="collage-card"><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQex4A3eUPKoCTjItjQYjaaF6BG4P8ykrmhdQ&s" alt=""></div>
+  <div class="collage-card"><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSyl9bC2C3RoxcnH8Eqb2y6oX8LvHuQfT3XNA&s" alt=""></div>
+  <div class="collage-card"><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSkI3j29GvESYXM5Htg7Ai-9WhkY9CWkMKdnw&s" alt=""></div>
+  <div class="collage-card"><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR4vY9PmxgrzW9ExrbMcVi256It8xWsRGspeg&s" alt=""></div>
+  <div class="collage-card"><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSiuYgDh2pNCWswS0E1YD4aVMt9LWAtd0D48g&s" alt=""></div>
+</div>
     <!-- Floating particles -->
     <div class="particles" aria-hidden="true">
       <div class="particle" style="left:15%;bottom:20%;animation-duration:6s;animation-delay:0s;"></div>
@@ -1299,6 +1433,8 @@ if ('IntersectionObserver' in window) {
     obs.observe(el);
   });
 }
+
+
 </script>
 
 </body>

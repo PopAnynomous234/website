@@ -1,4 +1,65 @@
+document.addEventListener('DOMContentLoaded', () => {
+    const cursorGlow = document.createElement('div');
 
+    cursorGlow.style.cssText = `
+        position: fixed;
+        pointer-events: none;
+        width: 240px;
+        height: 240px;
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 9999;
+        opacity: 0;
+
+        background: radial-gradient(circle,
+            rgba(38,255,154,0.6) 0%,
+            rgba(38,255,154,0.25) 30%,
+            rgba(38,255,154,0.1) 50%,
+            transparent 75%
+        );
+
+        filter: blur(28px) brightness(1.8) saturate(160%);
+        mix-blend-mode: screen;
+
+        transition: opacity 0.2s ease;
+    `;
+
+    document.body.appendChild(cursorGlow);
+
+    let mouseX = 0, mouseY = 0;
+    let currentX = 0, currentY = 0;
+    let isVisible = false;
+
+    document.addEventListener('mousemove', (e) => {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+
+        if (!isVisible) {
+            isVisible = true;
+            cursorGlow.style.opacity = '1';
+        }
+    });
+
+    document.addEventListener('mouseleave', () => {
+        isVisible = false;
+        cursorGlow.style.opacity = '0';
+    });
+
+    function animate() {
+        const ease = 0.18;
+
+        currentX += (mouseX - currentX) * ease;
+        currentY += (mouseY - currentY) * ease;
+
+        cursorGlow.style.left = currentX + 'px';
+        cursorGlow.style.top = currentY + 'px';
+
+        requestAnimationFrame(animate);
+    }
+
+    animate();
+    
+});
   function injectSidebarAndCSS() {
     // Inject local CSS
     const localCSS = document.createElement('link');
